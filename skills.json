@@ -1,0 +1,23 @@
+{
+  "skills": [
+    {
+      "name": "msaf-architect",
+      "files": [
+        "msaf-architect/SKILL.md",
+        "msaf-architect/references/version-map.md",
+        "msaf-architect/references/v1.11/agent-loops.md",
+        "msaf-architect/references/v1.11/agent-layer-core.md",
+        "msaf-architect/references/v1.11/agent-skills.md",
+        "msaf-architect/references/v1.11/hitl-and-routing.md",
+        "msaf-architect/references/v1.11/production-readiness.md",
+        "msaf-architect/references/v1.11/state-and-persistence.md",
+        "msaf-architect/references/v1.12/agent-loops.md",
+        "msaf-architect/references/v1.12/agent-layer-core.md",
+        "msaf-architect/references/v1.12/agent-skills.md",
+        "msaf-architect/references/v1.12/hitl-and-routing.md",
+        "msaf-architect/references/v1.12/production-readiness.md",
+        "msaf-architect/references/v1.12/state-and-persistence.md"
+      ]
+    }
+  ]
+}
