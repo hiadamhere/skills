@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Skills Catalog Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --bg-card: #0e131f;
+            --bg-card-hover: #151c2e;
+            --bg-border: #1e293b;
+            --color-primary: #8b5cf6; /* Violet */
+            --color-primary-glow: rgba(139, 92, 246, 0.15);
+            --color-secondary: #3b82f6; /* Blue */
+            --color-secondary-glow: rgba(59, 130, 246, 0.15);
+            --color-accent: #14b8a6; /* Teal */
+            --color-accent-glow: rgba(20, 184, 166, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-main: 'Outfit', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* Ambient glowing background */
+        .bg-glows {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.05) 0%, transparent 50%);
+            filter: blur(80px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        header {
+            margin-top: 80px;
+            margin-bottom: 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-main) 10%, var(--color-primary) 50%, var(--color-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* Portal Grid Section */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+
+        .portal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-border);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.1);
+            background: var(--bg-card-hover);
+        }
+
+        .portal-card.teal:hover {
+            border-color: rgba(20, 184, 166, 0.4);
+            box-shadow: 0 20px 40px rgba(20, 184, 166, 0.1);
+        }
+
+        .portal-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .portal-card.teal::after {
+            background: radial-gradient(circle, var(--color-accent-glow) 0%, transparent 70%);
+        }
+
+        .card-body {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .portal-card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .portal-card p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 24px;
+            font-weight: 350;
+        }
+
+        .btn-portal {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .portal-card.teal .btn-portal {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-portal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .portal-card.teal .btn-portal:hover {
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
+        }
+
+        /* Catalog Section */
+        .catalog-section {
+            margin-top: 80px;
+            border-top: 1px solid var(--bg-border);
+            padding-top: 60px;
+        }
+
+        .catalog-header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .catalog-header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .catalog-header p {
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .skill-card {
+            background: rgba(14, 19, 31, 0.6);
+            border: 1px solid var(--bg-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+
+        .skill-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+            background: var(--bg-card-hover);
+        }
+
+        .skill-top h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .skill-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-meta {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .badge-meta.primary {
+            background: rgba(139, 92, 246, 0.1);
+            color: #c084fc;
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .skill-top p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .skill-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 16px;
+            margin-top: auto;
+        }
+
+        .ver-list {
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .ver-tag {
+            background: rgba(255,255,255,0.03);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .btn-skill-read {
+            font-size: 0.85rem;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-skill-read:hover {
+            color: var(--text-main);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glows"></div>
+
+    <div class="container">
+        <header>
+            <h1>AI Agent Skills Catalog</h1>
+            <p>A curated collection of verified, master-level capabilities, guidelines, and API references for Google Antigravity, Claude Code, OpenAI Codex, Aider, and Cline.</p>
+        </header>
+
+        <!-- Portal Navigation Pathways -->
+        <section class="portal-grid">
+            <!-- Pathway 1: Interactive Visualizer -->
+            <div class="portal-card" id="card-visualizer">
+                <div class="card-body">
+                    <h2><span class="card-icon">⚡</span>Interactive Visualizer</h2>
+                    <p>Explore the C# Microsoft Agent Framework (MSAF) execution graphs, dynamic agent states, checkpointing, and human-in-the-loop triggers visually inside a sleek, interactive visualizer dashboard.</p>
+                </div>
+                <a href="./msaf-visualizer.html" class="btn-portal">
+                    Launch Visualizer <span>→</span>
+                </a>
+            </div>
+
+            <!-- Pathway 2: Verified Documentation -->
+            <div class="portal-card teal" id="card-documentation">
+                <div class="card-body">
+                    <h2><span class="card-icon">📖</span>Verified API & Docs Catalog</h2>
+                    <p>Browse our <code>docs/</code> folder containing reconstructed documentation files. Designed to prevent AI hallucinations, these files provide correct, compilable specifications and structural references.</p>
+                </div>
+                <a href="./docs/" class="btn-portal" onclick="alert('The documentation index in /docs/ is being created. For now, reference documents can be read directly in the repository folders.');">
+                    Explore Docs Folder <span>→</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Dynamic Skills Catalog List -->
+        <section class="catalog-section" id="catalog">
+            <div class="catalog-header">
+                <div>
+                    <h2>Available Skills</h2>
+                    <p>The structured instruction sets deployed globally to local agent configuration paths.</p>
+                </div>
+                <span class="badge-meta primary" id="skill-count">Loading catalog...</span>
+            </div>
+
+            <div class="skills-grid" id="skills-container">
+                <!-- Fallback content in case fetch fails or is slow -->
+                <div class="skill-card">
+                    <div class="skill-top">
+                        <div class="skill-meta">
+                            <span class="badge-meta primary">Core</span>
+                        </div>
+                        <h3>msaf-architect</h3>
+                        <p>Master architecture guidelines, execution models, and API mappings for building multi-agent systems using the Microsoft Agent Framework.</p>
+                    </div>
+                    <div class="skill-bottom">
+                        <div class="ver-list">
+                            <span class="ver-tag">v1.12.0</span>
+                            <span class="ver-tag">v1.11.0</span>
+                            <span class="ver-tag">v1.10.0</span>
+                        </div>
+                        <a href="./msaf-visualizer.html" class="btn-skill-read">View Reference</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Fetch and dynamically render skills from skills.json
+        async function loadSkillsCatalog() {
+            try {
+                const response = await fetch('./skills.json');
+                if (!response.ok) throw new Error('Failed to fetch skills.json');
+                const catalog = await response.json();
+                
+                const countBadge = document.getElementById('skill-count');
+                const skillsContainer = document.getElementById('skills-container');
+                
+                const skills = catalog.skills || [];
+                countBadge.textContent = `${skills.length} Registered Skills`;
+                
+                if (skills.length > 0) {
+                    skillsContainer.innerHTML = skills.map(skill => {
+                        const isPrivate = skill.private === true;
+                        const categoryBadge = `<span class="badge-meta ${isPrivate ? '' : 'primary'}">${isPrivate ? 'Private' : 'Public'}</span>`;
+                        const versionsHtml = (skill.versions || []).map(v => `<span class="ver-tag">${v}</span>`).join('');
+                        const readUrl = skill.name === 'msaf-architect' ? './msaf-visualizer.html' : `./skills/${skill.name}/SKILL.md`;
+                        
+                        return `
+                            <div class="skill-card" id="skill-${skill.name}">
+                                <div class="skill-top">
+                                    <div class="skill-meta">
+                                        ${categoryBadge}
+                                        <span class="badge-meta">${skill.name}</span>
+                                    </div>
+                                    <h3>${skill.displayName || skill.name}</h3>
+                                    <p>${skill.description || ''}</p>
+                                </div>
+                                <div class="skill-bottom">
+                                    <div class="ver-list">
+                                        ${versionsHtml}
+                                    </div>
+                                    <a href="${readUrl}" class="btn-skill-read">View Reference</a>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading skills catalog:', error);
+                const countBadge = document.getElementById('skill-count');
+                countBadge.textContent = 'Catalog Error';
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', loadSkillsCatalog);
+    </script>
+</body>
+</html>
