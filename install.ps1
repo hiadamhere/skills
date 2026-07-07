@@ -4,17 +4,31 @@
 #   Remote (one-line): irm https://raw.githubusercontent.com/hiadamhere/skills/main/install.ps1 | iex
 
 param (
-    [ValidateSet("Copy", "Link")]
     [string]$Mode
 )
+
+# NOTE: do NOT put a [ValidateSet(...)] attribute on $Mode. When this script is
+# piped to Invoke-Expression (irm ... | iex), PowerShell applies the attribute to
+# $Mode while its value is still empty and aborts with:
+#   "The attribute cannot be added because variable Mode with value  would no
+#    longer be valid."
+# Validate manually instead so the remote one-liner keeps working.
+if ($Mode -and $Mode -notin @("Copy", "Link")) {
+    Write-Error "Invalid -Mode '$Mode'. Valid values: Copy, Link."
+    exit 1
+}
 
 $GithubUser = "hiadamhere"
 $GithubRepo = "skills" # public catalog repo (remote mode fetches published files only)
 $Branch = "main"
 $RawBaseUrl = "https://raw.githubusercontent.com/$GithubUser/$GithubRepo/$Branch/skills"
 
-# Check if script folder exists to determine if running locally
-$RepoDir = Split-Path -Parent $MyInvocation.MyCommand.Path -ErrorAction SilentlyContinue
+# Check if script folder exists to determine if running locally.
+# $MyInvocation.MyCommand.Path is $null when this script is piped to iex
+# (irm ... | iex); guard it so Split-Path never receives a null argument
+# (a terminating parameter-binding error that -ErrorAction cannot suppress).
+$ScriptPath = $MyInvocation.MyCommand.Path
+$RepoDir = if ($ScriptPath) { Split-Path -Parent $ScriptPath } else { $null }
 if (-not $RepoDir -or -not (Test-Path (Join-Path $RepoDir "skills"))) {
     $IsRemote = $true
 } else {
