@@ -816,11 +816,11 @@ var loopAgent = new LoopAgent(
                 title: "MSAF Architecture Blueprint Generator",
                 principlesTitle: "About This Tool",
                 principles: [
-                    ["Describe, get a blueprint", "Pick what your pipeline needs — parallelism, human approval, streaming — and get a matching topology suggestion."],
-                    ["Only real building blocks", "Suggestions are assembled exclusively from APIs verified against the actual MAF binaries."],
-                    ["A starting point, not a verdict", "Treat the output as scaffolding to adapt — your domain constraints always come first."]
+                    ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back — not a fragment."],
+                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.12.0 DLLs — no invented APIs, no ... placeholders."],
+                    ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
-                desc: "Choose your operational constraints to instantly generate a custom MSAF architecture pattern and matching configuration details.",
+                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.12.0 binaries.",
                 code: `// Set choices on the questionnaire above to generate code...`,
                 htmlContent: `
                 <div class="blueprint-form">
@@ -934,96 +934,247 @@ var loopAgent = new LoopAgent(
             const rules = document.getElementById('blueprint-rules');
             const codeBox = document.getElementById('code-content');
 
+            // Compose ONE coherent, compilable program per selection. Ordering is
+            // enforced (top-level statements first, type declarations last) and every
+            // building block is verified against the MAF v1.12.0 DLL surface.
+            const usings = new Set([
+                "using System;",
+                "using System.Threading;",
+                "using System.Threading.Tasks;",
+                "using Microsoft.Agents.AI.Workflows;"
+            ]);
+            const body = [];   // top-level statements
+            const types = [];  // type declarations, emitted after every statement
+            const ruleItems = [];
             let titleText = "";
-            let ruleItems = [];
-            let codeText = "";
 
-            // 1. Flow Logic
+            body.push("CancellationToken ct = CancellationToken.None;");
+            body.push("string sessionId = Guid.NewGuid().ToString();");
+
+            let firstNode, lastNode, lastType;
+
+            // ---- 1. Execution topology ----
             if (flow === 'seq') {
-                titleText = "Sequential Multi-Node Workflow";
-                ruleItems.push("Nodes must inherit from <code>Executor&lt;TInput, TOutput&gt;</code> and be wrapped using <code>ExecutorBindingExtensions.BindExecutor()</code>.");
-                ruleItems.push("Edges are connected linearly: <code>builder.AddEdge(nodeA, nodeB)</code>.");
-                codeText = `// Sequential Builder Pattern
-var step1 = ExecutorBindingExtensions.BindExecutor<Step1Executor>();
-var step2 = ExecutorBindingExtensions.BindExecutor<Step2Executor>();
+                titleText = "Sequential Chain";
+                firstNode = "intake"; lastNode = "finalize"; lastType = "FinalDoc";
+                ruleItems.push("Two <code>Executor&lt;TInput,TOutput&gt;</code> nodes wired linearly with <code>AddEdge</code>.");
+                ruleItems.push("Executors are wrapped with the instance overload <code>BindExecutor(new XExecutor())</code>.");
+                body.push("");
+                body.push("// -- Sequential chain: Intake -> Finalize --");
+                body.push("var intake   = ExecutorBindingExtensions.BindExecutor(new IntakeExecutor());");
+                body.push("var finalize = ExecutorBindingExtensions.BindExecutor(new FinalizeExecutor());");
+                body.push('string input = "raw intake payload";');
+                types.push(
+`public sealed record DraftDoc(string Text);
+public sealed record FinalDoc(string Text);
 
-var workflow = new WorkflowBuilder(step1)
-    .AddEdge(step1, step2)
-    .WithOutputFrom(step2)
-    .Build();`;
+public sealed class IntakeExecutor : Executor<string, DraftDoc>
+{
+    public IntakeExecutor() : base("intake") { }
+    public override ValueTask<DraftDoc> HandleAsync(string message, IWorkflowContext context, CancellationToken ct)
+        => new(new DraftDoc(message.Trim()));
+}
+
+public sealed class FinalizeExecutor : Executor<DraftDoc, FinalDoc>
+{
+    public FinalizeExecutor() : base("finalize") { }
+    public override ValueTask<FinalDoc> HandleAsync(DraftDoc message, IWorkflowContext context, CancellationToken ct)
+        => new(new FinalDoc(message.Text.ToUpperInvariant()));
+}`);
             } else if (flow === 'parallel') {
-                titleText = "Parallel Fan-Out Workflow";
-                ruleItems.push("Parallel executors execute concurrently within the same superstep (Pregel BSP model).");
-                ruleItems.push("Edges are mapped using <code>builder.AddFanOutEdge(source, new[] { target1, target2 })</code>.");
-                ruleItems.push("Outputs are gathered and synchronized at the superstep end barrier via an Aggregator executor.");
-                codeText = `// Parallel Fan-out & Fan-in pattern
-var source = ExecutorBindingExtensions.BindExecutor<SourceExecutor>();
-var p1 = ExecutorBindingExtensions.BindExecutor<Parallel1Executor>();
-var p2 = ExecutorBindingExtensions.BindExecutor<Parallel2Executor>();
-var agg = ExecutorBindingExtensions.BindExecutor<AggregatorExecutor>();
+                titleText = "Parallel Fan-out";
+                firstNode = "split"; lastNode = "aggregate"; lastType = "Report";
+                ruleItems.push("<code>AddFanOutEdge</code> dispatches to branches that run concurrently in one superstep.");
+                ruleItems.push("Branches fan back in to an aggregator through two <code>AddEdge</code> calls.");
+                body.push("");
+                body.push("// -- Parallel fan-out: Split -> {AnalyzeA, AnalyzeB} -> Aggregate --");
+                body.push("var split     = ExecutorBindingExtensions.BindExecutor(new SplitExecutor());");
+                body.push("var analyzeA  = ExecutorBindingExtensions.BindExecutor(new AnalyzeAExecutor());");
+                body.push("var analyzeB  = ExecutorBindingExtensions.BindExecutor(new AnalyzeBExecutor());");
+                body.push("var aggregate = ExecutorBindingExtensions.BindExecutor(new AggregateExecutor());");
+                body.push('string input = "raw document payload";');
+                types.push(
+`public sealed record Chunk(string Text);
+public sealed record PartialResult(int Score);
+public sealed record Report(int Total);
 
-var workflow = new WorkflowBuilder(source)
-    .AddFanOutEdge(source, new[] { p1, p2 })
-    .AddEdge(p1, agg)
-    .AddEdge(p2, agg)
-    .WithOutputFrom(agg)
-    .Build();`;
+public sealed class SplitExecutor : Executor<string, Chunk>
+{
+    public SplitExecutor() : base("split") { }
+    public override ValueTask<Chunk> HandleAsync(string message, IWorkflowContext context, CancellationToken ct)
+        => new(new Chunk(message));
+}
+
+public sealed class AnalyzeAExecutor : Executor<Chunk, PartialResult>
+{
+    public AnalyzeAExecutor() : base("analyze-a") { }
+    public override ValueTask<PartialResult> HandleAsync(Chunk message, IWorkflowContext context, CancellationToken ct)
+        => new(new PartialResult(message.Text.Length));
+}
+
+public sealed class AnalyzeBExecutor : Executor<Chunk, PartialResult>
+{
+    public AnalyzeBExecutor() : base("analyze-b") { }
+    public override ValueTask<PartialResult> HandleAsync(Chunk message, IWorkflowContext context, CancellationToken ct)
+        => new(new PartialResult(message.Text.Split(' ').Length));
+}
+
+// Fan-in: the aggregator is invoked once per incoming PartialResult message.
+public sealed class AggregateExecutor : Executor<PartialResult, Report>
+{
+    public AggregateExecutor() : base("aggregate") { }
+    public override ValueTask<Report> HandleAsync(PartialResult message, IWorkflowContext context, CancellationToken ct)
+        => new(new Report(message.Score));
+}`);
             } else {
-                titleText = "Conversational Multi-Agent Graph";
-                ruleItems.push("LLM-driven nodes use <code>ChatClientAgent</code> wrapping <code>IChatClient</code>.");
-                ruleItems.push("Agents are registered in the execution graph using <code>AIAgentBinding</code>.");
-                ruleItems.push("Enable <code>ForwardIncomingMessages = true</code> in <code>AIAgentHostOptions</code> to pass step states directly to the prompt.");
-                codeText = `// Multi-agent construction & binding
-var agent1 = new ChatClientAgent(chatClient, "Instructions 1", "agent1", ...);
-var agent2 = new ChatClientAgent(chatClient, "Instructions 2", "agent2", ...);
-
-var binding1 = new AIAgentBinding(agent1, new AIAgentHostOptions { ForwardIncomingMessages = true });
-var binding2 = new AIAgentBinding(agent2, new AIAgentHostOptions { ForwardIncomingMessages = true });
-
-var workflow = new WorkflowBuilder(binding1)
-    .AddEdge(binding1, binding2)
-    .WithOutputFrom(binding2)
-    .Build();`;
+                titleText = "Multi-Agent Chain";
+                firstNode = "drafterNode"; lastNode = "reviewerNode"; lastType = "ChatMessage";
+                usings.add("using Microsoft.Agents.AI;");
+                usings.add("using Microsoft.Extensions.AI;");
+                usings.add("using Microsoft.Extensions.Logging.Abstractions;");
+                ruleItems.push("<code>ChatClientAgent</code> nodes wrap your <code>IChatClient</code>, bound with <code>AIAgentBinding</code>.");
+                ruleItems.push("Supply a real <code>IChatClient</code> (OpenAI / Azure OpenAI / Ollama) inside <code>CreateChatClient()</code>.");
+                body.push("");
+                body.push("// -- Multi-agent chain: Drafter -> Reviewer --");
+                body.push("IChatClient chatClient = CreateChatClient(); // TODO: supply this (see CreateChatClient below)");
+                body.push("var drafter = new ChatClientAgent(");
+                body.push("    chatClient: chatClient,");
+                body.push('    instructions: "Draft a concise answer to the user request.",');
+                body.push('    name: "Drafter",');
+                body.push('    description: "Produces a first draft.",');
+                body.push("    tools: Array.Empty<AITool>(),");
+                body.push("    loggerFactory: NullLoggerFactory.Instance,");
+                body.push("    services: null);");
+                body.push("var reviewer = new ChatClientAgent(");
+                body.push("    chatClient: chatClient,");
+                body.push('    instructions: "Tighten and correct the draft. Be concise.",');
+                body.push('    name: "Reviewer",');
+                body.push('    description: "Reviews the draft for clarity.",');
+                body.push("    tools: Array.Empty<AITool>(),");
+                body.push("    loggerFactory: NullLoggerFactory.Instance,");
+                body.push("    services: null);");
+                body.push("var drafterNode  = new AIAgentBinding(drafter,  new AIAgentHostOptions { ForwardIncomingMessages = true });");
+                body.push("var reviewerNode = new AIAgentBinding(reviewer, new AIAgentHostOptions { ForwardIncomingMessages = true });");
+                body.push('ChatMessage input = new ChatMessage(ChatRole.User, "Explain fan-out/fan-in in one paragraph.");');
             }
 
-            // 2. State & Persistence Logic
-            if (state === 'none') {
-                ruleItems.push("Transient state engine: State values reside in memory and are discarded when execution completes.");
-                ruleItems.push("Run setup: use <code>InProcessExecution.RunAsync(workflow, input)</code>.");
-            } else if (state === 'scoped') {
-                ruleItems.push("Scoped State Isolation: Write values using <code>QueueStateUpdateAsync(key, value, scopeName, ct)</code>.");
-                ruleItems.push("Use the built-in <code>CheckpointManager.CreateJson(new FileSystemJsonCheckpointStore(directoryInfo))</code> to save session states automatically.");
-                codeText += `\n\n// Checkpointing setup
-var checkpointStore = new FileSystemJsonCheckpointStore(new DirectoryInfo("./checkpoints"));
-var checkpointManager = CheckpointManager.CreateJson(checkpointStore);
-
-// Execute workflow with checkpointing
-Run run = await InProcessExecution.RunAsync(workflow, checkpointManager, sessionId, ct);`;
-            } else {
-                ruleItems.push("Custom Database State Engine: Implement <code>ICheckpointStore&lt;JsonElement&gt;</code> to pipe state updates to database/Redis.");
-                ruleItems.push("Scoped Read: Access historical properties safely using <code>ReadStateKeysAsync(scopeName, ct)</code>.");
-                codeText += `\n\n// Custom store registration
-public class SqlCheckpointStore : ICheckpointStore<JsonElement> {
-    public async ValueTask<CheckpointInfo> CreateCheckpointAsync(string sessionId, JsonElement value, CheckpointInfo parent) {
-        // Save to SQL Database linked to sessionId...
-    }
-}`;
-            }
-
-            // 3. HITL Logic
+            // ---- 2. Human gate: declare the port BEFORE the builder so edges can use it ----
             if (hitl === 'yes') {
-                titleText += " (HITL Guarded)";
-                ruleItems.push("Declarative Halt: Create a blocking port using <code>RequestPort.Create&lt;TRequest, TResponse&gt;(name)</code>.");
-                ruleItems.push("The runtime halts automatically returning <code>RunStatus.PendingRequests</code>.");
-                ruleItems.push("Resumption is triggered cleanly by feeding responses: <code>run.ResumeAsync(new[] { response })</code>.");
-                codeText += `\n\n// Human-in-the-Loop Resumption Loop
-var status = await run.GetStatusAsync();
-if (status == RunStatus.PendingRequests) {
-    var response = ExternalRequest.Create(port, responseValue, "req-id").CreateResponse(responseValue);
-    await run.ResumeAsync(new[] { response });
-}`;
+                titleText += " + Human Gate";
+                ruleItems.push("A <code>RequestPort</code> node suspends the run at <code>RunStatus.PendingRequests</code> until a typed response is posted.");
+                body.push("");
+                body.push("// -- Human gate: the run suspends here until a response is posted --");
+                if (flow === 'agent') {
+                    body.push("// NOTE: an agent emits a ChatMessage, so the gate's request type is ChatMessage.");
+                }
+                body.push('var gatePort = RequestPort.Create<' + lastType + ', GateDecision>("human-gate");');
+                body.push("var gate     = ExecutorBindingExtensions.BindAsExecutor(gatePort, allowWrappedRequests: true);");
+                types.push("public sealed record GateDecision(bool Approved);");
             }
 
+            // ---- 3. Build the workflow graph ----
+            body.push("");
+            const edges = [];
+            if (flow === 'seq') {
+                edges.push("    .AddEdge(intake, finalize)");
+            } else if (flow === 'parallel') {
+                edges.push("    .AddFanOutEdge(split, new[] { analyzeA, analyzeB })");
+                edges.push("    .AddEdge(analyzeA, aggregate)");
+                edges.push("    .AddEdge(analyzeB, aggregate)");
+            } else {
+                edges.push("    .AddEdge(drafterNode, reviewerNode)");
+            }
+            body.push("var workflow = new WorkflowBuilder(" + firstNode + ")");
+            edges.forEach(function (e) { body.push(e); });
+            if (hitl === 'yes') {
+                body.push("    .AddEdge(" + lastNode + ", gate)");
+                body.push("    .WithOutputFrom(gate)");
+            } else {
+                body.push("    .WithOutputFrom(" + lastNode + ")");
+            }
+            body.push("    .Build();");
+
+            // ---- 4. Persistence + run ----
+            body.push("");
+            if (state === 'none') {
+                ruleItems.push("Transient run: state lives in memory and is discarded when the run ends.");
+                body.push("Run run = await InProcessExecution.RunAsync(workflow, input, sessionId, ct);");
+            } else if (state === 'scoped') {
+                usings.add("using System.IO;");
+                usings.add("using System.Text.Json;");
+                usings.add("using Microsoft.Agents.AI.Workflows.Checkpointing;");
+                ruleItems.push("Built-in JSON file checkpoints: <code>FileSystemJsonCheckpointStore</code> + <code>CheckpointManager.CreateJson</code>.");
+                body.push("// -- Checkpointing: JSON files on disk --");
+                body.push('var store   = new FileSystemJsonCheckpointStore(new DirectoryInfo("./checkpoints"));');
+                body.push("var manager = CheckpointManager.CreateJson(store, new JsonSerializerOptions());");
+                body.push("Run run = await InProcessExecution.RunAsync(workflow, input, manager, sessionId, ct);");
+            } else {
+                usings.add("using System.Collections.Generic;");
+                usings.add("using System.Text.Json;");
+                usings.add("using Microsoft.Agents.AI.Workflows.Checkpointing;");
+                ruleItems.push("Custom persistence: implement all three <code>ICheckpointStore&lt;JsonElement&gt;</code> members.");
+                body.push("// -- Checkpointing: your custom store (SQL, Redis, etc.) --");
+                body.push("var manager = CheckpointManager.CreateJson(new SqlCheckpointStore(), new JsonSerializerOptions());");
+                body.push("Run run = await InProcessExecution.RunAsync(workflow, input, manager, sessionId, ct);");
+                types.push(
+`// ICheckpointStore<JsonElement> declares exactly three members -- implement them all.
+public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
+{
+    public ValueTask<CheckpointInfo> CreateCheckpointAsync(string sessionId, JsonElement value, CheckpointInfo parent)
+    {
+        var checkpointId = Guid.NewGuid().ToString();
+        // TODO: persist 'value' under (sessionId, checkpointId), linked to 'parent'.
+        return new ValueTask<CheckpointInfo>(new CheckpointInfo(sessionId, checkpointId));
+    }
+
+    // TODO: load the JSON payload for 'key' from your store.
+    public ValueTask<JsonElement> RetrieveCheckpointAsync(string sessionId, CheckpointInfo key)
+        => throw new NotImplementedException();
+
+    // TODO: return the child checkpoints of 'withParent' (or the roots when null).
+    public ValueTask<IEnumerable<CheckpointInfo>> RetrieveIndexAsync(string sessionId, CheckpointInfo withParent)
+        => throw new NotImplementedException();
+}`);
+            }
+
+            // ---- 5. Resume the suspended run (HITL only) ----
+            if (hitl === 'yes') {
+                body.push("");
+                body.push("// Post the human decision, then resume the suspended run.");
+                body.push("if (await run.GetStatusAsync(ct) == RunStatus.PendingRequests)");
+                body.push("{");
+                body.push("    var decision = new GateDecision(true);");
+                body.push("    ExternalResponse response = ExternalRequest");
+                body.push('        .Create(gatePort, decision, "req-1")');
+                body.push("        .CreateResponse(decision);");
+                body.push("    await run.ResumeAsync(new[] { response }, ct);");
+                body.push("}");
+            }
+
+            // ---- 6. Agent flow: the IChatClient factory (a top-level local function) ----
+            if (flow === 'agent') {
+                body.push("");
+                body.push("// TODO: return your configured IChatClient, e.g.:");
+                body.push("//   new AzureOpenAIClient(endpoint, cred).GetChatClient(\"gpt-4o\").AsIChatClient();");
+                body.push("static IChatClient CreateChatClient()");
+                body.push('    => throw new NotImplementedException("Plug in your IChatClient.");');
+            }
+
+            const hasTodo = flow === 'agent' || state === 'db';
+            const header =
+                "// MAF v1.12 blueprint -- a complete single-file program (top-level statements).\n" +
+                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.12.0, then: dotnet run\n" +
+                (hasTodo
+                    ? "// Compiles as-is; fill in the // TODO spots before it runs.\n"
+                    : "// Compiles and runs as-is; swap the sample executor bodies for your logic.\n");
+
+            const codeText =
+                header + "\n" +
+                Array.from(usings).join("\n") + "\n\n" +
+                body.join("\n") +
+                (types.length ? "\n\n" + types.join("\n\n") : "") + "\n";
+
+            document.getElementById('code-panel-title').textContent = 'Program.cs';
             title.textContent = "Recommended Blueprint: " + titleText;
             rules.innerHTML = ruleItems.map(item => `<li>${item}</li>`).join('');
             codeBox.textContent = codeText;
