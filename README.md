@@ -19,11 +19,13 @@ Master architecture guidelines, execution models, and API mappings for building 
 
 ---
 
-## 🚀 Multi-Agent Skill Installer
+## 🚀 Multi-Agent Skill Installer & Uninstaller
 
-Use the dynamic installer scripts to deploy catalog skills globally to your local agent configuration folders.
+Deploy catalog skills to your local agent configuration folders either globally (user-wide) or locally (project-wide).
 
-### Quick Start (Local Run)
+### 1. Global Installation (Quick Start)
+
+Runs the installer and deploys all catalog skills globally to standard user-level agent config paths (`~/.agents/skills` for Codex/Gemini, and `~/.claude/skills` for Claude Code):
 
 #### On Windows (PowerShell):
 ```powershell
@@ -33,6 +35,54 @@ irm https://raw.githubusercontent.com/hiadamhere/skills/main/install.ps1 | iex
 #### On macOS/Linux (Bash):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hiadamhere/skills/main/install.sh | bash
+```
+
+### 2. Local/Workspace Installation & Selection
+
+If you clone the repository locally, you can run the scripts with parameters to configure installation scope and select specific skills:
+
+*   **Mode:** Copy files or Symlink files (recommended for automatic updates via `git pull`).
+*   **Scope:** Deploy **Global** (user-profile) or **Folder** (workspace-level). Workspace-level copies skills into `<folder>/.agents/skills/` (shared by Codex and Gemini) and `<folder>/.claude/skills/`.
+*   **Skills:** Multi-select specific skills. By default, running interactively presents a menu with `ALL` as the first choice, or you can specify skill names on the CLI.
+
+#### Windows (PowerShell) Examples:
+```powershell
+# Interactive run (prompts for mode, scope, target folder, and skills selection)
+.\install.ps1
+
+# Non-interactive copy of specific skills to a local project workspace
+.\install.ps1 -Mode Copy -Scope Folder -Path C:\MyProject -Skills msaf-architect
+```
+
+#### macOS/Linux (Bash) Examples:
+```bash
+# Interactive run
+./install.sh
+
+# Non-interactive symlink of specific skills to a local project workspace
+./install.sh --mode link --scope folder --path /path/to/my-project --skills msaf-architect
+```
+
+### 3. Uninstalling Skills
+
+You can cleanly remove catalog skills from either global or workspace-level folders using the uninstaller scripts:
+
+#### Windows (PowerShell):
+```powershell
+# Interactive uninstall
+.\uninstall.ps1
+
+# Non-interactive uninstall of specific skills from a workspace folder
+.\uninstall.ps1 -Scope Folder -Path C:\MyProject -Skills msaf-architect
+```
+
+#### macOS/Linux (Bash):
+```bash
+# Interactive uninstall
+./uninstall.sh
+
+# Non-interactive uninstall from a workspace folder
+./uninstall.sh --scope folder --path /path/to/my-project --skills msaf-architect
 ```
 
 ---
