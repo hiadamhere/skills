@@ -15,7 +15,7 @@ Master architecture guidelines, execution models, and API mappings for building 
 > **API Ground-Truth Alignment**
 > Tutorials and LLM training data describe Microsoft Agent Framework APIs that **were never shipped** (e.g. a `WorkflowSuspendedException` suspend pattern) and cause compiler failures.
 >
-> Every claim in this skill is **verified against the actual v1.10.0 / v1.11.0 / v1.12.0 assemblies from NuGet** — reflection surface extraction plus compile tests against the pinned packages. Reference documents carry per-version verification stamps, and an automated gate rejects any unverified API identifier before release.
+> Every claim in this skill is **verified against the actual v1.10.0 / v1.11.0 / v1.12.0 / v1.13.0 assemblies from NuGet** — reflection surface extraction plus compile tests against the pinned packages. Reference documents carry per-version verification stamps, and an automated gate rejects any unverified API identifier before release. The latest guidance targets **v1.13** (composable/disposable agent skills and the renamed `AgentFileStore` contract).
 
 ---
 

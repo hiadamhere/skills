@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSAF Architect Visualizer (v1.12.0)</title>
+    <title>MSAF Architect Visualizer (v1.13.0)</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -444,7 +444,7 @@
             <h1>⚡ MSAF Architect Visualizer</h1>
             <p>Interactive architecture patterns & blueprints for Microsoft Agent Framework</p>
         </div>
-        <div class="version-badge">MAF v1.12.0 STABLE</div>
+        <div class="version-badge">MAF v1.13.0 STABLE</div>
     </header>
 
     <main>
@@ -493,7 +493,7 @@
                     <p><strong>The slowest branch sets the pace</strong><br>Parallel paths re-sync every round — a long chain next to a short one makes the short one wait. Keep sequential work consolidated.</p>
                     <p><strong>State lands between rounds</strong><br>Updates queue up during a round and commit at the barrier, so concurrent nodes never race each other.</p>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10–v1.12 binaries — no invented APIs.</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10–v1.13 binaries — no invented APIs.</p>
             </div>
         </div>
 
@@ -817,10 +817,10 @@ var loopAgent = new LoopAgent(
                 principlesTitle: "About This Tool",
                 principles: [
                     ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back — not a fragment."],
-                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.12.0 DLLs — no invented APIs, no ... placeholders."],
+                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.13.0 DLLs — no invented APIs, no ... placeholders."],
                     ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
-                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.12.0 binaries.",
+                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.13.0 binaries.",
                 code: `// Set choices on the questionnaire above to generate code...`,
                 htmlContent: `
                 <div class="blueprint-form">
@@ -852,7 +852,7 @@ var loopAgent = new LoopAgent(
                 <div class="blueprint-output">
                     <div class="blueprint-output-header">
                         <h4 id="blueprint-title">Recommended Blueprint: Sequential Pipeline</h4>
-                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.12.0 Blueprint</span>
+                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.13.0 Blueprint</span>
                     </div>
                     <ul class="blueprint-bullets" id="blueprint-rules">
                         <li>Linear executors connected via simple <code>builder.AddEdge()</code> routes.</li>
@@ -936,7 +936,7 @@ var loopAgent = new LoopAgent(
 
             // Compose ONE coherent, compilable program per selection. Ordering is
             // enforced (top-level statements first, type declarations last) and every
-            // building block is verified against the MAF v1.12.0 DLL surface.
+            // building block is verified against the MAF v1.13.0 DLL surface.
             const usings = new Set([
                 "using System;",
                 "using System.Threading;",
@@ -1162,8 +1162,8 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
 
             const hasTodo = flow === 'agent' || state === 'db';
             const header =
-                "// MAF v1.12 blueprint -- a complete single-file program (top-level statements).\n" +
-                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.12.0, then: dotnet run\n" +
+                "// MAF v1.13 blueprint -- a complete single-file program (top-level statements).\n" +
+                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.13.0, then: dotnet run\n" +
                 (hasTodo
                     ? "// Compiles as-is; fill in the // TODO spots before it runs.\n"
                     : "// Compiles and runs as-is; swap the sample executor bodies for your logic.\n");

@@ -16,7 +16,13 @@
         "msaf-architect/references/v1.12/agent-skills.md",
         "msaf-architect/references/v1.12/hitl-and-routing.md",
         "msaf-architect/references/v1.12/production-readiness.md",
-        "msaf-architect/references/v1.12/state-and-persistence.md"
+        "msaf-architect/references/v1.12/state-and-persistence.md",
+        "msaf-architect/references/v1.13/agent-loops.md",
+        "msaf-architect/references/v1.13/agent-layer-core.md",
+        "msaf-architect/references/v1.13/agent-skills.md",
+        "msaf-architect/references/v1.13/hitl-and-routing.md",
+        "msaf-architect/references/v1.13/production-readiness.md",
+        "msaf-architect/references/v1.13/state-and-persistence.md"
       ]
     }
   ]
