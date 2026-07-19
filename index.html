@@ -410,7 +410,8 @@
                         const isPrivate = skill.private === true;
                         const categoryBadge = `<span class="badge-meta ${isPrivate ? '' : 'primary'}">${isPrivate ? 'Private' : 'Public'}</span>`;
                         const versionsHtml = (skill.versions || []).map(v => `<span class="ver-tag">${v}</span>`).join('');
-                        const readUrl = skill.name === 'msaf-architect' ? './msaf-visualizer.html' : `./skills/${skill.name}/SKILL.md`;
+                        const skillPages = { 'msaf-architect': './msaf-visualizer.html', 'spectre-console': './spectre-console.html' };
+                        const readUrl = skillPages[skill.name] || `./skills/${skill.name}/SKILL.md`;
                         
                         return `
                             <div class="skill-card" id="skill-${skill.name}">
