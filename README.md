@@ -17,6 +17,13 @@ Master architecture guidelines, execution models, and API mappings for building 
 >
 > Every claim in this skill is **verified against the actual v1.10.0 / v1.11.0 / v1.12.0 / v1.13.0 assemblies from NuGet** — reflection surface extraction plus compile tests against the pinned packages. Reference documents carry per-version verification stamps, and an automated gate rejects any unverified API identifier before release. The latest guidance targets **v1.13** (composable/disposable agent skills and the renamed `AgentFileStore` contract).
 
+### 🎨 `spectre-console` (Spectre.Console Terminal-UI Expert)
+Verified, version-matched guidance for building rich .NET terminal UIs with [Spectre.Console](https://spectreconsole.net/): tables, panels, trees, markup & color, live displays (`Status`/`Progress`/`Live`), and interactive prompts — plus the terminal-gating discipline that keeps interactive features from hanging in CI or hosted contexts.
+
+> [!IMPORTANT]
+> **API Ground-Truth Alignment**
+> Every type, method, and property is **verified against the actual Spectre.Console v0.57.2 assemblies** (`Spectre.Console`, `Spectre.Console.Ansi`, `Spectre.Console.Testing`) — reflection surface extraction plus compile tests against the pinned package. The same automated gate rejects any unverified API identifier before release.
+
 ---
 
 ## 🚀 Multi-Agent Skill Installer & Uninstaller

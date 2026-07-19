@@ -26,7 +26,7 @@ if ($Scope -and $Scope -notin @("Global", "Folder")) {
 $GithubUser = "hiadamhere"
 $GithubRepo = "skills" # public catalog repo (remote mode fetches published files only)
 $Branch = "main"
-$RawBaseUrl = "https://raw.githubusercontent.com/$GithubUser/$GithubRepo/$Branch/skills"
+# $RawBaseUrl is built below from $Ref -- a pinned commit SHA for remote installs.
 
 # Check if script folder exists to determine if running locally.
 # $MyInvocation.MyCommand.Path is $null when this script is piped to iex
@@ -40,6 +40,25 @@ if (-not $RepoDir -or -not (Test-Path (Join-Path $RepoDir "skills"))) {
     $IsRemote = $false
     $SkillsDir = Join-Path $RepoDir "skills"
 }
+
+# Resolve the ref to install from. Remote installs pin to a single commit SHA so
+# a push landing mid-install can't serve a manifest from one commit and files
+# from another -- every remote install is a consistent snapshot. Fall back to the
+# branch ref on any API failure (e.g. rate limit) so the install still proceeds.
+$Ref = $Branch
+if ($IsRemote) {
+    try {
+        $commitInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$GithubUser/$GithubRepo/commits/$Branch" -Headers @{ "User-Agent" = "skills-installer" } -ErrorAction Stop
+        if ($commitInfo.sha) {
+            $Ref = $commitInfo.sha
+            Write-Host "Pinned to commit $($Ref.Substring(0, 7)) for a consistent snapshot." -ForegroundColor DarkGray
+        }
+    }
+    catch {
+        Write-Warning "Could not resolve '$Branch' to a commit SHA ($($_.Exception.Message)). Falling back to '$Branch' refs; this install may not be a consistent snapshot."
+    }
+}
+$RawBaseUrl = "https://raw.githubusercontent.com/$GithubUser/$GithubRepo/$Ref/skills"
 
 # 1. Handle Remote vs Local Setup
 if ($IsRemote) {
@@ -111,7 +130,7 @@ $null = New-Item -ItemType Directory -Force -Path $ClaudeSkillsDir
 
 # Manifest: remote mode fetches from GitHub; local mode reads the clone (no network)
 if ($IsRemote) {
-    $ManifestUrl = "https://raw.githubusercontent.com/$GithubUser/$GithubRepo/$Branch/skills.json"
+    $ManifestUrl = "https://raw.githubusercontent.com/$GithubUser/$GithubRepo/$Ref/skills.json"
     try {
         $SkillsManifest = Invoke-RestMethod -Uri $ManifestUrl -ErrorAction Stop
     }
@@ -218,34 +237,71 @@ function Download-File {
 
 # 4. Main Deploy Logic
 if ($IsRemote) {
-    # Download files dynamically in parallel using background jobs
-    Write-Host "Downloading files in parallel..." -ForegroundColor Yellow
-    $Jobs = foreach ($Skill in $SkillsManifest.skills) {
+    # Build the download worklist: each file is fetched once, then copied to the
+    # second target dir (halves network traffic vs. downloading per destination).
+    $Downloads = foreach ($Skill in $SkillsManifest.skills) {
         if ($Skill.name -in $SelectedSkills) {
             foreach ($File in $Skill.files) {
-                $Url = "$RawBaseUrl/$File"
-                $AgentsDest = Join-Path $AgentsSkillsDir $File
-                $ClaudeDest = Join-Path $ClaudeSkillsDir $File
-                
-                Start-Job -ScriptBlock {
-                    param($Url, $ADest, $CDest)
-                    $ParentA = Split-Path $ADest -Parent; $null = New-Item -ItemType Directory -Force -Path $ParentA
-                    $ParentC = Split-Path $CDest -Parent; $null = New-Item -ItemType Directory -Force -Path $ParentC
-                    try {
-                        Invoke-RestMethod -Uri $Url -OutFile $ADest -ErrorAction Stop
-                        Invoke-RestMethod -Uri $Url -OutFile $CDest -ErrorAction Stop
-                    } catch {
-                        throw "Failed to download $Url"
-                    }
-                } -ArgumentList $Url, $AgentsDest, $ClaudeDest | Out-Null
+                [pscustomobject]@{
+                    Url        = "$RawBaseUrl/$File"
+                    AgentsDest = Join-Path $AgentsSkillsDir $File
+                    ClaudeDest = Join-Path $ClaudeSkillsDir $File
+                }
             }
         }
     }
-    if ($Jobs) {
-        Get-Job | Wait-Job | Out-Null
-        Get-Job | Remove-Job
-        Write-Host "[+] Downloaded selected skills dynamically from manifest" -ForegroundColor Green
+
+    # Kick off one background job per file. NOTE: capture the Start-Job objects into
+    # $Jobs (do NOT pipe to Out-Null here, or $Jobs is empty and the wait below never
+    # runs — the original bug that made the installer report success before, and
+    # regardless of, any download completing).
+    Write-Host "Downloading files in parallel..." -ForegroundColor Yellow
+    $Jobs = foreach ($D in $Downloads) {
+        Start-Job -ScriptBlock {
+            param($Url, $ADest, $CDest)
+            $null = New-Item -ItemType Directory -Force -Path (Split-Path $ADest -Parent)
+            $null = New-Item -ItemType Directory -Force -Path (Split-Path $CDest -Parent)
+            Invoke-RestMethod -Uri $Url -OutFile $ADest -ErrorAction Stop
+            Copy-Item -LiteralPath $ADest -Destination $CDest -Force
+        } -ArgumentList $D.Url, $D.AgentsDest, $D.ClaudeDest
     }
+
+    # Wait on OUR jobs only (Get-Job | Wait-Job would also block on the user's own
+    # pre-existing session jobs), drain them, and remove them so none are left
+    # running or orphaned in the session.
+    if ($Jobs) {
+        $Jobs | Wait-Job | Out-Null
+        $Jobs | Receive-Job -ErrorAction SilentlyContinue | Out-Null
+        $Jobs | Remove-Job -Force
+    }
+
+    # Disk state — not job exit state — is the source of truth for success: a file
+    # present and non-empty in BOTH target dirs is installed. This ignores spurious
+    # background-job teardown noise while still catching genuinely dropped files, any
+    # of which get one sequential retry before the install is declared a failure.
+    $Failed = foreach ($D in $Downloads) {
+        foreach ($Dest in @($D.AgentsDest, $D.ClaudeDest)) {
+            $ok = (Test-Path -LiteralPath $Dest) -and ((Get-Item -LiteralPath $Dest).Length -gt 0)
+            if (-not $ok) {
+                try {
+                    $null = New-Item -ItemType Directory -Force -Path (Split-Path $Dest -Parent)
+                    Invoke-RestMethod -Uri $D.Url -OutFile $Dest -ErrorAction Stop
+                } catch {}
+                $ok = (Test-Path -LiteralPath $Dest) -and ((Get-Item -LiteralPath $Dest).Length -gt 0)
+            }
+            if (-not $ok) { $D.Url }
+        }
+    }
+    $Failed = @($Failed | Select-Object -Unique)
+
+    if ($Failed.Count -gt 0) {
+        Write-Host ""
+        Write-Error "Install failed: $($Failed.Count) file(s) could not be downloaded:"
+        foreach ($Url in $Failed) { Write-Error "  - $Url" }
+        exit 1
+    }
+
+    Write-Host "[+] Downloaded selected skills dynamically from manifest" -ForegroundColor Green
 } else {
     # Local installation
     foreach ($SkillName in $SelectedSkills) {
@@ -255,6 +311,23 @@ if ($IsRemote) {
             Deploy-Folder -Source $SourcePath -Destination (Join-Path $ClaudeSkillsDir $SkillName) -Mode $Mode -AgentLabel "Claude"
         }
     }
+}
+
+# Record what was installed so uninstall/upgrade (and a future --check-updates)
+# can reason about it: the exact commit, how it was installed, and which skills.
+$installedSha = if ($IsRemote) { $Ref } else { "local" }
+$marker = [ordered]@{
+    markerVersion = 1
+    sha           = $installedSha
+    ref           = $Branch
+    remote        = [bool]$IsRemote
+    mode          = $Mode
+    scope         = $Scope
+    date          = (Get-Date).ToString("o")
+    skills        = @($SelectedSkills)
+} | ConvertTo-Json
+foreach ($dir in @($AgentsSkillsDir, $ClaudeSkillsDir)) {
+    try { Set-Content -Path (Join-Path $dir ".installed.json") -Value $marker -Encoding UTF8 } catch {}
 }
 
 Write-Host "`r`nDone! All selected skills successfully installed in $Mode mode." -ForegroundColor Cyan

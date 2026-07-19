@@ -2,6 +2,9 @@
   "skills": [
     {
       "name": "msaf-architect",
+      "displayName": "MSAF Architect (Microsoft Agent Framework C#)",
+      "description": "Version-matched architecture and API guidance for building multi-agent workflows with the Microsoft Agent Framework. Every claim verified against the real NuGet assemblies.",
+      "versions": ["v1.10", "v1.11", "v1.12", "v1.13"],
       "files": [
         "msaf-architect/SKILL.md",
         "msaf-architect/references/version-map.md",
@@ -23,6 +26,20 @@
         "msaf-architect/references/v1.13/hitl-and-routing.md",
         "msaf-architect/references/v1.13/production-readiness.md",
         "msaf-architect/references/v1.13/state-and-persistence.md"
+      ]
+    },
+    {
+      "name": "spectre-console",
+      "displayName": "Spectre.Console Terminal-UI Expert",
+      "description": "Verified guidance for rich .NET terminal UIs with Spectre.Console: tables, panels, trees, markup & color, live displays (Status/Progress/Live), and interactive prompts — plus terminal-gating for CI/non-tty safety.",
+      "versions": ["v0.57.2"],
+      "files": [
+        "spectre-console/SKILL.md",
+        "spectre-console/references/output-widgets.md",
+        "spectre-console/references/markup-and-color.md",
+        "spectre-console/references/live-displays.md",
+        "spectre-console/references/prompts.md",
+        "spectre-console/references/layout-and-testing.md"
       ]
     }
   ]

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectre.Console Skill — Verified Terminal-UI Reference (v0.57.2)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --bg-card: #0e131f;
+            --bg-card-hover: #151c2e;
+            --bg-border: #1e293b;
+            --color-primary: #8b5cf6;   /* Violet */
+            --color-secondary: #3b82f6; /* Blue */
+            --color-accent: #14b8a6;    /* Teal */
+            --color-warn: #f59e0b;      /* Amber */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-main: 'Outfit', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .bg-glows {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(20, 184, 166, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            filter: blur(80px);
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover { color: var(--color-primary); }
+
+        header { margin-top: 24px; margin-bottom: 48px; }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-main) 10%, var(--color-accent) 55%, var(--color-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        header p { color: var(--text-muted); font-size: 1.15rem; max-width: 760px; font-weight: 300; }
+
+        .badges { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .badge {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            padding: 5px 12px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.06);
+            font-family: var(--font-code);
+        }
+        .badge.accent { background: rgba(20, 184, 166, 0.1); color: #5eead4; border-color: rgba(20, 184, 166, 0.25); }
+        .badge.verified { background: rgba(139, 92, 246, 0.1); color: #c084fc; border-color: rgba(139, 92, 246, 0.25); }
+
+        /* The One Rule — flagship callout */
+        .rule-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 48px;
+        }
+        .rule-card h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .rule-card p { color: var(--text-muted); margin-bottom: 18px; }
+        .rule-card strong { color: var(--text-main); }
+
+        section.ref { margin-bottom: 44px; }
+        section.ref > h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        section.ref > h2 .ic { font-size: 1.5rem; }
+        section.ref > .lead { color: var(--text-muted); margin-bottom: 20px; max-width: 800px; }
+
+        .code-block {
+            background: rgba(2, 4, 8, 0.7);
+            border: 1px solid var(--bg-border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .code-block .code-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--bg-border);
+            background: rgba(255,255,255,0.02);
+        }
+        .code-block .code-head .lang { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+        .code-block .code-head .dots { display: flex; gap: 6px; }
+        .code-block .code-head .dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+        .code-block pre {
+            margin: 0;
+            padding: 18px 20px;
+            overflow-x: auto;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+        .code-block pre .cm { color: #64748b; font-style: italic; }  /* comments */
+
+        .note {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-left: 2px solid var(--color-accent);
+            padding-left: 14px;
+            margin-top: 4px;
+        }
+        .note code, section.ref .lead code, .rule-card code {
+            font-family: var(--font-code);
+            font-size: 0.82em;
+            background: rgba(255,255,255,0.05);
+            padding: 1px 6px;
+            border-radius: 5px;
+            color: #a5b4fc;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--bg-border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer .stamp { font-family: var(--font-code); font-size: 0.78rem; opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <div class="bg-glows"></div>
+
+    <div class="container">
+        <a href="./index.html" class="back-link">← Back to the Skills Catalog</a>
+
+        <header>
+            <h1>🎨 Spectre.Console Skill</h1>
+            <p>Verified, version-matched guidance for building rich .NET terminal UIs — tables, panels, trees, markup &amp; color, live displays, and interactive prompts — with the terminal-gating discipline that keeps interactive features from hanging in CI or hosted contexts.</p>
+            <div class="badges">
+                <span class="badge accent">Spectre.Console v0.57.2</span>
+                <span class="badge">Spectre.Console.Ansi</span>
+                <span class="badge">Spectre.Console.Testing</span>
+                <span class="badge verified">✓ Verified against the real DLL surface</span>
+            </div>
+        </header>
+
+        <div class="rule-card">
+            <h2>🚦 The one rule that prevents hangs</h2>
+            <p>Spectre's <strong>interactive</strong> features — every prompt and the <code>Status</code>/<code>Progress</code>/<code>Live</code> displays — assume a real terminal. Under redirected stdin, in CI, or in a hosted (non-tty) process they <strong>throw or block forever</strong> waiting for input that never comes. Always gate on capability first, with a non-interactive fallback.</p>
+            <div class="code-block">
+                <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
+<pre>using Spectre.Console;
+
+<span class="cm">// Interactive == a real, attached terminal that can read keystrokes.</span>
+if (AnsiConsole.Profile.Capabilities.Interactive &amp;&amp; AnsiConsole.Profile.Out.IsTerminal)
+{
+    var name = AnsiConsole.Ask&lt;string&gt;("Your [green]name[/]?");
+    AnsiConsole.MarkupLine($"Hello, [bold]{Markup.Escape(name)}[/]!");
+}
+else
+{
+    <span class="cm">// Non-interactive fallback: plain output, defaults, or read from args/env.</span>
+    AnsiConsole.WriteLine("Running non-interactively; using defaults.");
+}</pre>
+            </div>
+            <p class="note"><code>AnsiConsole.Profile.Capabilities.Interactive</code> is <code>false</code> when input is redirected; <code>AnsiConsole.Profile.Out.IsTerminal</code> is <code>false</code> when stdout is piped/captured.</p>
+        </div>
+
+        <section class="ref">
+            <h2><span class="ic">📦</span>Output widgets</h2>
+            <p class="lead">Everything printed is an <code>IRenderable</code> written with <code>AnsiConsole.Write(renderable)</code>; widgets nest inside one another. Columns and rows are fluent extension methods.</p>
+            <div class="code-block">
+                <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
+<pre>using Spectre.Console;
+
+var table = new Table();
+table.Border = TableBorder.Rounded;          <span class="cm">// Rounded | Square | Minimal | Ascii | Markdown | Heavy …</span>
+table.Title = new TableTitle("[yellow]Users[/]");
+
+table.AddColumn("Name");
+table.AddColumn(new TableColumn("Age").Centered());
+table.AddRow("Alice", "30");
+table.AddRow("Bob", "25");
+
+AnsiConsole.Write(table);
+
+<span class="cm">// Compose freely: Panel, Tree, Rule, Columns, Rows, Padder, Align, BarChart …</span>
+var tree = new Tree("[bold]solution/[/]");
+var src = tree.AddNode("[blue]src/[/]");
+src.AddNode("Program.cs");
+AnsiConsole.Write(new Panel(tree) { Header = new PanelHeader("Files") });</pre>
+            </div>
+            <p class="note">Covered in the skill: <code>Table</code>, <code>Grid</code>, <code>Panel</code>, <code>Tree</code>, <code>Rule</code>, <code>Columns</code>, <code>Rows</code>, <code>Padder</code>, <code>Align</code>, <code>TextPath</code>, <code>FigletText</code>, and charts.</p>
+        </section>
+
+        <section class="ref">
+            <h2><span class="ic">🎨</span>Markup &amp; color — escape untrusted text</h2>
+            <p class="lead">Spectre renders styled text from an inline <code>[style]…[/]</code> markup string. Any <code>[</code> or <code>]</code> in interpolated or user-supplied text is a control character and will throw or corrupt output — escape it.</p>
+            <div class="code-block">
+                <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
+<pre>using Spectre.Console;
+
+AnsiConsole.MarkupLine("[bold red]Error:[/] disk full");
+
+string userInput = "array[0] = [redacted]";
+AnsiConsole.MarkupLine($"You typed: [grey]{Markup.Escape(userInput)}[/]");   <span class="cm">// safe</span>
+
+<span class="cm">// Or the interpolated helpers, which escape the holes for you:</span>
+AnsiConsole.MarkupLineInterpolated($"You typed: [grey]{userInput}[/]");</pre>
+            </div>
+            <p class="note"><code>Markup.Escape</code> doubles brackets; <code>MarkupLineInterpolated</code> / <code>Markup.FromInterpolated</code> escape interpolation holes automatically — the safest option for dynamic text. <code>Color</code>, <code>Style</code>, and <code>Decoration</code> are value types for building styles without hand-written markup.</p>
+        </section>
+
+        <section class="ref">
+            <h2><span class="ic">⏳</span>Live displays — Status, Progress, Live</h2>
+            <p class="lead">Three widgets animate a console region. <strong>A live display owns the region exclusively</strong> — never write to the console directly or start a second live display from inside the callback; mutate through the supplied context instead.</p>
+            <div class="code-block">
+                <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
+<pre>using Spectre.Console;
+
+AnsiConsole.Progress()
+    .AutoClear(false)
+    .Columns(new ProgressColumn[]
+    {
+        new TaskDescriptionColumn(),
+        new ProgressBarColumn(),
+        new PercentageColumn(),
+        new SpinnerColumn(),
+    })
+    .Start(ctx =>
+    {
+        var download = ctx.AddTask("[green]Downloading[/]");   <span class="cm">// MaxValue defaults to 100</span>
+        while (!ctx.IsFinished)
+        {
+            download.Increment(2.5);
+            <span class="cm">// …pace the loop / await real work…</span>
+        }
+    });</pre>
+            </div>
+            <p class="note"><code>Status()</code> shows a spinner + message; <code>Live(renderable)</code> re-renders any widget in place via <code>ctx.Refresh()</code>. Async variants (<code>StartAsync</code>) take a <code>Task</code>-returning callback.</p>
+        </section>
+
+        <section class="ref">
+            <h2><span class="ic">⌨️</span>Prompts</h2>
+            <p class="lead">Four interactive prompts: free-text (<code>TextPrompt&lt;T&gt;</code>), yes/no (<code>ConfirmationPrompt</code>), single-choice (<code>SelectionPrompt&lt;T&gt;</code>), and multi-choice (<code>MultiSelectionPrompt&lt;T&gt;</code>) — run via <code>AnsiConsole.Prompt(...)</code> or the <code>Ask</code>/<code>Confirm</code> shortcuts. All require a real terminal (gate first).</p>
+            <div class="code-block">
+                <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
+<pre>using Spectre.Console;
+
+string env = AnsiConsole.Prompt(
+    new SelectionPrompt&lt;string&gt;()
+        .Title("Choose an [green]environment[/]")
+        .PageSize(10)
+        .EnableSearch()
+        .AddChoices("dev", "staging", "production"));
+
+int age = AnsiConsole.Ask&lt;int&gt;("Your [green]age[/]?");
+bool ok = AnsiConsole.Confirm("Deploy to [red]production[/]?", defaultValue: false);</pre>
+            </div>
+            <p class="note"><code>TextPrompt&lt;T&gt;</code> supports <code>.Validate(...)</code>, <code>.Secret()</code>, <code>.DefaultValue(...)</code>, and <code>.AllowEmpty()</code>; <code>MultiSelectionPrompt&lt;T&gt;</code> returns a <code>List&lt;T&gt;</code> with <code>.Required()</code> / <code>.NotRequired()</code>.</p>
+        </section>
+
+        <section class="ref">
+            <h2><span class="ic">🧪</span>Layout, DI &amp; testing</h2>
+            <p class="lead">Prefer an injected <code>IAnsiConsole</code> over the static <code>AnsiConsole</code> facade — it is the seam that makes output testable. The <code>Spectre.Console.Testing</code> package's <code>TestConsole</code> captures output and can feed scripted input.</p>
+            <div class="code-block">
+                <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
+<pre>using Spectre.Console;
+using Spectre.Console.Testing;
+
+<span class="cm">// Mark the test console interactive so gated prompt code runs.</span>
+var console = new TestConsole().Interactive();
+console.Input.PushTextWithEnter("Alice");        <span class="cm">// scripted keystrokes</span>
+
+string name = console.Prompt(new TextPrompt&lt;string&gt;("Name?"));
+<span class="cm">// name == "Alice"; inspect rendered output via console.Output / console.Lines</span></pre>
+            </div>
+            <p class="note">Static output (<code>Table</code>, <code>Panel</code>, <code>MarkupLine</code>) is safe everywhere — it renders without color/animation when unsupported. Only prompts and live displays need gating.</p>
+        </section>
+
+        <footer>
+            <p>Part of the <a href="./index.html" class="back-link" style="margin:0;display:inline;">AI Agent Skills Catalog</a>. Install with the catalog's one-line installer, then select <code style="font-family:var(--font-code)">spectre-console</code>.</p>
+            <p class="stamp" style="margin-top:10px;">✓ Every type, method, and property shown is verified against the actual Spectre.Console v0.57.2 assembly surface (Spectre.Console, Spectre.Console.Ansi, Spectre.Console.Testing) — reflection extraction plus compile tests against the pinned package. An automated gate rejects any unverified API identifier before release.</p>
+        </footer>
+    </div>
+</body>
+</html>

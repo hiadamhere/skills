@@ -24,7 +24,7 @@ done
 GITHUB_USER="hiadamhere"
 GITHUB_REPO="skills" # public catalog repo (remote mode fetches published files only)
 BRANCH="main"
-RAW_BASE_URL="https://raw.githubusercontent.com/$GITHUB_USER/$GITHUB_REPO/$BRANCH/skills"
+# RAW_BASE_URL is built below from $REF -- a pinned commit SHA for remote installs.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_DIR="$REPO_DIR/skills"
@@ -35,6 +35,23 @@ if [ -d "$SKILLS_DIR" ]; then
 else
     IS_REMOTE=true
 fi
+
+# Resolve the ref to install from. Remote installs pin to a single commit SHA so
+# a push landing mid-install can't serve a manifest from one commit and files
+# from another. Fall back to the branch ref on any API failure (rate limit /
+# missing python3) so the install still proceeds.
+REF="$BRANCH"
+if [ "$IS_REMOTE" = true ]; then
+    commit_json=$(curl -fsSL -H "User-Agent: skills-installer" "https://api.github.com/repos/$GITHUB_USER/$GITHUB_REPO/commits/$BRANCH" 2>/dev/null)
+    resolved_sha=$(echo "$commit_json" | python3 -c "import sys, json; print(json.load(sys.stdin).get('sha',''))" 2>/dev/null)
+    if [ -n "$resolved_sha" ]; then
+        REF="$resolved_sha"
+        echo "Pinned to commit ${REF:0:7} for a consistent snapshot."
+    else
+        echo "Warning: could not resolve '$BRANCH' to a commit SHA; falling back to '$BRANCH' refs (install may not be a consistent snapshot)." >&2
+    fi
+fi
+RAW_BASE_URL="https://raw.githubusercontent.com/$GITHUB_USER/$GITHUB_REPO/$REF/skills"
 
 # 1. Handle Remote vs Local Setup
 if [ "$IS_REMOTE" = true ]; then
@@ -122,7 +139,7 @@ mkdir -p "$CLAUDE_SKILLS_DIR"
 
 # Manifest is retrieved dynamically from skills.json or read locally
 if [ "$IS_REMOTE" = true ]; then
-    MANIFEST_URL="https://raw.githubusercontent.com/$GITHUB_USER/$GITHUB_REPO/$BRANCH/skills.json"
+    MANIFEST_URL="https://raw.githubusercontent.com/$GITHUB_USER/$GITHUB_REPO/$REF/skills.json"
     files_json=$(curl -fsSL "$MANIFEST_URL")
     if [ -z "$files_json" ]; then
         echo "Error: Failed to download manifest from $MANIFEST_URL" >&2
@@ -287,5 +304,19 @@ else
         fi
     done
 fi
+
+# Record what was installed so uninstall/upgrade (and a future --check-updates)
+# can reason about it: the exact commit, how it was installed, and which skills.
+installed_sha="local"
+[ "$IS_REMOTE" = true ] && installed_sha="$REF"
+skills_json_arr=""
+for s in "${SELECTED_SKILLS[@]}"; do
+    esc=$(printf '%s' "$s" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    skills_json_arr+="\"$esc\","
+done
+skills_json_arr="[${skills_json_arr%,}]"
+marker="{\"markerVersion\":1,\"sha\":\"$installed_sha\",\"ref\":\"$BRANCH\",\"remote\":$IS_REMOTE,\"mode\":\"$MODE\",\"scope\":\"$SCOPE\",\"date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"skills\":$skills_json_arr}"
+printf '%s\n' "$marker" > "$AGENTS_SKILLS_DIR/.installed.json"
+printf '%s\n' "$marker" > "$CLAUDE_SKILLS_DIR/.installed.json"
 
 echo -e "\nDone! All selected skills successfully installed in $MODE mode."
