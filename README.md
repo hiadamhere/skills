@@ -26,13 +26,39 @@ Verified, version-matched guidance for building rich .NET terminal UIs with [Spe
 
 ---
 
-## 🚀 Multi-Agent Skill Installer & Uninstaller
+## 🚀 Installing the Skills
 
-Deploy catalog skills to your local agent configuration folders either globally (user-wide) or locally (project-wide).
+Three ways to install — pick whichever fits your setup.
 
-### 1. Global Installation (Quick Start)
+### 1. With `spm` (recommended) — installs into every coding agent
 
-Runs the installer and deploys all catalog skills globally to standard user-level agent config paths (`~/.agents/skills` for Codex/Gemini, and `~/.claude/skills` for Claude Code):
+**[`spm`](https://www.npmjs.com/package/@hiadamhere/spm)** (Skill & Plugin Manager) is a package manager for AI-agent skills. It installs this catalog into **all** your coding agents — Claude Code, Codex, Cursor, Cline, Aider, GitHub Copilot, and more — from the command line.
+
+**Install `spm`** (choose one — no repo clone required):
+```bash
+npm install -g @hiadamhere/spm     # Node — self-contained, no .NET required
+dotnet tool install -g spm          # …or the .NET global tool
+```
+
+**Install every skill from this catalog:**
+```bash
+spm install hiadamhere/skills
+```
+> Don't want a global install? Run it once with npx: `npx @hiadamhere/spm install hiadamhere/skills`
+
+**Or subscribe to the catalog** to keep it updated and install skills by name:
+```bash
+spm catalog add hiadamhere https://github.com/hiadamhere/skills.git
+spm catalog sync
+spm list                      # browse available skills
+spm search table              # find one
+spm install spectre-console   # install a single skill
+spm uninstall spectre-console # remove it
+```
+
+### 2. One-line remote install — no package manager needed
+
+No Node or .NET? A self-contained script deploys all catalog skills to your user-level agent config folders (`~/.agents/skills` for Codex/Gemini, `~/.claude/skills` for Claude Code):
 
 #### On Windows (PowerShell):
 ```powershell
@@ -44,51 +70,31 @@ irm https://raw.githubusercontent.com/hiadamhere/skills/main/install.ps1 | iex
 curl -fsSL https://raw.githubusercontent.com/hiadamhere/skills/main/install.sh | bash
 ```
 
-### 2. Local/Workspace Installation & Selection
+### 3. Local / workspace install (clone) — copy or symlink, per-skill, custom scope
 
-If you clone the repository locally, you can run the scripts with parameters to configure installation scope and select specific skills:
+Clone the repo and run the installer with flags for finer control:
 
-*   **Mode:** Copy files or Symlink files (recommended for automatic updates via `git pull`).
-*   **Scope:** Deploy **Global** (user-profile) or **Folder** (workspace-level). Workspace-level copies skills into `<folder>/.agents/skills/` (shared by Codex and Gemini) and `<folder>/.claude/skills/`.
-*   **Skills:** Multi-select specific skills. By default, running interactively presents a menu with `ALL` as the first choice, or you can specify skill names on the CLI.
-
-#### Windows (PowerShell) Examples:
-```powershell
-# Interactive run (prompts for mode, scope, target folder, and skills selection)
-.\install.ps1
-
-# Non-interactive copy of specific skills to a local project workspace
-.\install.ps1 -Mode Copy -Scope Folder -Path C:\MyProject -Skills msaf-architect
-```
-
-#### macOS/Linux (Bash) Examples:
-```bash
-# Interactive run
-./install.sh
-
-# Non-interactive symlink of specific skills to a local project workspace
-./install.sh --mode link --scope folder --path /path/to/my-project --skills msaf-architect
-```
-
-### 3. Uninstalling Skills
-
-You can cleanly remove catalog skills from either global or workspace-level folders using the uninstaller scripts:
+*   **Mode:** Copy files or Symlink (recommended for automatic updates via `git pull`).
+*   **Scope:** **Global** (user-profile) or **Folder** (workspace-level — copies into `<folder>/.agents/skills/` and `<folder>/.claude/skills/`).
+*   **Skills:** Multi-select specific skills; interactive runs present a menu with `ALL` as the first choice.
 
 #### Windows (PowerShell):
 ```powershell
-# Interactive uninstall
-.\uninstall.ps1
-
-# Non-interactive uninstall of specific skills from a workspace folder
+# Interactive (prompts for mode, scope, target folder, and skills)
+.\install.ps1
+# Non-interactive copy of specific skills to a workspace
+.\install.ps1 -Mode Copy -Scope Folder -Path C:\MyProject -Skills msaf-architect
+# Uninstall
 .\uninstall.ps1 -Scope Folder -Path C:\MyProject -Skills msaf-architect
 ```
 
 #### macOS/Linux (Bash):
 ```bash
-# Interactive uninstall
-./uninstall.sh
-
-# Non-interactive uninstall from a workspace folder
+# Interactive
+./install.sh
+# Non-interactive symlink of specific skills to a workspace
+./install.sh --mode link --scope folder --path /path/to/my-project --skills msaf-architect
+# Uninstall
 ./uninstall.sh --scope folder --path /path/to/my-project --skills msaf-architect
 ```
 
