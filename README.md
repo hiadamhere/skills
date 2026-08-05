@@ -15,7 +15,16 @@ Master architecture guidelines, execution models, and API mappings for building 
 > **API Ground-Truth Alignment**
 > Tutorials and LLM training data describe Microsoft Agent Framework APIs that **were never shipped** (e.g. a `WorkflowSuspendedException` suspend pattern) and cause compiler failures.
 >
-> Every claim in this skill is **verified against the actual v1.10.0 / v1.11.0 / v1.12.0 / v1.13.0 assemblies from NuGet** — reflection surface extraction plus compile tests against the pinned packages. Reference documents carry per-version verification stamps, and an automated gate rejects any unverified API identifier before release. The latest guidance targets **v1.13** (composable/disposable agent skills and the renamed `AgentFileStore` contract).
+> Every claim in this skill is **verified against the actual v1.10.0 through v1.17.0 assemblies from NuGet** — reflection surface extraction plus compile tests against the pinned packages. Reference documents carry per-version verification stamps, and an automated gate rejects any unverified API identifier before release. The latest guidance targets **v1.17**, whose public API surface is *byte-identical* to **v1.16** (Magentic manager prompt overrides and response language, both behind the `MAAI001` experimental diagnostic), on top of **v1.15** (latest-checkpoint resolution and the `blockOnPendingRequest` streaming overload).
+
+Both v1.15 and v1.16 are **purely additive** by mechanical surface diff, and **v1.17 changes nothing at all** — v1.14 code compiles unchanged throughout — so the traps are in adoption, not migration: `MagenticPromptOverrides` properties are `init`-only, `GetLatestCheckpointAsync` returns a **nullable** `CheckpointInfo?`, and the v1.16 prompt API is still a compile **error** until `MAAI001` is suppressed.
+
+The interactive visualizer includes a dedicated **v1.14 Migration Map** showing the unchanged Workflows layer and the compile-verified agent-mode, message-injection, tool-approval, and approval-middleware replacements, plus a **v1.15 & v1.16 Additions** view covering latest-checkpoint resolution, the pending-request streaming choice, the seven Magentic prompt slots, and the `MAAI001` gate.
+
+### 📱 `maui-engineer` (.NET MAUI Architect)
+Version-aware **architecture and planning** guidance for .NET MAUI apps: the decisions to get right before writing feature code — target-platform and SDK/workload/package strategy, project layout, MVVM/DI, navigation, state and offline data, platform-abstraction boundaries, performance budgets, accessibility, and publish/signing constraints. It resolves the real SDK, target frameworks, workloads, and packages first, and requires platform/runtime evidence instead of treating one successful desktop build as cross-platform proof.
+
+The bundled environment inspector produces a reviewable JSON snapshot of the project's toolchain. This is a methodology skill: API specifics and platform behavior are resolved from the target project and official Microsoft docs, not asserted from a pinned DLL surface.
 
 ### 🎨 `spectre-console` (Spectre.Console Terminal-UI Expert)
 Verified, version-matched guidance for building rich .NET terminal UIs with [Spectre.Console](https://spectreconsole.net/): tables, panels, trees, markup & color, live displays (`Status`/`Progress`/`Live`), and interactive prompts — plus the terminal-gating discipline that keeps interactive features from hanging in CI or hosted contexts.
@@ -23,6 +32,20 @@ Verified, version-matched guidance for building rich .NET terminal UIs with [Spe
 > [!IMPORTANT]
 > **API Ground-Truth Alignment**
 > Every type, method, and property is **verified against the actual Spectre.Console v0.57.2 assemblies** (`Spectre.Console`, `Spectre.Console.Ansi`, `Spectre.Console.Testing`) — reflection surface extraction plus compile tests against the pinned package. The same automated gate rejects any unverified API identifier before release.
+
+### 🧩 `microsoft-extensions-ai` (Microsoft.Extensions.AI — .NET LLM abstractions)
+Verified, version-matched guidance for [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/), .NET's unified LLM layer: `IChatClient` calls and streaming, `ChatOptions`, tool/function calling, embeddings, and the middleware pipeline — so generated code targets the current GA API instead of renamed preview members.
+
+> [!IMPORTANT]
+> **API Ground-Truth Alignment**
+> Every type, method, and property is **verified against the actual Microsoft.Extensions.AI v10.8.1 assemblies** (`Microsoft.Extensions.AI`, `Microsoft.Extensions.AI.Abstractions`) — reflection surface extraction plus compile tests against the pinned package. Training data mixes the old preview API with GA (e.g. the renamed `GetResponseAsync`); the same automated gate rejects any unverified API identifier before release.
+
+### 🔌 `mcp-sdk` (Model Context Protocol SDKs)
+Verified guidance for building **MCP servers** with the official SDKs: defining tools, wiring the stdio transport, and standing up a minimal server with the correct, version-matched API. MCP postdates most training data, so models invent its shapes — this anchors them to the real SDK.
+
+> [!IMPORTANT]
+> **API Ground-Truth Alignment**
+> The **C# reference** is **verified against the actual ModelContextProtocol v2.0.0-preview.3 assemblies** (`ModelContextProtocol`, `ModelContextProtocol.Core`) — reflection surface extraction plus compile tests against the pinned package. TypeScript (`@modelcontextprotocol/sdk`) and Python (`mcp`) references are being added, each verified against the pinned SDK. The same automated gate rejects any unverified API identifier before release.
 
 ---
 
@@ -53,6 +76,7 @@ spm catalog sync
 spm list                      # browse available skills
 spm search table              # find one
 spm install spectre-console   # install a single skill
+spm install maui-engineer     # install the MAUI architect
 spm uninstall spectre-console # remove it
 ```
 
