@@ -11,7 +11,7 @@ This skill embeds the architectural guidelines, design principles, and API mappi
 
 ## 🧭 Getting Started: Version Resolution
 
-The Workflows layer is API-stable across v1.10–v1.13, but the agent layer (`Microsoft.Agents.AI`) changes between releases — and stale tutorials/model memory describe APIs that were **never shipped** (e.g. `WorkflowSuspendedException`). **Resolve the version, then trust only the matching reference folder and the version map.**
+The Workflows layer was API-stable across v1.10–v1.14, adds members again in v1.15 and v1.16, and is unchanged in v1.17; the agent layer (`Microsoft.Agents.AI`) changes between the earlier releases — and stale tutorials/model memory describe APIs that were **never shipped** (e.g. `WorkflowSuspendedException`). **Resolve the version, then trust only the matching reference folder and the version map.**
 
 1. Check the local project's `.csproj` or dependency files to resolve the installed version of `Microsoft.Agents.AI.Workflows` or `Microsoft.Agents.AI`.
    * *Note:* If the project references `Microsoft.Agents.Builder` or `Microsoft.Agents.Hosting.AspNetCore` (v1.6.x), that belongs to the separate **Microsoft 365 Agents SDK**—this skill does not apply to that SDK.
@@ -19,7 +19,11 @@ The Workflows layer is API-stable across v1.10–v1.13, but the agent layer (`Mi
 3. Load the matching reference folder:
    * **[v1.11 Reference Guides](references/v1.11/)**
    * **[v1.12 Reference Guides](references/v1.12/)**
-   * **[v1.13 Reference Guides (Latest)](references/v1.13/)** — composable/disposable agent skills + renamed `AgentFileStore` contract
+   * **[v1.13 Reference Guides](references/v1.13/)** — composable/disposable agent skills + renamed `AgentFileStore` contract
+   * **[v1.14 Reference Guides](references/v1.14/)** — async agent modes, contextual tool auto-approval, async message injection, and approval middleware changes
+   * **[v1.15 Reference Guides](references/v1.15/)** — latest-checkpoint resolution + the `blockOnPendingRequest` streaming overload
+   * **[v1.16 Reference Guides](references/v1.16/)** — Magentic manager prompt overrides and response language (experimental, `MAAI001`)
+   * **[v1.17 Reference Guides (Latest)](references/v1.17/)** — API-identical to v1.16; nothing to migrate
 
 ---
 
