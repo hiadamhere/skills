@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSAF Architect Visualizer (v1.13.0)</title>
+    <title>MSAF Architect Visualizer (v1.17.0)</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -458,7 +458,7 @@
             <h1>⚡ MSAF Architect Visualizer</h1>
             <p>Interactive architecture patterns & blueprints for Microsoft Agent Framework</p>
         </div>
-        <div class="version-badge">MAF v1.13.0 STABLE</div>
+        <div class="version-badge">MAF v1.10–v1.17 VERIFIED</div>
     </header>
 
     <main>
@@ -492,6 +492,18 @@
                         </button>
                     </li>
                     <li>
+                        <button class="nav-btn" onclick="switchView('v114', this)">
+                            <span class="nav-btn-icon">1.14</span>
+                            v1.14 Migration Map
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" onclick="switchView('v116', this)">
+                            <span class="nav-btn-icon">1.16</span>
+                            v1.15 &amp; v1.16 Additions
+                        </button>
+                    </li>
+                    <li>
                         <button class="nav-btn" onclick="switchView('generator', this)">
                             <span class="nav-btn-icon">🛠️</span>
                             Architecture Generator
@@ -507,7 +519,7 @@
                     <p><strong>The slowest branch sets the pace</strong><br>Parallel paths re-sync every round — a long chain next to a short one makes the short one wait. Keep sequential work consolidated.</p>
                     <p><strong>State lands between rounds</strong><br>Updates queue up during a round and commit at the barrier, so concurrent nodes never race each other.</p>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10–v1.13 binaries — no invented APIs.</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10–v1.17 binaries — no invented APIs.</p>
             </div>
         </div>
 
@@ -826,15 +838,162 @@ var loopAgent = new LoopAgent(
     </g>
 </svg>`
             },
+            v114: {
+                title: "MAF v1.14 Agent-Layer Migration Map",
+                principlesTitle: "What Actually Changed",
+                principles: [
+                    ["Workflows stayed stable", "Microsoft.Agents.AI.Workflows and Microsoft.Agents.AI.Abstractions are byte-identical to v1.13. Existing executor, edge, HITL, state, checkpoint, and streaming patterns carry forward."],
+                    ["State access became async", "Agent modes and message injection now use async methods with cancellation tokens. Replace the removed synchronous calls instead of wrapping them in Task.Run."],
+                    ["Approval policy sees full context", "Auto-approval rules now receive ToolAutoApprovalRuleContext, including the call, agent, session, request messages, and run options."],
+                    ["Approval middleware was renamed", "Use approval-not-required bypass and approval-response binding. The builder extensions require ILoggerFactory; the ChatClientAgentOptions switches are opt-out flags."]
+                ],
+                desc: "The v1.14 breaking surface is concentrated in Microsoft.Agents.AI. This map shows the compile-verified replacements for agent modes, message injection, contextual tool approval, and approval middleware; the Workflows graph model is unchanged.",
+                code: `// Microsoft.Agents.AI 1.14.0
+using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
+
+var mode = new AgentModeProviderOptions.AgentMode(
+    "review",
+    "Review the proposed change and report concrete defects.");
+
+using var modeProvider = new AgentModeProvider(new AgentModeProviderOptions
+{
+    Modes = new[] { mode },
+    DefaultMode = "review"
+});
+
+await modeProvider.SetModeAsync(session, "review", cancellationToken);
+string currentMode = await modeProvider.GetModeAsync(session, cancellationToken);
+
+var approvalOptions = new ToolApprovalAgentOptions
+{
+    AutoApprovalRules = new Func<ToolAutoApprovalRuleContext, ValueTask<bool>>[]
+    {
+        context => new ValueTask<bool>(
+            context.FunctionCallContent.Name == "read_file" &&
+            context.RequestMessages.Count > 0)
+    }
+};
+
+await injectingClient.EnqueueMessagesAsync(session, messages, cancellationToken);
+IReadOnlyList<ChatMessage> pending =
+    await injectingClient.GetPendingMessagesAsync(session, cancellationToken);
+
+ChatClientBuilder builder = chatClient.AsBuilder()
+    .UseApprovalNotRequiredFunctionBypassing(loggerFactory)
+    .UseApprovalResponseBinding(loggerFactory);`,
+                svg: `
+<svg width="650" height="270" viewBox="0 0 650 270" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 175 78 H 245" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 405 78 H 475" stroke="#10b981" stroke-width="2"/>
+    <path class="animated-line" d="M 325 112 V 170" stroke="#f59e0b" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Async agent modes', 'AgentModeProviderOptions.AgentMode now stores Instructions. AgentModeProvider implements IDisposable, and mode reads and writes use GetModeAsync and SetModeAsync with cancellation tokens.')">
+        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+        <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Agent Modes</text>
+        <text x="100" y="92" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">Get/SetModeAsync</text>
+    </g>
+
+    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Contextual auto-approval', 'Rules now receive ToolAutoApprovalRuleContext rather than FunctionCallContent directly. Inspect FunctionCallContent plus trusted agent, session, request-message, and run-option context.')">
+        <rect x="245" y="45" width="160" height="66" rx="9" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+        <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Tool Approval</text>
+        <text x="325" y="92" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">RuleContext</text>
+    </g>
+
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Async message injection', 'EnqueueMessagesAsync and GetPendingMessagesAsync replace the removed synchronous methods and both accept CancellationToken.')">
+        <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Message Injection</text>
+        <text x="550" y="92" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">Async + cancellation</text>
+    </g>
+
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Approval middleware', 'UseApprovalNotRequiredFunctionBypassing and UseApprovalResponseBinding replace the old bypass surface. Both builder extensions require ILoggerFactory; ChatClientAgentOptions exposes matching Disable opt-out flags.')">
+        <rect x="205" y="170" width="240" height="70" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="325" y="199" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Approval Middleware</text>
+        <text x="325" y="219" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">bypass + response binding</text>
+    </g>
+
+    <text x="325" y="258" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Workflows and Abstractions: no public API delta from v1.13</text>
+</svg>`
+            },
+            v116: {
+                title: "MAF v1.15 & v1.16 Workflows Additions",
+                principlesTitle: "What Actually Changed",
+                principles: [
+                    ["Nothing broke", "Both releases are purely additive by mechanical surface diff. No type, member, or signature was removed or renamed, so v1.14 code compiles unchanged on v1.16."],
+                    ["v1.15: find the latest checkpoint", "CheckpointManager.GetLatestCheckpointAsync(sessionId, cancellationToken) resolves a session's most recent checkpoint. The token is optional and the return is NULLABLE -- a session with no checkpoints yields null. It resolves identity, not compatibility -- still validate before resuming."],
+                    ["v1.15: choose stream behavior at a human request", "WatchStreamAsync(blockOnPendingRequest, cancellationToken) makes parking-vs-yielding at a pending request an explicit hosting decision. The v1.13 single-token overload still works."],
+                    ["v1.16: Magentic prompts are customizable", "MagenticPromptOverrides supplies seven init-only prompt slots, MagenticDefaultPrompts exposes each shipped default, and the builder gains WithPromptOverrides and WithResponseLanguage."],
+                    ["v1.16 is experimental", "The whole prompt surface raises MAAI001 as a compile ERROR until suppressed. The pre-existing MagenticWorkflowBuilder methods are not gated. Treat it as subject to change."]
+                ],
+                desc: "v1.15 and v1.16 move the Workflows layer again after four stable releases -- both additive. v1.17 then changes nothing at all: its public surface is byte-identical to v1.16 by mechanical diff. This map shows the compile-verified new members: checkpoint lookup, pending-request stream control, and the experimental Magentic prompt surface.",
+                code: `// Microsoft.Agents.AI.Workflows 1.16.0
+// Requires <NoWarn>$(NoWarn);MAAI001</NoWarn> for the Magentic prompt surface.
+using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Workflows;
+using Microsoft.Agents.AI.Workflows.Checkpointing;
+
+// --- v1.15: resolve a session's most recent checkpoint (token is optional) ---
+CheckpointInfo? latest = await manager.GetLatestCheckpointAsync(sessionId, cancellationToken);
+if (latest is null) { /* session never checkpointed -- start fresh, do not resume */ }
+
+// --- v1.15: decide what the stream does at a pending human request ---
+await foreach (WorkflowEvent evt in run.WatchStreamAsync(blockOnPendingRequest: false, cancellationToken))
+{
+    // handle evt; the host regains control instead of parking on the request
+}
+
+// --- v1.16: customize the Magentic manager's prompts (init-only properties) ---
+Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
+    .AddParticipants(participants)
+    .WithPromptOverrides(new MagenticPromptOverrides
+    {
+        ProgressLedgerPrompt = MagenticDefaultPrompts.ProgressLedgerPrompt + "\\nAlso list blockers.",
+        FinalAnswerPrompt    = "Answer as a short executive summary."
+    })
+    .WithResponseLanguage("French")
+    .WithMaxRounds(10)
+    .Build();`,
+                svg: `
+<svg width="650" height="270" viewBox="0 0 650 270" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 175 78 H 245" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 325 112 V 168" stroke="#f59e0b" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Latest checkpoint (v1.15)', 'CheckpointManager.GetLatestCheckpointAsync(sessionId, cancellationToken) returns the session most recent CheckpointInfo, or NULL when the session has never checkpointed. Declare it CheckpointInfo? and branch. The cancellation token is optional. It answers where did this session get to, not whether the checkpoint is still compatible.')">
+        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+        <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Checkpoint Lookup</text>
+        <text x="100" y="92" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · GetLatest…</text>
+    </g>
+
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Pending-request streaming (v1.15)', 'WatchStreamAsync(blockOnPendingRequest, cancellationToken) lets the host choose whether the event stream parks at a pending human request or yields control. Pass false in request handlers and queue workers.')">
+        <rect x="245" y="45" width="160" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Stream Control</text>
+        <text x="325" y="92" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · blockOnPendingRequest</text>
+    </g>
+
+    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Magentic prompt overrides (v1.16)', 'MagenticPromptOverrides has seven init-only slots: TaskLedgerFactsPrompt, TaskLedgerPlanPrompt, TaskLedgerFullPrompt, TaskLedgerFactsUpdatePrompt, TaskLedgerPlanUpdatePrompt, ProgressLedgerPrompt and FinalAnswerPrompt. MagenticDefaultPrompts exposes each shipped default.')">
+        <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+        <text x="550" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Magentic Prompts</text>
+        <text x="550" y="92" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">v1.16 · 7 init-only slots</text>
+    </g>
+
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('MAAI001 gate', 'MagenticPromptOverrides, MagenticDefaultPrompts, WithPromptOverrides and WithResponseLanguage are marked experimental and raise MAAI001 as a compile ERROR. Add NoWarn MAAI001 to build. The pre-existing MagenticWorkflowBuilder methods are not gated.')">
+        <rect x="205" y="168" width="240" height="70" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="325" y="197" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">⚗️ MAAI001 — experimental</text>
+        <text x="325" y="217" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">compile error until suppressed</text>
+    </g>
+
+    <text x="325" y="258" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Both releases are purely additive — v1.14 code compiles unchanged</text>
+</svg>`
+            },
             generator: {
                 title: "MSAF Architecture Blueprint Generator",
                 principlesTitle: "About This Tool",
                 principles: [
                     ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back — not a fragment."],
-                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.13.0 DLLs — no invented APIs, no ... placeholders."],
+                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.14.0 DLLs — no invented APIs, no ... placeholders."],
                     ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
-                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.13.0 binaries.",
+                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.14.0 binaries.",
                 code: `// Set choices on the questionnaire above to generate code...`,
                 htmlContent: `
                 <div class="blueprint-form">
@@ -866,7 +1025,7 @@ var loopAgent = new LoopAgent(
                 <div class="blueprint-output">
                     <div class="blueprint-output-header">
                         <h4 id="blueprint-title">Recommended Blueprint: Sequential Pipeline</h4>
-                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.13.0 Blueprint</span>
+                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.14.0 Blueprint</span>
                     </div>
                     <ul class="blueprint-bullets" id="blueprint-rules">
                         <li>Linear executors connected via simple <code>builder.AddEdge()</code> routes.</li>
@@ -917,7 +1076,7 @@ var loopAgent = new LoopAgent(
                 setTimeout(generateBlueprint, 50);
             } else {
                 target.innerHTML = viewData.svg;
-                document.getElementById('code-panel-title').textContent = viewKey === 'bsp' ? 'PregelSuperstep.cs' : viewKey === 'hitl' ? 'HitlResumption.cs' : viewKey === 'loops' ? 'LoopAgent.cs' : 'MultiAgentWorkflow.cs';
+                document.getElementById('code-panel-title').textContent = viewKey === 'bsp' ? 'PregelSuperstep.cs' : viewKey === 'hitl' ? 'HitlResumption.cs' : viewKey === 'loops' ? 'LoopAgent.cs' : viewKey === 'v114' ? 'Maf114Migration.cs' : 'MultiAgentWorkflow.cs';
                 document.getElementById('code-content').textContent = viewData.code;
             }
         }
@@ -950,7 +1109,7 @@ var loopAgent = new LoopAgent(
 
             // Compose ONE coherent, compilable program per selection. Ordering is
             // enforced (top-level statements first, type declarations last) and every
-            // building block is verified against the MAF v1.13.0 DLL surface.
+            // building block is verified against the MAF v1.14.0 DLL surface.
             const usings = new Set([
                 "using System;",
                 "using System.Threading;",
@@ -1176,8 +1335,8 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
 
             const hasTodo = flow === 'agent' || state === 'db';
             const header =
-                "// MAF v1.13 blueprint -- a complete single-file program (top-level statements).\n" +
-                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.13.0, then: dotnet run\n" +
+                "// MAF v1.14 blueprint -- a complete single-file program (top-level statements).\n" +
+                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.14.0, then: dotnet run\n" +
                 (hasTodo
                     ? "// Compiles as-is; fill in the // TODO spots before it runs.\n"
                     : "// Compiles and runs as-is; swap the sample executor bodies for your logic.\n");
