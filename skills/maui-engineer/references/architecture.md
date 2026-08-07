@@ -1,4 +1,4 @@
-# MAUI App Architecture
+# 🏗️ MAUI App Architecture
 
 The structural decisions to make while planning a .NET MAUI app, and how to keep them honest with evidence. Resolve the project's toolchain first ([version and sources](version-and-sources.md)).
 

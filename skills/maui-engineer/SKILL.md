@@ -1,6 +1,6 @@
 ---
 name: maui-engineer
-description: Version-aware architecture and planning guidance for .NET MAUI apps. Use when planning, structuring, or architecting a .NET MAUI application — target platforms, SDK/workload/package strategy, project layout, MVVM/DI, Shell navigation, state and offline data, platform-abstraction boundaries, performance budgets, accessibility, and publish/signing constraints. Resolve the project SDK, target frameworks, workloads, and MAUI package versions before giving API guidance.
+description: Version-aware architecture and planning guidance for .NET MAUI apps. Use when planning, structuring, or architecting a .NET MAUI application — target platforms, SDK/workload/package strategy, project layout, Shell/stack navigation and deep links, MVVM and DI lifetimes, state and offline data, platform-abstraction boundaries, performance budgets, accessibility, and publish/signing constraints. Resolve the project SDK, target frameworks, workloads, and MAUI package versions before giving API guidance.
 ---
 
 # 📱 .NET MAUI Architect
@@ -19,7 +19,14 @@ Reach for this skill when planning a new MAUI app or making a structural decisio
 1. **Resolve the ground before advising.** Read repository instructions, the solution/project files, `global.json`, `Directory.Build.*`, and any central package files. Run `scripts/inspect-maui.ps1 -Path <repo>` (PowerShell 7) for a reviewable JSON snapshot of SDK, workloads, target frameworks, and MAUI package versions — or collect the same facts with `dotnet --info`, `dotnet workload list`, and project inspection. Full policy: [version and sources](references/version-and-sources.md).
 2. **Identify the target platforms.** The platform set drives most architectural decisions (navigation shell, lifecycle handling, native capability boundaries, packaging).
 3. **Preserve the project's current SDK/package strategy** unless the user explicitly asks for an upgrade. Never solve an application design question by bumping every workload.
-4. **Make the architecture decisions** using [architecture](references/architecture.md): the diagnostic/ownership split, layering, XAML/binding/layout structure, platform-work boundaries, and the validation ladder.
+4. **Make the architecture decisions** using the reference that matches the question:
+
+| Decision | Reference |
+|---|---|
+| Ownership split, layering, XAML/binding/layout, platform boundaries, validation ladder | [architecture](references/architecture.md) |
+| Navigation model, deep links and back stack, MVVM boundaries, DI lifetimes | [navigation and MVVM](references/navigation-and-mvvm.md) |
+| What to budget, how to set and hold a number, structural performance choices | [performance budgets](references/performance-budgets.md) |
+| What counts as verified, and where to resolve versions from | [version and sources](references/version-and-sources.md) |
 
 ---
 
@@ -37,6 +44,8 @@ Reach for this skill when planning a new MAUI app or making a structural decisio
 
 ## Constraints
 
+- **Pick one primary navigation model** and treat the others as exceptions within it. A page reachable by deep link must construct its state from its parameters alone — otherwise it works in manual testing and fails on cold start.
+- **A performance claim needs a before/after measurement** on the target platform in a Release build. Never quote a threshold that did not come from this project's own baseline.
 - **Do not infer native behavior from a single desktop target or a XAML preview.** Validate runtime behavior on every affected platform; for UI decisions capture device/OS, orientation/window size, theme, and font scale.
 - **Do not label a change an optimization from intuition.** For performance architecture, set and measure budgets — startup, allocation, layout, scrolling, package size — before and after.
 - **Do not treat compilation as shippability.** For publish/signing, distinguish compiling from installability, launchability, permissions/entitlements, trimming/AOT, and store acceptance.
