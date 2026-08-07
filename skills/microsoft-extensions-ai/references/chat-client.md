@@ -61,7 +61,16 @@ var options = new ChatOptions
 ChatResponse response = await client.GetResponseAsync("Summarize MVU.", options);
 ```
 
-`ChatOptions` numeric properties are nullable value types (`float?`, `int?`, `long?`) — pass `0.7f`, not `0.7`. Full set includes `Temperature`, `TopP`, `TopK`, `MaxOutputTokens`, `FrequencyPenalty`, `PresencePenalty`, `Seed`, `Instructions`, `ModelId`, `ResponseFormat`, `Reasoning`, and `Tools` (see [tool calling](tool-calling.md)).
+`ChatOptions` numeric properties are nullable value types (`float?`, `int?`, `long?`) — pass `0.7f`, not `0.7`, or you get **CS0266** (`cannot implicitly convert double to float?`). Full set includes `Temperature`, `TopP`, `TopK`, `MaxOutputTokens`, `FrequencyPenalty`, `PresencePenalty`, `Seed`, `Instructions`, `ModelId`, `ResponseFormat`, `Reasoning`, `ToolMode`, and `Tools` (see [tool calling](tool-calling.md)).
+
+> [!IMPORTANT]
+> The token limit is **`MaxOutputTokens`**. `ChatOptions.MaxTokens` — the name most tutorials and model memory reach for — does not exist and fails with **CS0117**.
+
+## Where to go next
+
+- Let the model call your code → [tool calling](tool-calling.md)
+- Get a typed value instead of prose → [structured output](structured-output.md)
+- Add caching, telemetry, or DI registration → [middleware and DI](middleware-and-di.md)
 
 ---
-*Verified against Microsoft.Extensions.AI 10.8.1 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) and compile-tested against the pinned package (2026-07-21).*
+*Verified against Microsoft.Extensions.AI 10.8.1 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) and compile-tested against the pinned package (2026-08-05).*
