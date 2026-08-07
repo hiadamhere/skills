@@ -24,6 +24,8 @@ The interactive visualizer includes a dedicated **v1.14 Migration Map** showing 
 ### 📱 `maui-engineer` (.NET MAUI Architect)
 Version-aware **architecture and planning** guidance for .NET MAUI apps: the decisions to get right before writing feature code — target-platform and SDK/workload/package strategy, project layout, MVVM/DI, navigation, state and offline data, platform-abstraction boundaries, performance budgets, accessibility, and publish/signing constraints. It resolves the real SDK, target frameworks, workloads, and packages first, and requires platform/runtime evidence instead of treating one successful desktop build as cross-platform proof.
 
+The navigation guidance covers choosing one primary model, deep links that survive a cold start, and the DI lifetimes behind the classic page/view-model leak. The performance guidance deliberately ships **no threshold numbers** — it covers what to budget and how to measure and hold it, because a budget that did not come from your own baseline on your own target hardware is decoration.
+
 The bundled environment inspector produces a reviewable JSON snapshot of the project's toolchain. This is a methodology skill: API specifics and platform behavior are resolved from the target project and official Microsoft docs, not asserted from a pinned DLL surface.
 
 ### 🎨 `spectre-console` (Spectre.Console Terminal-UI Expert)
@@ -34,18 +36,22 @@ Verified, version-matched guidance for building rich .NET terminal UIs with [Spe
 > Every type, method, and property is **verified against the actual Spectre.Console v0.57.2 assemblies** (`Spectre.Console`, `Spectre.Console.Ansi`, `Spectre.Console.Testing`) — reflection surface extraction plus compile tests against the pinned package. The same automated gate rejects any unverified API identifier before release.
 
 ### 🧩 `microsoft-extensions-ai` (Microsoft.Extensions.AI — .NET LLM abstractions)
-Verified, version-matched guidance for [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/), .NET's unified LLM layer: `IChatClient` calls and streaming, `ChatOptions`, tool/function calling, embeddings, and the middleware pipeline — so generated code targets the current GA API instead of renamed preview members.
+Verified, version-matched guidance for [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/), .NET's unified LLM layer: `IChatClient` calls and streaming, `ChatOptions`, tool/function calling, structured output, embeddings, and the middleware/DI pipeline — so generated code targets the current GA API instead of renamed preview members.
+
+It covers the two mistakes that fail silently rather than loudly: declaring `ChatOptions.Tools` without the `UseFunctionInvocation()` middleware that actually executes them, and middleware ordering — where the cache sits relative to function invocation decides whether a cache hit skips the entire tool loop.
 
 > [!IMPORTANT]
 > **API Ground-Truth Alignment**
 > Every type, method, and property is **verified against the actual Microsoft.Extensions.AI v10.8.1 assemblies** (`Microsoft.Extensions.AI`, `Microsoft.Extensions.AI.Abstractions`) — reflection surface extraction plus compile tests against the pinned package. Training data mixes the old preview API with GA (e.g. the renamed `GetResponseAsync`); the same automated gate rejects any unverified API identifier before release.
 
 ### 🔌 `mcp-sdk` (Model Context Protocol SDKs)
-Verified guidance for building **MCP servers** with the official SDKs: defining tools, wiring the stdio transport, and standing up a minimal server with the correct, version-matched API. MCP postdates most training data, so models invent its shapes — this anchors them to the real SDK.
+Verified guidance for building **MCP servers** with the official SDKs in **C#, TypeScript, and Python**: defining tools, wiring the stdio transport, and standing up a minimal server with the correct, version-matched API. MCP postdates most training data, so models invent its shapes — this anchors them to the real SDK.
+
+Each language carries a different trap, and each is compile- or type-checked here: in **Python**, `from mcp.server.fastmcp import FastMCP` — the import in nearly every MCP tutorial — **does not exist** in `mcp` 2.0.0 (the class is now `MCPServer`); in **TypeScript**, the widely-shown `server.tool()` is `@deprecated` in favour of `registerTool`, and import paths need `.js` suffixes; in **C#**, the `WithHttpTransport()` / `MapMcp()` wiring most samples show lives in a separate package and does not compile against the pinned one.
 
 > [!IMPORTANT]
 > **API Ground-Truth Alignment**
-> The **C# reference** is **verified against the actual ModelContextProtocol v2.0.0-preview.3 assemblies** (`ModelContextProtocol`, `ModelContextProtocol.Core`) — reflection surface extraction plus compile tests against the pinned package. TypeScript (`@modelcontextprotocol/sdk`) and Python (`mcp`) references are being added, each verified against the pinned SDK. The same automated gate rejects any unverified API identifier before release.
+> All three language references are verified against their own pinned SDK: **C#** against the real `ModelContextProtocol` v2.0.0-preview.3 assemblies (reflection surface extraction + compile tests), **TypeScript** against `@modelcontextprotocol/sdk` 1.30.0 shipped type definitions (type-checked with `tsc --noEmit`), and **Python** against `mcp` 2.0.0 shipped type information (type-checked with `pyright`). The same automated gate rejects any unverified API identifier before release.
 
 ---
 

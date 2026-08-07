@@ -2,7 +2,36 @@
 
 All notable changes to the **AI Agent Skills Catalog** are recorded here, newest first.
 
-Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver — skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.16), which is what you actually pin against.
+Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver — skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.17), which is what you actually pin against.
+
+---
+
+## 2026-08-06
+
+### Added
+
+- **`mcp-sdk` gains TypeScript and Python references**, completing the three-language coverage the skill's name promised. Each is verified against its own pinned SDK and type-checked before publish: `@modelcontextprotocol/sdk` **1.30.0** (`tsc --noEmit`) and `mcp` **2.0.0** (`pyright`).
+  - **Python:** `from mcp.server.fastmcp import FastMCP` — the import in nearly every MCP tutorial — **does not exist in `mcp` 2.0.0**. The class is now `MCPServer` in `mcp.server.mcpserver`. `mcp.types.ToolResult` does not exist either; both fail in the type checker *and* at runtime. Type annotations on the decorated function are the input schema.
+  - **TypeScript:** `server.tool()` is **`@deprecated`** in the shipped types — use `registerTool`. Import paths require `.js` suffixes under `Node16`/`NodeNext` resolution, and a tool result's `content` is an array of typed blocks; returning a bare string is a type error.
+  - **All languages:** a stdio server must never write to stdout — the transport *is* stdout, so a stray `console.log`/`print()` corrupts the protocol stream.
+
+### Changed
+
+- **`microsoft-extensions-ai` substantially expanded.** The skill previously documented only chat calls, streaming, and `ChatOptions` while its description advertised tool calling, embeddings, and the middleware pipeline. Four new references close that gap, each compile-tested against the pinned 10.8.1 package:
+  - **Tool and function calling** — `AIFunctionFactory`, `ChatOptions.Tools`, the four `ChatToolMode` values, and bounding the invocation loop.
+  - **Structured output** — `GetResponseAsync<T>` and handling the deserialization failure branch.
+  - **Embeddings** — the three `GenerateAsync` call shapes and their differing return types.
+  - **Middleware and DI** — `ChatClientBuilder` composition, layer ordering, and `AddChatClient` registration.
+
+- **`maui-engineer` gains navigation/MVVM and performance-budget guidance.** The skill advertised Shell navigation, MVVM/DI, and performance budgets while its references covered none of them. Two new guides close that: choosing one primary navigation model (and the deep-link/back-stack consequences), MVVM boundaries and DI lifetimes including the page/view-model ownership leak, and how to set, measure, and hold a performance budget. The performance guide deliberately contains **no threshold values** — per this skill's ground-truth policy, a performance claim is a before/after measurement on the target platform, never a number quoted from documentation.
+
+- **`mcp-sdk` now documents what the pinned packages actually ship for HTTP.** The skill advertised "stdio/HTTP transports" while documenting stdio only. `WithHttpTransport()` does not exist on `IMcpServerBuilder` in `ModelContextProtocol` 2.0.0-preview.3 (CS1061), and there is no `MapMcp` in either assembly — that turnkey ASP.NET Core wiring ships in a separate `ModelContextProtocol.AspNetCore` package this skill does not verify. What *is* there: `WithStdioServerTransport()`, `WithStreamServerTransport(input, output)`, the `StreamableHttpServerTransport` primitive you host yourself, and `HttpClientTransport` — which is the **client** side despite the name.
+
+### Notes
+
+- **`ChatOptions.Tools` alone executes nothing.** The provider returns a function-call request; `UseFunctionInvocation()` is what invokes it. Declaring tools without that middleware produces a chat loop that appears to do nothing — the most common silent failure with this library.
+- **Middleware order is behavior.** The first `Use…` registered is the outermost layer, so placing the cache before or after function invocation changes whether a cache hit skips the whole tool loop.
+- Four names that model memory reaches for do not exist, each confirmed by compile test: `CompleteAsync` (CS1061), `ChatOptions.MaxTokens` (CS0117 — it is `MaxOutputTokens`), `ChatToolMode.Required` (CS0117 — it is `RequireAny`), and `Temperature = 0.7` as a `double` (CS0266 — the property is `float?`).
 
 ---
 

@@ -69,21 +69,27 @@
     {
       "name": "microsoft-extensions-ai",
       "displayName": "Microsoft.Extensions.AI (.NET LLM abstractions)",
-      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions: IChatClient, streaming, ChatOptions, tool/function calling, embeddings, and the middleware pipeline.",
+      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions: IChatClient, streaming, ChatOptions, tool/function calling, structured output, embeddings, and the middleware/DI pipeline.",
       "versions": ["10.8.1"],
       "files": [
         "microsoft-extensions-ai/SKILL.md",
-        "microsoft-extensions-ai/references/chat-client.md"
+        "microsoft-extensions-ai/references/chat-client.md",
+        "microsoft-extensions-ai/references/tool-calling.md",
+        "microsoft-extensions-ai/references/structured-output.md",
+        "microsoft-extensions-ai/references/embeddings.md",
+        "microsoft-extensions-ai/references/middleware-and-di.md"
       ]
     },
     {
       "name": "mcp-sdk",
       "displayName": "MCP SDK (Model Context Protocol)",
-      "description": "Verified, version-matched guidance for building against the MCP SDKs: tools, stdio/HTTP transports, and a minimal server. C# reference available now (ModelContextProtocol); TypeScript and Python next.",
-      "versions": ["2.0.0-preview.3"],
+      "description": "Verified, version-matched guidance for building against the MCP SDKs in C#, TypeScript, and Python: tools, transports, and a minimal server -- each verified against its own pinned SDK.",
+      "versions": ["C# 2.0.0-preview.3", "TS 1.30.0", "Python 2.0.0"],
       "files": [
         "mcp-sdk/SKILL.md",
-        "mcp-sdk/references/csharp.md"
+        "mcp-sdk/references/csharp.md",
+        "mcp-sdk/references/typescript.md",
+        "mcp-sdk/references/python.md"
       ]
     },
     {
@@ -94,6 +100,8 @@
       "files": [
         "maui-engineer/SKILL.md",
         "maui-engineer/references/architecture.md",
+        "maui-engineer/references/navigation-and-mvvm.md",
+        "maui-engineer/references/performance-budgets.md",
         "maui-engineer/references/version-and-sources.md",
         "maui-engineer/scripts/inspect-maui.ps1"
       ]
