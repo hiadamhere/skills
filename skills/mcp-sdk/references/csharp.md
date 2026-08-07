@@ -47,5 +47,45 @@ public class EchoTools
 
 Returning a `string` (as above) is the simplest case. For richer results a tool can return a `CallToolResult`, whose `Content` is an `IList<ContentBlock>` (e.g. text blocks) — use this when a tool produces structured or multi-part output.
 
+## Transports: what these packages actually give you
+
+> [!WARNING]
+> **`WithHttpTransport()` does not exist** on `IMcpServerBuilder` in these packages — it fails with **CS1061**, and there is no `MapMcp` anywhere in either surface. The turnkey ASP.NET Core wiring that most samples show (`AddMcpServer().WithHttpTransport()` + `app.MapMcp()`) ships in a **separate** `ModelContextProtocol.AspNetCore` package, which is **not** pinned or verified by this skill. Do not write it from memory against these packages.
+
+The builder offers exactly two transports:
+
+| Builder method | Use |
+|---|---|
+| `WithStdioServerTransport()` | stdin/stdout — the standard transport for a locally launched server |
+| `WithStreamServerTransport(Stream input, Stream output)` | any paired streams you supply |
+
+HTTP *is* present in `ModelContextProtocol.Core`, but as primitives rather than wiring:
+
+```csharp
+using Microsoft.Extensions.Logging.Abstractions;
+using ModelContextProtocol.Server;
+
+// Server side: a primitive you drive from your OWN HTTP endpoint.
+var transport = new StreamableHttpServerTransport(NullLoggerFactory.Instance)
+{
+    Stateless = true,      // init-only -- see the note below
+};
+```
+
+You then route your endpoint's traffic into `HandleGetRequestAsync(Stream, CancellationToken)` and `HandlePostRequestAsync(JsonRpcMessage, Stream, CancellationToken)` yourself. That is the work the AspNetCore package exists to do for you.
+
+> [!IMPORTANT]
+> **`Stateless` is `init`-only.** Assigning it after construction fails with **CS8852**; set it in an object initializer. A reflection surface dump renders `init` and `set` identically, so the dump alone will mislead you here.
+
+> [!IMPORTANT]
+> **`HttpClientTransport` is the client side, not a server transport.** It lives in `ModelContextProtocol.Client` and connects *to* a remote MCP server:
+> ```csharp
+> var options = new HttpClientTransportOptions { Endpoint = new Uri("https://example.com/mcp") };
+> var client  = new HttpClientTransport(options, NullLoggerFactory.Instance);
+> ```
+> The name reads like a server transport; reaching for it to *host* a server is a dead end.
+
+**Practical guidance:** if you need an HTTP MCP server, add `ModelContextProtocol.AspNetCore` and verify its API against that package's own version — this skill's ground truth does not cover it. If you need a locally launched server, `WithStdioServerTransport()` is the shipped, verified path and should be the default.
+
 ---
-*Verified against ModelContextProtocol 2.0.0-preview.3 DLL surface (`ModelContextProtocol` + `ModelContextProtocol.Core`) and compile-tested against the pinned package (2026-07-21).*
+*Verified against ModelContextProtocol 2.0.0-preview.3 DLL surface (`ModelContextProtocol` + `ModelContextProtocol.Core`) and compile-tested against the pinned package (2026-08-05). That `WithHttpTransport()` does not exist (CS1061), that `Stateless` is `init`-only (CS8852), and the `ModelContextProtocol.Client` / `.Server` split of the HTTP types are all compile-test facts.*
