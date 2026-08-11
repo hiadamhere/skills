@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Reference — AI Agent Skills Catalog</title>
+<!--
+  Data-driven skill reference page.
+
+  Renders skills/<name>/SKILL.md for whichever skill is named in ?name=<skill>,
+  plus its reference list from skills.json. ONE page serves every skill on
+  purpose: a hand-written page per skill would be another artifact that must be
+  updated in the same commit as every skill change (policy #10), and the page we
+  maintain most -- msaf-visualizer.html -- is the one that went three MAF
+  releases stale. Here the skill file IS the content, so it cannot drift.
+
+  Dependency-free: the markdown renderer below is deliberately small rather than
+  a CDN import, because the published site must stay self-contained.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-dark:#07090e; --bg-card:#0e131f; --bg-border:#1e293b;
+  --color-primary:#8b5cf6; --color-secondary:#3b82f6; --color-accent:#14b8a6;
+  --text-main:#f8fafc; --text-muted:#94a3b8;
+  --font-main:'Outfit',sans-serif; --font-code:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg-dark);color:var(--text-main);font-family:var(--font-main);line-height:1.7;padding:0 20px 80px}
+.wrap{max-width:900px;margin:0 auto}
+header{padding:32px 0 24px;border-bottom:1px solid var(--bg-border);margin-bottom:32px}
+.back{color:var(--text-muted);text-decoration:none;font-size:.9rem}
+.back:hover{color:var(--color-primary)}
+h1.skill-name{font-size:2rem;font-weight:700;margin:14px 0 8px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.badge{background:rgba(255,255,255,.05);color:var(--text-muted);padding:3px 10px;border-radius:99px;font-size:.75rem;
+       text-transform:uppercase;letter-spacing:.5px;border:1px solid rgba(255,255,255,.05)}
+.badge.primary{background:rgba(139,92,246,.15);color:var(--color-primary);border-color:rgba(139,92,246,.3)}
+.lede{color:var(--text-muted)}
+.refs{background:var(--bg-card);border:1px solid var(--bg-border);border-radius:12px;padding:18px 22px;margin:28px 0}
+.refs h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px}
+.refs ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.refs a{font-family:var(--font-code);font-size:.8rem;color:var(--color-secondary);text-decoration:none;
+        background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);padding:4px 10px;border-radius:6px}
+.refs a:hover{background:rgba(59,130,246,.16)}
+/* rendered markdown */
+.md h1,.md h2,.md h3,.md h4{margin:32px 0 12px;font-weight:600;line-height:1.3}
+.md h1{font-size:1.7rem} .md h2{font-size:1.35rem} .md h3{font-size:1.1rem} .md h4{font-size:1rem}
+.md p{margin:12px 0} .md ul,.md ol{margin:12px 0 12px 24px} .md li{margin:6px 0}
+.md a{color:var(--color-secondary)}
+.md code{font-family:var(--font-code);font-size:.85em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px}
+.md pre{background:#050710;border:1px solid var(--bg-border);border-radius:10px;padding:16px;overflow-x:auto;margin:16px 0}
+.md pre code{background:none;padding:0;font-size:.82rem;line-height:1.6;display:block;white-space:pre}
+.md blockquote{border-left:3px solid var(--bg-border);padding:2px 0 2px 16px;margin:16px 0;color:var(--text-muted)}
+.md hr{border:none;border-top:1px solid var(--bg-border);margin:28px 0}
+.md table{width:100%;border-collapse:collapse;margin:16px 0;display:block;overflow-x:auto}
+.md th,.md td{border:1px solid var(--bg-border);padding:8px 12px;text-align:left;font-size:.9rem}
+.md th{background:rgba(255,255,255,.03);font-weight:600}
+.md em{color:var(--text-muted)}
+.callout{border-radius:10px;padding:14px 18px;margin:18px 0;border:1px solid}
+.callout .ct{font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:block}
+.callout.important{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3)} .callout.important .ct{color:var(--color-primary)}
+.callout.warning{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3)} .callout.warning .ct{color:#f59e0b}
+.callout.note{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3)} .callout.note .ct{color:var(--color-secondary)}
+.state{padding:40px 0;color:var(--text-muted)}
+.state a{color:var(--color-primary)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="./index.html">&larr; Back to the catalog</a>
+    <h1 class="skill-name" id="skill-name">Loading…</h1>
+    <div class="meta" id="skill-meta"></div>
+    <p class="lede" id="skill-desc"></p>
+  </header>
+  <div id="refs-slot"></div>
+  <main class="md" id="content"><p class="state">Loading skill…</p></main>
+</div>
+
+<script>
+// Escape first, always. Skill content is our own, but it is still fetched text
+// rendered into the DOM -- treat it as data, never as markup.
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Inline spans, applied only to already-escaped text.
+function inline(s){
+  return s
+    .replace(/`([^`]+)`/g,(m,c)=>'<code>'+c+'</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*]+)\*/g,'$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,txt,href)=>
+      /^(https?:|\.|\/|#)/.test(href) ? '<a href="'+href+'">'+txt+'</a>' : txt);
+}
+
+function render(md){
+  const lines = md.replace(/\r\n/g,'\n').split('\n');
+  const out = []; let i = 0;
+
+  // Strip YAML frontmatter -- name/description are shown in the header already.
+  if (lines[0] && lines[0].trim() === '---') {
+    let j = 1; while (j < lines.length && lines[j].trim() !== '---') j++;
+    i = j + 1;
+  }
+  let list = null;                                  // 'ul' | 'ol' | null
+  const closeList = () => { if (list) { out.push('</'+list+'>'); list = null; } };
+
+  for (; i < lines.length; i++) {
+    const raw = lines[i], line = raw.trim();
+
+    if (line.startsWith('```')) {                   // fenced code
+      closeList();
+      const lang = line.slice(3).trim(); const buf = [];
+      for (i++; i < lines.length && !lines[i].trim().startsWith('```'); i++) buf.push(lines[i]);
+      out.push('<pre><code data-lang="'+esc(lang)+'">'+esc(buf.join('\n'))+'</code></pre>');
+      continue;
+    }
+    if (/^>\s*\[!(IMPORTANT|WARNING|NOTE|TIP|CAUTION)\]/i.test(line)) {  // GH callout
+      closeList();
+      const kind = line.match(/\[!(\w+)\]/)[1].toLowerCase();
+      const cls = kind === 'warning' || kind === 'caution' ? 'warning' : kind === 'important' ? 'important' : 'note';
+      const buf = [];
+      for (i++; i < lines.length && lines[i].trim().startsWith('>'); i++)
+        buf.push(lines[i].trim().replace(/^>\s?/,''));
+      i--;
+      out.push('<div class="callout '+cls+'"><span class="ct">'+esc(kind)+'</span>'+
+               '<p>'+inline(esc(buf.join(' ')))+'</p></div>');
+      continue;
+    }
+    if (line.startsWith('|') && lines[i+1] && /^\|[\s:|-]+\|$/.test(lines[i+1].trim())) {  // table
+      closeList();
+      const cells = r => r.trim().replace(/^\||\|$/g,'').split('|').map(c=>inline(esc(c.trim())));
+      const head = cells(line); i += 2;
+      const rows = [];
+      for (; i < lines.length && lines[i].trim().startsWith('|'); i++) rows.push(cells(lines[i]));
+      i--;
+      out.push('<table><thead><tr>'+head.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+
+               rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>');
+      continue;
+    }
+    let m;
+    if ((m = line.match(/^(#{1,6})\s+(.*)$/))) {    // heading
+      closeList();
+      const lvl = Math.min(m[1].length, 4);
+      out.push('<h'+lvl+'>'+inline(esc(m[2]))+'</h'+lvl+'>');
+      continue;
+    }
+    if (/^(---|\*\*\*|___)$/.test(line)) { closeList(); out.push('<hr>'); continue; }
+    if ((m = line.match(/^[-*]\s+(.*)$/))) {
+      if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; }
+      out.push('<li>'+inline(esc(m[1]))+'</li>'); continue;
+    }
+    if ((m = line.match(/^\d+\.\s+(.*)$/))) {
+      if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; }
+      out.push('<li>'+inline(esc(m[1]))+'</li>'); continue;
+    }
+    if (line.startsWith('>')) {
+      closeList();
+      out.push('<blockquote>'+inline(esc(line.replace(/^>\s?/,'')))+'</blockquote>'); continue;
+    }
+    if (!line) { closeList(); continue; }
+    closeList();
+    out.push('<p>'+inline(esc(line))+'</p>');
+  }
+  closeList();
+  return out.join('\n');
+}
+
+// Two genuinely different failures, so two handlers. Sharing one produced a page
+// headed "Not found" sitting above a fully populated, correct skill header --
+// alarming, and wrong: the catalog entry HAD loaded, only the body had not.
+function notFound(msg){
+  document.getElementById('skill-name').textContent = 'Not found';
+  document.getElementById('content').innerHTML =
+    '<p class="state">'+esc(msg)+' <a href="./index.html">Back to the catalog</a>.</p>';
+}
+function bodyUnavailable(name){
+  // Header, versions and reference list are already rendered and correct -- keep
+  // them, and say only what actually failed.
+  document.getElementById('content').innerHTML =
+    '<p class="state">The reference list above is live, but this skill’s <code>SKILL.md</code> '+
+    'could not be loaded from this site. Read it in the repository: '+
+    '<a href="https://github.com/hiadamhere/skills/blob/main/skills/'+esc(name)+'/SKILL.md">'+
+    'skills/'+esc(name)+'/SKILL.md</a>.</p>';
+}
+
+(async function(){
+  const name = new URLSearchParams(location.search).get('name');
+  if (!name || !/^[a-z0-9-]+$/.test(name)) { notFound('No valid skill named in the URL.'); return; }
+
+  let skill = null;
+  try {
+    const res = await fetch('./skills.json');
+    if (res.ok) {
+      const cat = await res.json();
+      skill = (cat.skills || []).find(s => s.name === name) || null;
+    }
+  } catch (e) { /* fall through -- the SKILL.md fetch below is the real content */ }
+
+  if (!skill) { notFound('“'+name+'” is not in this catalog.'); return; }
+
+  document.title = skill.displayName || skill.name;
+  document.getElementById('skill-name').textContent = skill.displayName || skill.name;
+  document.getElementById('skill-desc').textContent = skill.description || '';
+  document.getElementById('skill-meta').innerHTML =
+    '<span class="badge primary">'+esc(skill.name)+'</span>' +
+    (skill.versions || []).map(v => '<span class="badge">'+esc(v)+'</span>').join('');
+
+  const refs = (skill.files || []).filter(f => f !== skill.name+'/SKILL.md');
+  if (refs.length) {
+    document.getElementById('refs-slot').innerHTML =
+      '<div class="refs"><h3>'+refs.length+' reference file'+(refs.length>1?'s':'')+'</h3><ul>' +
+      refs.map(f => '<li><a href="./skills/'+esc(f)+'">'+esc(f.replace(skill.name+'/',''))+'</a></li>').join('') +
+      '</ul></div>';
+  }
+
+  try {
+    const md = await fetch('./skills/'+name+'/SKILL.md');
+    if (!md.ok) throw new Error(md.status);
+    document.getElementById('content').innerHTML = render(await md.text());
+  } catch (e) {
+    bodyUnavailable(name);
+  }
+})();
+</script>
+</body>
+</html>

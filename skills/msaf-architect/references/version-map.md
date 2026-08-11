@@ -11,6 +11,7 @@ This document maps feature availability and breaking API changes across Microsof
 | Pregel/BSP workflow execution, executors, edges, streaming | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `SKILL.md` |
 | `RequestPort` HITL and `RunStatus.PendingRequests` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/hitl-and-routing.md` |
 | Scoped workflow state and checkpointing | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/state-and-persistence.md` |
+| Sequential / concurrent / group-chat / handoff orchestration builders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/orchestration-patterns.md` |
 | `LoopAgent` and loop evaluators | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-loops.md` |
 | Context-aware agent skills and tool auto-approval | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-skills.md` |
 | Composable/disposable skill sources and renamed `AgentFileStore` contract | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-skills.md` |

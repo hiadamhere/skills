@@ -289,6 +289,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 16px;
             margin-top: auto;
@@ -298,13 +300,18 @@
             font-family: var(--font-code);
             font-size: 0.75rem;
             color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-width: 0;        /* allow shrinking below content width */
+            flex: 1 1 auto;
         }
 
         .ver-tag {
             background: rgba(255,255,255,0.03);
             padding: 2px 6px;
             border-radius: 4px;
-            margin-right: 4px;
+            white-space: nowrap;
             border: 1px solid rgba(255,255,255,0.03);
         }
 
@@ -345,16 +352,6 @@
                 </a>
             </div>
 
-            <!-- Pathway 2: Verified Documentation -->
-            <div class="portal-card teal" id="card-documentation">
-                <div class="card-body">
-                    <h2><span class="card-icon">📖</span>Verified API & Docs Catalog</h2>
-                    <p>Browse our <code>docs/</code> folder containing reconstructed documentation files. Designed to prevent AI hallucinations, these files provide correct, compilable specifications and structural references.</p>
-                </div>
-                <a href="./docs/" class="btn-portal" onclick="alert('The documentation index in /docs/ is being created. For now, reference documents can be read directly in the repository folders.');">
-                    Explore Docs Folder <span>→</span>
-                </a>
-            </div>
         </section>
 
         <!-- Dynamic Skills Catalog List -->
@@ -375,7 +372,7 @@
                             <span class="badge-meta primary">Core</span>
                         </div>
                         <h3>msaf-architect</h3>
-                        <p>Version-matched Microsoft Agent Framework architecture, verified through v1.17 — Magentic prompt overrides, latest-checkpoint resolution, and the v1.14 async-migration map.</p>
+                        <p>Version-matched Microsoft Agent Framework architecture, verified through v1.17 — the four orchestration builders, Magentic prompt overrides, latest-checkpoint resolution, and the v1.14 async-migration map.</p>
                     </div>
                     <div class="skill-bottom">
                         <div class="ver-list">
@@ -415,7 +412,7 @@
                         const categoryBadge = `<span class="badge-meta ${isPrivate ? '' : 'primary'}">${isPrivate ? 'Private' : 'Public'}</span>`;
                         const versionsHtml = (skill.versions || []).map(v => `<span class="ver-tag">${v}</span>`).join('');
                         const skillPages = { 'msaf-architect': './msaf-visualizer.html', 'spectre-console': './spectre-console.html' };
-                        const readUrl = skillPages[skill.name] || `./skills/${skill.name}/SKILL.md`;
+                        const readUrl = skillPages[skill.name] || `./skill.html?name=${encodeURIComponent(skill.name)}`;
                         
                         return `
                             <div class="skill-card" id="skill-${skill.name}">
