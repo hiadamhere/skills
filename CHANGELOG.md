@@ -6,6 +6,60 @@ Entries are dated by the day the change landed on `main`. The catalog is not ver
 
 ---
 
+## 2026-08-11
+
+### Added
+
+- **Every skill now has a reference page.** `skill.html?name=<skill>` renders a skill's own `SKILL.md` and lists its reference files. Previously only `msaf-architect` and `spectre-console` had pages; the other four linked straight to raw markdown, which the browser either dumped unstyled or refused to render. One data-driven page serves all six on purpose — a hand-written page per skill would be another artifact to keep in step with every skill change, and the page we maintain most is the one that went three MAF releases stale.
+
+### Changed
+
+- **The catalog page no longer hides the "View Reference" button.** `msaf-architect` carries eight version pills (v1.10–v1.17) in a flex row that could neither wrap nor shrink, so the pills pushed the button out of the card. Only that card was affected; every other skill has one to three pills.
+- **The "Explore Docs Folder" card is gone.** It popped an alert saying the docs were being created and then navigated anyway — the alert never cancelled the click — to a `docs/` directory that is not published. A card advertising something that does not exist was the defect, not its wording.
+- **The interactive visualizer's blueprint generator now offers the orchestration builders.** A new **Agent Orchestration** topology generates `AgentWorkflowBuilder` code — the shipped facade — alongside the existing hand-wired graph, which is now labelled **Multi-Agent Graph (hand-wired)** and is the right choice when you need to mix agents with plain `Executor` nodes. Previously the only agent option produced `new WorkflowBuilder(...)` + `.AddEdge(...)`: exactly the hand-rolling the orchestration reference tells you to avoid, on the page that reference links to.
+  - The builders return a **finished `Workflow`**, so the generator no longer offers a human gate on that topology — a `RequestPort` needs edges to attach to. It says so instead of emitting code that cannot compile.
+  - The generator is re-pinned from **v1.14.0 to v1.17.0**, on a page that already badged v1.10–v1.17.
+
+### Notes
+
+- **Every program the generator can produce is now compile-tested.** All 24 combinations of topology × persistence × human-gate were generated headlessly and built against pinned `Microsoft.Agents.AI.Workflows` 1.17.0 — 24/24 compile. That check found two real defects before release: the new topology emitted a call to an `IChatClient` factory it never declared (CS0103), and two later human-gate branches still emitted a gate the orchestration path cannot support (CS0246).
+
+---
+
+## 2026-08-10
+
+### Added
+
+- **`msaf-architect` documents the four orchestration builders** — sequential, concurrent, group chat, and handoff — in every version folder from v1.11 to v1.17. These are the shipped multi-agent topologies, and until now the skill documented none of them — Magentic, the fifth topology, appears only from v1.16 — so this was a whole category of workflow you would otherwise hand-roll from executors and edges.
+  - **`AgentWorkflowBuilder` is the entry point and it is a `static` class** — reached through one-call methods (`BuildSequential`, `BuildConcurrent`) or factories that hand you a builder. Not obvious from the type names, and not where anyone looks first.
+  - **`GroupChatWorkflowBuilder` has no public constructor** (CS1729) — it must be created through `CreateGroupChatBuilderWith`, which takes a `GroupChatManager` factory.
+  - **There are two handoff builder types and both work.** `HandoffWorkflowBuilder` and `HandoffsWorkflowBuilder` — note the `s` — are separate sealed classes that both compile to a working workflow. The facade returns the non-`s` one.
+  - **The reflected signature of `BuildConcurrent` is misleading:** its aggregator reads as required but is **optional**, as are `RoundRobinGroupChatManager`'s terminate function and every parameter of `WithAutonomousMode()`. A reflection dump renders an optional parameter identically to a required one — these three are compile-test facts the surface alone would have got wrong.
+
+### Changed
+
+- **Documentation coverage is now a ratchet, not a hope.** The gate measures how much of a pinned API surface a skill actually documents and **fails when that number drops**. Coverage may rise but never silently fall, and a package version that introduces undocumented types can no longer pass unnoticed. `msaf-architect` moves from 92 to 102 of 276 public MAF types with this release.
+
+---
+
+## 2026-08-07
+
+### Added
+
+- **`reviewers` — a configurable multi-lens review panel.** Several independent lenses examine the same change in parallel, each answering one question well rather than one reviewer answering all of them adequately. Findings merge by severity; verdicts roll up **worst-case-wins**, so one blocking lens outranks every approval.
+  - **The default pack is organised by who pays when a change is wrong**, not by job title. Always-on: `correctness` (behavior at the edges nobody tried), `evidence` (test quality over test count — does a test fail without the change?), `risk` (blast radius, detection, reversibility), `clarity` (can the next person change it safely). Triggered by what the change touches: `security`, `performance`, `interface`, `docs`.
+  - **Customization survives updates.** Shipped files under `references/` are replaced on every update; a `reviewers.local/` overlay is never touched. Disable a lens, retune when it fires, replace one wholesale, or add your own — a lens is a markdown file plus a roster entry, with no code to write and nothing else to register.
+  - **It reviews more than code.** Nothing in the machinery assumes source code; only the default lenses do. Point it at specs, migrations, infrastructure, or documentation by turning off what does not apply and adding lenses that carry your own rules.
+  - **Point it at your own history.** Set `lessons` to your post-mortems or ADRs and every lens reads them *before* hunting new findings — which is what stops a panel rediscovering a defect you already paid for.
+  - **Vendor-neutral by construction.** Lenses are plain markdown with no tool names or vendor framing; a thin adapter per harness dispatches them. Any agent that can run a sub-task with a prompt can run the panel.
+
+### Notes
+
+- **The cost controls are load-bearing, not convenience.** A trivial-change clause (typo → one-line acknowledgement) and a scope cap (large diffs → top findings only) exist because an expensive gate gets skipped, and a skipped gate catches nothing. Removing them to be "more thorough" ends with the panel unused.
+- **The panel reports; it never edits.** A reviewer that fixes is one nobody dares run on a whim — and running it on a whim is the entire value.
+
+---
+
 ## 2026-08-06
 
 ### Added

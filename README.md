@@ -19,6 +19,8 @@ Master architecture guidelines, execution models, and API mappings for building 
 
 Both v1.15 and v1.16 are **purely additive** by mechanical surface diff, and **v1.17 changes nothing at all** — v1.14 code compiles unchanged throughout — so the traps are in adoption, not migration: `MagenticPromptOverrides` properties are `init`-only, `GetLatestCheckpointAsync` returns a **nullable** `CheckpointInfo?`, and the v1.16 prompt API is still a compile **error** until `MAAI001` is suppressed.
 
+It also covers the four shipped **orchestration builders** — sequential, concurrent, group chat, and handoff — reached through the `static` `AgentWorkflowBuilder` facade. Each carries a trap the reflected surface cannot show: `GroupChatWorkflowBuilder` has **no public constructor**, there are **two** handoff builder types (`HandoffWorkflowBuilder` and `HandoffsWorkflowBuilder`) that both work, and `BuildConcurrent`'s aggregator reads as required but is optional — all three established by compile test.
+
 The interactive visualizer includes a dedicated **v1.14 Migration Map** showing the unchanged Workflows layer and the compile-verified agent-mode, message-injection, tool-approval, and approval-middleware replacements, plus a **v1.15 & v1.16 Additions** view covering latest-checkpoint resolution, the pending-request streaming choice, the seven Magentic prompt slots, and the `MAAI001` gate.
 
 ### 📱 `maui-engineer` (.NET MAUI Architect)
@@ -52,6 +54,14 @@ Each language carries a different trap, and each is compile- or type-checked her
 > [!IMPORTANT]
 > **API Ground-Truth Alignment**
 > All three language references are verified against their own pinned SDK: **C#** against the real `ModelContextProtocol` v2.0.0-preview.3 assemblies (reflection surface extraction + compile tests), **TypeScript** against `@modelcontextprotocol/sdk` 1.30.0 shipped type definitions (type-checked with `tsc --noEmit`), and **Python** against `mcp` 2.0.0 shipped type information (type-checked with `pyright`). The same automated gate rejects any unverified API identifier before release.
+
+### 🔍 `reviewers` (configurable review panel)
+A **review panel** rather than a single reviewer: several independent lenses examine the same change in parallel, each answering one question well instead of one reviewer answering all of them adequately. Findings merge by severity; verdicts roll up **worst-case-wins**, so a single blocking lens outranks every approval — deliberately, because averaging dilutes the one specialist who saw what nobody else was looking for.
+
+The default pack is organised by *who pays when a change is wrong*, not by job title. Four lenses run on every change — **correctness** (does it work at the edges nobody tried), **evidence** (do we know, or do we believe), **risk** (what happens when it fails, who notices, how it is undone), **clarity** (can the next person change it safely). Four cost nothing until the change touches their surface — **security**, **performance**, **interface**, **docs**.
+
+> [!IMPORTANT]
+> **Built to be customized, and to survive updates.** Shipped files are replaced on every update; your overlay in `reviewers.local/` is never touched. Disable a lens, retune when it fires, replace one wholesale, or add your own — a lens is a markdown file plus a roster entry, with no code anywhere. Point `lessons` at your own post-mortems and every lens reads them *before* hunting new findings, so a defect you already paid for is not rediscovered from scratch. The panel reviews anything, not only code: the machinery makes no assumption about source code, only the default lenses do.
 
 ---
 
