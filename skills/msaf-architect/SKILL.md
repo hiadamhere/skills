@@ -1,6 +1,6 @@
 ---
 name: msaf-architect
-description: C# architecture and version-specific API guidance for Microsoft Agent Framework (MAF/MSAF) agent workflows. Use when building or debugging multi-agent workflows with the Microsoft.Agents.AI / Microsoft.Agents.AI.Workflows NuGet packages in .NET — executors, edges, checkpointing, human-in-the-loop. Always resolve the installed package version first and load the matching references/vX.X folder. Not for the Microsoft 365 Agents SDK (Microsoft.Agents.Builder).
+description: C# architecture and version-specific API guidance for Microsoft Agent Framework (MAF/MSAF) agent workflows. Use when building or debugging multi-agent workflows with the Microsoft.Agents.AI / Microsoft.Agents.AI.Workflows NuGet packages in .NET — executors, edges, checkpointing, human-in-the-loop, and the four orchestration builders (sequential, concurrent, group chat, handoff). Always resolve the installed package version first and load the matching references/vX.X folder. Not for the Microsoft 365 Agents SDK (Microsoft.Agents.Builder).
 ---
 
 # 🏛️ Microsoft Agent Framework (MAF) C# Architect Skill
