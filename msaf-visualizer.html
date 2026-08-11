@@ -990,10 +990,10 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
                 principlesTitle: "About This Tool",
                 principles: [
                     ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back — not a fragment."],
-                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.14.0 DLLs — no invented APIs, no ... placeholders."],
+                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.17.0 DLLs, and every generated program is compile-tested against the pinned packages — no invented APIs, no ... placeholders."],
                     ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
-                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.14.0 binaries.",
+                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.17.0 binaries.",
                 code: `// Set choices on the questionnaire above to generate code...`,
                 htmlContent: `
                 <div class="blueprint-form">
@@ -1002,7 +1002,8 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
                         <select id="flow-type" onchange="generateBlueprint()">
                             <option value="seq">Sequential Chain (Linear)</option>
                             <option value="parallel">Parallel Fan-out (Pregel BSP)</option>
-                            <option value="agent">Multi-Agent Orchestrator</option>
+                            <option value="orchestrate">Agent Orchestration (AgentWorkflowBuilder)</option>
+                            <option value="agent">Multi-Agent Graph (hand-wired)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1025,7 +1026,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
                 <div class="blueprint-output">
                     <div class="blueprint-output-header">
                         <h4 id="blueprint-title">Recommended Blueprint: Sequential Pipeline</h4>
-                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.14.0 Blueprint</span>
+                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.17.0 Blueprint</span>
                     </div>
                     <ul class="blueprint-bullets" id="blueprint-rules">
                         <li>Linear executors connected via simple <code>builder.AddEdge()</code> routes.</li>
@@ -1109,7 +1110,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
 
             // Compose ONE coherent, compilable program per selection. Ordering is
             // enforced (top-level statements first, type declarations last) and every
-            // building block is verified against the MAF v1.14.0 DLL surface.
+            // building block is verified against the MAF v1.17.0 DLL surface.
             const usings = new Set([
                 "using System;",
                 "using System.Threading;",
@@ -1119,6 +1120,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
             const body = [];   // top-level statements
             const types = [];  // type declarations, emitted after every statement
             const ruleItems = [];
+            let prebuilt = false;   // orchestration builders return a finished Workflow
             let titleText = "";
 
             body.push("CancellationToken ct = CancellationToken.None;");
@@ -1199,9 +1201,51 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
     public override ValueTask<Report> HandleAsync(PartialResult message, IWorkflowContext context, CancellationToken ct)
         => new(new Report(message.Score));
 }`);
+            } else if (flow === 'orchestrate') {
+                titleText = "Agent Orchestration";
+                prebuilt = true;
+                lastType = "ChatMessage";
+                usings.add("using Microsoft.Agents.AI;");
+                usings.add("using Microsoft.Extensions.AI;");
+                usings.add("using Microsoft.Extensions.Logging.Abstractions;");
+                ruleItems.push("<code>AgentWorkflowBuilder</code> is a <code>static</code> facade — it returns a finished <code>Workflow</code>, so there is no <code>WorkflowBuilder</code> and no edge wiring.");
+                ruleItems.push("Swap <code>BuildSequential</code> for <code>BuildConcurrent</code>, or use <code>CreateHandoffBuilderWith</code> / <code>CreateGroupChatBuilderWith</code> for the other two topologies.");
+                ruleItems.push("<code>BuildConcurrent</code>'s aggregator reads as required in the surface dump but is <strong>optional</strong>; <code>GroupChatWorkflowBuilder</code> has <strong>no public constructor</strong> — go through the facade.");
+                body.push("");
+                body.push("// -- Agent orchestration: the shipped builders, not a hand-wired graph --");
+                body.push("IChatClient chatClient = CreateChatClient(); // TODO: supply this (see CreateChatClient below)");
+                body.push("var drafter = new ChatClientAgent(");
+                body.push("    chatClient: chatClient,");
+                body.push('    instructions: "Draft a concise answer to the user request.",');
+                body.push('    name: "Drafter",');
+                body.push('    description: "Produces a first draft.",');
+                body.push("    tools: Array.Empty<AITool>(),");
+                body.push("    loggerFactory: NullLoggerFactory.Instance,");
+                body.push("    services: null);");
+                body.push("var reviewer = new ChatClientAgent(");
+                body.push("    chatClient: chatClient,");
+                body.push('    instructions: "Tighten and correct the draft. Be concise.",');
+                body.push('    name: "Reviewer",');
+                body.push('    description: "Reviews the draft for clarity.",');
+                body.push("    tools: Array.Empty<AITool>(),");
+                body.push("    loggerFactory: NullLoggerFactory.Instance,");
+                body.push("    services: null);");
+                body.push("AIAgent[] agents = new AIAgent[] { drafter, reviewer };");
+                body.push("");
+                body.push("// Sequential: each agent sees what came before. One call, no builder.");
+                body.push('var workflow = AgentWorkflowBuilder.BuildSequential("draft-then-review", agents);');
+                body.push("");
+                body.push("// Other topologies from the same facade:");
+                body.push("//   AgentWorkflowBuilder.BuildConcurrent(agents)                      -- aggregator is optional");
+                body.push("//   AgentWorkflowBuilder.CreateHandoffBuilderWith(drafter)");
+                body.push('//       .WithHandoff(drafter, reviewer, "needs review").Build()');
+                body.push("//   AgentWorkflowBuilder.CreateGroupChatBuilderWith(a => new RoundRobinGroupChatManager(a))");
+                body.push("//       .AddParticipants(agents).Build()");
+                body.push('ChatMessage input = new ChatMessage(ChatRole.User, "Explain fan-out/fan-in in one paragraph.");');
             } else {
-                titleText = "Multi-Agent Chain";
+                titleText = "Multi-Agent Graph (hand-wired)";
                 firstNode = "drafterNode"; lastNode = "reviewerNode"; lastType = "ChatMessage";
+                ruleItems.push("A hand-wired graph — use this to mix agents with plain <code>Executor</code> nodes. For a pure agent topology prefer <strong>Agent Orchestration</strong> above, which uses the shipped builders.");
                 usings.add("using Microsoft.Agents.AI;");
                 usings.add("using Microsoft.Extensions.AI;");
                 usings.add("using Microsoft.Extensions.Logging.Abstractions;");
@@ -1232,7 +1276,12 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
             }
 
             // ---- 2. Human gate: declare the port BEFORE the builder so edges can use it ----
-            if (hitl === 'yes') {
+            if (hitl === 'yes' && prebuilt) {
+                // The builders return a finished Workflow with no edge surface to
+                // attach a gate to. Emitting the gate anyway would produce code
+                // that does not compile, so state the constraint instead.
+                ruleItems.push("<strong>No human gate on this topology.</strong> <code>AgentWorkflowBuilder</code> returns a finished <code>Workflow</code>, so there is no edge to attach a <code>RequestPort</code> to. Use <strong>Multi-Agent Graph (hand-wired)</strong> if the run must pause for a human.");
+            } else if (hitl === 'yes') {
                 titleText += " + Human Gate";
                 ruleItems.push("A <code>RequestPort</code> node suspends the run at <code>RunStatus.PendingRequests</code> until a typed response is posted.");
                 body.push("");
@@ -1248,6 +1297,9 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
             // ---- 3. Build the workflow graph ----
             body.push("");
             const edges = [];
+            if (prebuilt) {
+                // workflow already assigned by the branch above -- no builder, no edges.
+            } else {
             if (flow === 'seq') {
                 edges.push("    .AddEdge(intake, finalize)");
             } else if (flow === 'parallel') {
@@ -1259,13 +1311,14 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
             }
             body.push("var workflow = new WorkflowBuilder(" + firstNode + ")");
             edges.forEach(function (e) { body.push(e); });
-            if (hitl === 'yes') {
+            if (hitl === 'yes' && !prebuilt) {
                 body.push("    .AddEdge(" + lastNode + ", gate)");
                 body.push("    .WithOutputFrom(gate)");
             } else {
                 body.push("    .WithOutputFrom(" + lastNode + ")");
             }
             body.push("    .Build();");
+            }
 
             // ---- 4. Persistence + run ----
             body.push("");
@@ -1311,7 +1364,7 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
             }
 
             // ---- 5. Resume the suspended run (HITL only) ----
-            if (hitl === 'yes') {
+            if (hitl === 'yes' && !prebuilt) {
                 body.push("");
                 body.push("// Post the human decision, then resume the suspended run.");
                 body.push("if (await run.GetStatusAsync(ct) == RunStatus.PendingRequests)");
@@ -1324,8 +1377,8 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
                 body.push("}");
             }
 
-            // ---- 6. Agent flow: the IChatClient factory (a top-level local function) ----
-            if (flow === 'agent') {
+            // ---- 6. Agent flows: the IChatClient factory (a top-level local function) ----
+            if (flow === 'agent' || flow === 'orchestrate') {
                 body.push("");
                 body.push("// TODO: return your configured IChatClient, e.g.:");
                 body.push("//   new AzureOpenAIClient(endpoint, cred).GetChatClient(\"gpt-4o\").AsIChatClient();");
@@ -1333,10 +1386,10 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
                 body.push('    => throw new NotImplementedException("Plug in your IChatClient.");');
             }
 
-            const hasTodo = flow === 'agent' || state === 'db';
+            const hasTodo = flow === 'agent' || flow === 'orchestrate' || state === 'db';
             const header =
-                "// MAF v1.14 blueprint -- a complete single-file program (top-level statements).\n" +
-                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.14.0, then: dotnet run\n" +
+                "// MAF v1.17 blueprint -- a complete single-file program (top-level statements).\n" +
+                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.17.0, then: dotnet run\n" +
                 (hasTodo
                     ? "// Compiles as-is; fill in the // TODO spots before it runs.\n"
                     : "// Compiles and runs as-is; swap the sample executor bodies for your logic.\n");
