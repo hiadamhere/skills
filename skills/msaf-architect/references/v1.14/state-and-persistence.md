@@ -31,5 +31,16 @@ Workflow scoped-state APIs did not change in v1.14. Agent modes did: await `GetM
 - Resume is idempotent at every external side-effect boundary.
 - Agent-mode access uses the v1.14 asynchronous contract.
 
+<!-- shared:workflow-hosting -->
+## 🧭 Hosting a workflow as an agent
+
+`WorkflowHostingExtensions.AsAIAgent` (present since v1.10; every parameter optional) turns a `Workflow` into an `AIAgent`, so a host that speaks agents — sessions, `RunAsync`, serialization — can run a graph without knowing it is one. Two facts hold in every verified version:
+
+- **The workflow must speak the chat protocol.** `AsAIAgent` accepts any `Workflow`, but the first `RunAsync` throws an **InvalidOperationException** (*"Workflow does not support ChatProtocol: At least List<ChatMessage> and TurnToken must be supported as input"*) unless the start executor accepts `List<ChatMessage>` and `TurnToken`. A bare `Executor<string, string>` graph fails here; a `BuildSequential` workflow qualifies.
+- **Give it an explicit `id`.** Without one the agent gets a fresh identifier per call, and `Name` / `Description` are empty.
+
+Executed against pinned 1.14.0, 1.17.0 and 1.19.0; the signature is identical in every dump from 1.10.0. The v1.19 controls for where a hosted agent's checkpoints live are in [the v1.19 state guide](../v1.19/state-and-persistence.md).
+<!-- /shared:workflow-hosting -->
+
 ---
-*Verified against MAF v1.14.0 DLL surface (2026-07-22). The Workflows state and checkpointing surface is byte-identical to v1.13 by mechanical diff.*
+*Verified against MAF v1.14.0 DLL surface (2026-07-22). The Workflows state and checkpointing surface is byte-identical to v1.13 by mechanical diff. Workflow-hosting block added 2026-08-27: `AsAIAgent` executed against pinned 1.14.0, 1.17.0 and 1.19.0.*

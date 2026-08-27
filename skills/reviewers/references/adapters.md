@@ -7,12 +7,32 @@ An adapter must never restate the roster, the severity scale, the verdict map, o
 ## The contract
 
 1. **Load the panel.** Read the shipped `panel.yaml`, then merge `reviewers.local/panel.local.yaml` over it if present ([resolution order](customizing.md)).
+
 2. **Resolve the scope.** An explicit argument, else uncommitted changes, else the current branch against the default branch. Stop with one line if there is nothing to review.
+
 3. **Build one brief, once.** File list with stat summary, commit messages if a range is in play, branch and base. Every lens gets the *identical* brief. Do not paste the diff — each lens opens the files it needs.
-4. **Dispatch each rostered lens** whose `mode` is not `disabled`. Pass the lens file's body as the sub-task's instructions, plus the brief, the severity scale, the verdict vocabulary, `limits`, and `lessons`. Each sub-task must be **self-contained** — it sees none of the parent conversation.
-5. **Run them in parallel.** Sequential works and is only slower.
-6. **Synthesize.** Group by severity, merge duplicates and note which lenses flagged each, resolve `## Hand-off` pointers (merge if the target lens found it independently; otherwise surface it credited to the originator), and roll the verdict up **worst-case-wins**.
-7. **Report. Never edit.**
+
+   Put every shared fact in the brief rather than in per-lens prose: the scope, what has already been verified, the severity scale, the verdict vocabulary, `limits`, and `lessons`. Per-lens text should be the lens file plus its focus, nothing more. Fourteen bespoke prompts cost fourteen times what one shared brief does.
+
+4. **Select the roster.** Dispatch every lens with `mode: core`. Dispatch a `mode: triggered` lens **only when one of its `triggers` globs matches a changed path** — that is what `triggered` means, and honouring it is the difference between paying for the lenses a change needs and paying for all of them. Skip `mode: disabled` entirely.
+
+   Report the selection: which lenses ran, which were skipped and why. A silently skipped lens is worse than a slow one, because the report still reads as complete.
+
+   `--all` (or equivalent) overrides the triggers and runs the whole roster: correct before a release or a merge, wasteful on a routine change.
+
+5. **Dispatch.** Pass the lens file's body as the sub-task's instructions, plus the shared brief. Each sub-task must be **self-contained** — it sees none of the parent conversation.
+
+   **Tell each lens which of its own prior findings are claimed fixed, and to verify rather than trust.** Without this a re-run mostly inherits the previous run's conclusions. With it, panels have caught a blocker inside the fix to the previous blocker, a stamp whose reasoning was circular, and a sentence broken by the edit that fixed the sentence before it.
+
+   **No lens may run a command that mutates tracked files** — a test suite that rewrites files in place, a formatter, a build that regenerates sources. Lenses run in parallel and read the same working tree, so one lens's mutation becomes another lens's observation. This is not hypothetical: a panel once read a config file mid-rewrite and reported a finding about state that existed for two seconds. If a lens must run such a command, it copies the inputs to a temporary location first.
+
+6. **Run them in parallel.** Sequential works and is only slower.
+
+7. **Synthesize.** Group by severity, merge duplicates and note which lenses flagged each, resolve `## Hand-off` pointers (merge if the target lens found it independently; otherwise surface it credited to the originator), and roll the verdict up **worst-case-wins**.
+
+   **Surface disagreements; do not quietly pick a side.** When two lenses reach opposite conclusions on the same question — both citing the manifest or a policy correctly — that is a real finding about the change, and it belongs in the report as its own item. It is the author's call, not the synthesizer's. One such disagreement produced a design gap neither lens had named on its own.
+
+8. **Report. Never edit.**
 
 That is the whole contract. Any harness that can spawn a sub-task with a prompt and collect its text can run this panel.
 

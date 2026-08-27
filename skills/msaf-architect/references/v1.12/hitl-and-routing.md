@@ -6,6 +6,9 @@ MAF v1.12.x introduces type-safe `ExecutorBinding` routing, declarative topology
 
 ## 🏗️ Orchestration Builders
 
+> [!IMPORTANT]
+> **The traps live in the dedicated guide, not here.** This section shows the shapes; `vX.X/orchestration-patterns.md` carries the three things a surface dump cannot tell you — `BuildConcurrent`'s aggregator reads as required but is optional, `GroupChatWorkflowBuilder` has no public constructor, and there are two handoff builder types that both work. Read it before writing any of these topologies.
+
 Instead of manually mapping edges for common patterns, MAF v1.12.x provides dedicated builders via `AgentWorkflowBuilder`:
 
 ```csharp

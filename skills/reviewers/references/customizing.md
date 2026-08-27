@@ -51,6 +51,8 @@ reviewers:
     mode: core          # was triggered; now always runs
 ```
 
+Mode is the main cost dial. `core` runs on every change; `triggered` runs only when one of its globs matches a changed path. Make a lens `core` when it has something to say about almost any change, and `triggered` otherwise — a lens that is `core` *and* declares `triggers` is incoherent, because the triggers will never be consulted. Honouring triggers cut a real repository's panel by roughly 40%.
+
 **Replace a shipped lens's content** — same name, your file:
 ```yaml
 reviewers:
@@ -102,6 +104,7 @@ Two failure modes end with the panel being ignored, and both are yours to avoid:
 
 - **A lens that never returns its one-line acknowledgement is not scoped** — it is a second opinion on everything, and it will be tuned out within a week. Give every lens a shape of change it says nothing about.
 - **Removing the cost controls to be "more thorough"** makes the panel expensive, which makes it skipped, which makes it catch nothing. `limits` in `panel.yaml` is load-bearing.
+- **Making everything `core`.** It is the same mistake wearing a different hat: the roster runs in full on every change, the cost multiplies by the roster size, and the panel stops being something anyone reaches for.
 
 ## Checking your overlay
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSAF Architect Visualizer (v1.17.0)</title>
+    <title>MSAF Architect Visualizer (v1.19.0)</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -458,7 +458,7 @@
             <h1>⚡ MSAF Architect Visualizer</h1>
             <p>Interactive architecture patterns & blueprints for Microsoft Agent Framework</p>
         </div>
-        <div class="version-badge">MAF v1.10–v1.17 VERIFIED</div>
+        <div class="version-badge">MAF v1.10–v1.19 VERIFIED</div>
     </header>
 
     <main>
@@ -504,6 +504,12 @@
                         </button>
                     </li>
                     <li>
+                        <button class="nav-btn" onclick="switchView('v119', this)">
+                            <span class="nav-btn-icon">1.19</span>
+                            v1.18 &amp; v1.19 Additions
+                        </button>
+                    </li>
+                    <li>
                         <button class="nav-btn" onclick="switchView('generator', this)">
                             <span class="nav-btn-icon">🛠️</span>
                             Architecture Generator
@@ -519,7 +525,7 @@
                     <p><strong>The slowest branch sets the pace</strong><br>Parallel paths re-sync every round — a long chain next to a short one makes the short one wait. Keep sequential work consolidated.</p>
                     <p><strong>State lands between rounds</strong><br>Updates queue up during a round and commit at the barrier, so concurrent nodes never race each other.</p>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10–v1.17 binaries — no invented APIs.</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10–v1.19 binaries — no invented APIs.</p>
             </div>
         </div>
 
@@ -845,7 +851,7 @@ var loopAgent = new LoopAgent(
                     ["Workflows stayed stable", "Microsoft.Agents.AI.Workflows and Microsoft.Agents.AI.Abstractions are byte-identical to v1.13. Existing executor, edge, HITL, state, checkpoint, and streaming patterns carry forward."],
                     ["State access became async", "Agent modes and message injection now use async methods with cancellation tokens. Replace the removed synchronous calls instead of wrapping them in Task.Run."],
                     ["Approval policy sees full context", "Auto-approval rules now receive ToolAutoApprovalRuleContext, including the call, agent, session, request messages, and run options."],
-                    ["Approval middleware was renamed", "Use approval-not-required bypass and approval-response binding. The builder extensions require ILoggerFactory; the ChatClientAgentOptions switches are opt-out flags."]
+                    ["Approval middleware was renamed", "Use approval-not-required bypass and approval-response binding. The builder extensions take an optional ILoggerFactory (default null); the ChatClientAgentOptions switches are opt-out flags."]
                 ],
                 desc: "The v1.14 breaking surface is concentrated in Microsoft.Agents.AI. This map shows the compile-verified replacements for agent modes, message injection, contextual tool approval, and approval middleware; the Workflows graph model is unchanged.",
                 code: `// Microsoft.Agents.AI 1.14.0
@@ -906,7 +912,7 @@ ChatClientBuilder builder = chatClient.AsBuilder()
         <text x="550" y="92" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">Async + cancellation</text>
     </g>
 
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Approval middleware', 'UseApprovalNotRequiredFunctionBypassing and UseApprovalResponseBinding replace the old bypass surface. Both builder extensions require ILoggerFactory; ChatClientAgentOptions exposes matching Disable opt-out flags.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Approval middleware', 'UseApprovalNotRequiredFunctionBypassing and UseApprovalResponseBinding replace the old bypass surface. Both builder extensions take an optional ILoggerFactory (default null); ChatClientAgentOptions exposes matching Disable opt-out flags.')">
         <rect x="205" y="170" width="240" height="70" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="325" y="199" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Approval Middleware</text>
         <text x="325" y="219" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">bypass + response binding</text>
@@ -925,7 +931,7 @@ ChatClientBuilder builder = chatClient.AsBuilder()
                     ["v1.16: Magentic prompts are customizable", "MagenticPromptOverrides supplies seven init-only prompt slots, MagenticDefaultPrompts exposes each shipped default, and the builder gains WithPromptOverrides and WithResponseLanguage."],
                     ["v1.16 is experimental", "The whole prompt surface raises MAAI001 as a compile ERROR until suppressed. The pre-existing MagenticWorkflowBuilder methods are not gated. Treat it as subject to change."]
                 ],
-                desc: "v1.15 and v1.16 move the Workflows layer again after four stable releases -- both additive. v1.17 then changes nothing at all: its public surface is byte-identical to v1.16 by mechanical diff. This map shows the compile-verified new members: checkpoint lookup, pending-request stream control, and the experimental Magentic prompt surface.",
+                desc: "v1.15 and v1.16 move the Workflows layer again after four stable releases -- both additive. v1.17 then changes nothing at all: its public surface is byte-identical to v1.16 by mechanical diff. v1.18 and v1.19 add again -- agent-layer options and hosted-workflow checkpoint controls; see the v1.18 and v1.19 view. This map shows the compile-verified new members: checkpoint lookup, pending-request stream control, and the experimental Magentic prompt surface.",
                 code: `// Microsoft.Agents.AI.Workflows 1.16.0
 // Requires <NoWarn>$(NoWarn);MAAI001</NoWarn> for the Magentic prompt surface.
 using Microsoft.Agents.AI;
@@ -985,15 +991,112 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
     <text x="325" y="258" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Both releases are purely additive — v1.14 code compiles unchanged</text>
 </svg>`
             },
+            v119: {
+                title: "MAF v1.18 & v1.19 Additions",
+                principlesTitle: "What Actually Changed",
+                principles: [
+                    ["Nothing broke, twice", "Both releases are purely additive by mechanical surface diff. v1.18 touches only the agent layer; v1.19 touches all three assemblies and moves the Microsoft.Extensions.AI dependency from 10.7.0 to 10.9.0."],
+                    ["v1.18: run tools in parallel, bound the approval loop", "ChatClientAgentOptions.AllowConcurrentInvocation (default false) runs several returned function calls concurrently. ToolApprovalAgentOptions.MaxAutoApprovalIterations caps auto-approved re-invocations; null means the const default of 40, which no reflection dump can show."],
+                    ["v1.18: keep backend calls from being orphaned", "EnableInvocableFunctionBypassing (or UseInvocableFunctionBypassing on a custom pipeline) stores backend function calls that arrive next to a frontend tool call and executes them on the next request. Experimental: MAAI001."],
+                    ["v1.19: route per session", "RoutePersistingRoutingChatClient picks a named inner client per agent session and persists the choice in the session state bag. It throws outside an agent run, and an unregistered route throws on SetActiveRoute. Experimental: MAAI001."],
+                    ["v1.19: own the workflow agent's checkpoints", "agent.GetService<WorkflowAgentMetadata>() identifies a workflow-hosting agent (even behind middleware). agent.WithCheckpointing(manager) returns a COPY writing to your manager -- and the SAME instance, unchanged, for a wrapped agent, a non-workflow agent, or an environment that already names a manager. Assert UsesOwnCheckpointStorage."],
+                    ["v1.19: TryPrepare does not check the id exists", "session.GetService<WorkflowSessionCheckpointRecovery>() (MAAI001) positions a workflow session on a checkpoint. CurrentCheckpoint is nullable, and TryPrepare accepts any well-formed id -- an unknown one makes the next run throw; only empty/whitespace is rejected. Resolve the id with GetLatestCheckpointAsync first."],
+                    ["Experimental is per member", "MAAI001 gates the bypass pair, BackgroundAgentsProvider, the routing client, the recovery service and FeatureUsage -- not AllowConcurrentInvocation, MaxAutoApprovalIterations, WithCheckpointing or WorkflowAgentMetadata. Scope the suppression to what needs it."]
+                ],
+                desc: "v1.18 adds five agent-layer members; v1.19 adds a per-session routing chat client, three hosted-workflow checkpoint controls and a feature-usage tracker. This map shows the compile- and execution-verified shapes, and which of them are behind the MAAI001 experimental diagnostic.",
+                code: `// Microsoft.Agents.AI 1.19.0 / Microsoft.Agents.AI.Workflows 1.19.0
+// Requires <NoWarn>$(NoWarn);MAAI001</NoWarn> for the members marked experimental below.
+using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Workflows;
+using Microsoft.Extensions.AI;
+
+// --- v1.18: concurrent tool invocation (not experimental) + the auto-approval cap (not experimental) ---
+var options = new ChatClientAgentOptions { Name = "analyst", AllowConcurrentInvocation = true };
+var gated = new ToolApprovalAgent(innerAgent, new ToolApprovalAgentOptions
+{
+    AutoApprovalRules = [ ToolApprovalAgent.AllToolsAutoApprovalRule ],
+    MaxAutoApprovalIterations = 8,   // null = ToolApprovalAgent.DefaultMaxAutoApprovalIterations (const 40)
+});
+
+// --- v1.18: invocable-function bypass (experimental, MAAI001) ---
+var bypass = new ChatClientAgentOptions { EnableInvocableFunctionBypassing = true };
+
+// --- v1.19: session-persisted routing (experimental, MAAI001) ---
+var router = new RoutePersistingRoutingChatClient(
+    new Dictionary<string, IChatClient> { ["fast"] = fastClient, ["smart"] = smartClient },
+    new RoutePersistingRoutingChatClientOptions { DefaultRoute = "fast" });
+AIAgent routed = new ChatClientAgent(router, instructions: "...", name: "triage");
+AgentSession session = await routed.CreateSessionAsync();
+router.SetActiveRoute(session, "smart");          // stored in the session's state bag
+await routed.RunAsync("Escalate this.", session);  // the router only works inside a run
+
+// --- v1.19: a workflow hosted as an agent, with the host owning its checkpoints ---
+Workflow workflow = AgentWorkflowBuilder.BuildSequential(agents);   // speaks the chat protocol
+AIAgent hosted = workflow.AsAIAgent(id: "triage-wf", name: "Triage"); // pass an explicit id: an auto-generated id is regenerated by the copy below
+WorkflowAgentMetadata? meta = hosted.GetService<WorkflowAgentMetadata>();   // non-null => it runs a workflow
+CheckpointManager manager = CheckpointManager.CreateInMemory();
+AIAgent durable = hosted.WithCheckpointing(manager);                // a copy; same instance if wrapped or already checkpointing
+bool owns = durable.GetService<WorkflowAgentMetadata>()!.UsesOwnCheckpointStorage;   // assert true
+
+// --- v1.19: continue a workflow session from a checkpoint (experimental, MAAI001) ---
+AgentSession wfSession = await durable.CreateSessionAsync();
+WorkflowSessionCheckpointRecovery? recovery = wfSession.GetService<WorkflowSessionCheckpointRecovery>();
+CheckpointInfo? current = recovery?.CurrentCheckpoint;              // null until the first run checkpoints
+if (recovery is not null && recovery.TryPrepare(validatedCheckpointId)) { /* continue queued work */ }`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 325 111 V 165" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 175 200 H 205" stroke="#10b981" stroke-width="2"/>
+    <path class="animated-line" d="M 445 200 H 475" stroke="#f59e0b" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('v1.18 agent options', 'AllowConcurrentInvocation and MaxAutoApprovalIterations compile clean. EnableInvocableFunctionBypassing, UseInvocableFunctionBypassing and BackgroundAgentsProvider.ReleaseSessionAsync are behind MAAI001.')">
+        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+        <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">v1.18 Agent Options</text>
+        <text x="100" y="92" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">concurrency + approval cap</text>
+    </g>
+
+    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Session-persisted routing', 'RoutePersistingRoutingChatClient (MAAI001) selects a named inner IChatClient per AgentSession and stores the route in the session state bag. GetActiveRoute / SetActiveRoute; throws outside an agent run, and an unregistered DefaultRoute surfaces as InvalidOperationException on the first run.')">
+        <rect x="250" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+        <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Routing Chat Client</text>
+        <text x="325" y="92" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">route stored per session</text>
+    </g>
+
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('FeatureUsage', 'Process-wide feature bitmask in Microsoft.Agents.AI.Abstractions (MAAI001). MarkUsed(index) and ApplyToUserAgent(userAgent, include). Infrastructure for framework integrations, not for applications.')">
+        <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2"/>
+        <text x="550" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">FeatureUsage</text>
+        <text x="550" y="92" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">Abstractions, infrastructure</text>
+    </g>
+
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('WorkflowAgentMetadata', 'agent.GetService<WorkflowAgentMetadata>() returns non-null for a workflow-hosting agent, through middleware too. UsesOwnCheckpointStorage tells whether checkpoints go to a named CheckpointManager or travel inside the serialized session. Not experimental.')">
+        <rect x="25" y="167" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="100" y="195" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">WorkflowAgentMetadata</text>
+        <text x="100" y="214" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">identify via GetService</text>
+    </g>
+
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('WithCheckpointing', 'WorkflowHostingExtensions.WithCheckpointing(agent, manager) returns a copy that writes checkpoints to your manager. Same instance, unchanged, for a wrapped agent, a non-workflow agent, or an environment that already names a manager. An auto-generated id is regenerated; an explicit id is kept. Not experimental.')">
+        <rect x="205" y="167" width="240" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="325" y="195" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Hosted Workflow Agent</text>
+        <text x="325" y="214" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">AsAIAgent + WithCheckpointing (copy, or unchanged)</text>
+    </g>
+
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('WorkflowSessionCheckpointRecovery', 'session.GetService<WorkflowSessionCheckpointRecovery>() (MAAI001). CurrentCheckpoint is CheckpointInfo? (null before the first run). TryPrepare(id) selects without checking the id exists: an unknown id is accepted and the next run throws KeyNotFoundException; an empty or whitespace id throws ArgumentException. Recovery of an interrupted run, not rollback.')">
+        <rect x="475" y="167" width="150" height="66" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="550" y="195" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Checkpoint Recovery</text>
+        <text x="550" y="214" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">TryPrepare: id not checked</text>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Both releases purely additive — v1.17 code compiles unchanged; MAAI001 is gated per member, not per release</text>
+</svg>`
+            },
             generator: {
                 title: "MSAF Architecture Blueprint Generator",
                 principlesTitle: "About This Tool",
                 principles: [
                     ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back — not a fragment."],
-                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.17.0 DLLs, and every generated program is compile-tested against the pinned packages — no invented APIs, no ... placeholders."],
+                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.19.0 DLLs; every generated program was compile-tested against pinned 1.17.0 packages, and the Workflows members it uses are unchanged through 1.19.0 by mechanical diff — no invented APIs, no ... placeholders."],
                     ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
-                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.17.0 binaries.",
+                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program — every variable declared, verified against the MAF v1.19.0 binaries.",
                 code: `// Set choices on the questionnaire above to generate code...`,
                 htmlContent: `
                 <div class="blueprint-form">
@@ -1026,7 +1129,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
                 <div class="blueprint-output">
                     <div class="blueprint-output-header">
                         <h4 id="blueprint-title">Recommended Blueprint: Sequential Pipeline</h4>
-                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.17.0 Blueprint</span>
+                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.19.0 Blueprint</span>
                     </div>
                     <ul class="blueprint-bullets" id="blueprint-rules">
                         <li>Linear executors connected via simple <code>builder.AddEdge()</code> routes.</li>
@@ -1077,7 +1180,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
                 setTimeout(generateBlueprint, 50);
             } else {
                 target.innerHTML = viewData.svg;
-                document.getElementById('code-panel-title').textContent = viewKey === 'bsp' ? 'PregelSuperstep.cs' : viewKey === 'hitl' ? 'HitlResumption.cs' : viewKey === 'loops' ? 'LoopAgent.cs' : viewKey === 'v114' ? 'Maf114Migration.cs' : 'MultiAgentWorkflow.cs';
+                document.getElementById('code-panel-title').textContent = viewKey === 'bsp' ? 'PregelSuperstep.cs' : viewKey === 'hitl' ? 'HitlResumption.cs' : viewKey === 'loops' ? 'LoopAgent.cs' : viewKey === 'v114' ? 'Maf114Migration.cs' : viewKey === 'v116' ? 'Maf116Additions.cs' : viewKey === 'v119' ? 'Maf119Additions.cs' : 'MultiAgentWorkflow.cs';
                 document.getElementById('code-content').textContent = viewData.code;
             }
         }
@@ -1110,7 +1213,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
 
             // Compose ONE coherent, compilable program per selection. Ordering is
             // enforced (top-level statements first, type declarations last) and every
-            // building block is verified against the MAF v1.17.0 DLL surface.
+            // building block is verified against the MAF v1.19.0 DLL surface.
             const usings = new Set([
                 "using System;",
                 "using System.Threading;",
@@ -1388,8 +1491,8 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
 
             const hasTodo = flow === 'agent' || flow === 'orchestrate' || state === 'db';
             const header =
-                "// MAF v1.17 blueprint -- a complete single-file program (top-level statements).\n" +
-                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.17.0, then: dotnet run\n" +
+                "// MAF v1.19 blueprint -- a complete single-file program (top-level statements).\n" +
+                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.19.0, then: dotnet run\n" +
                 (hasTodo
                     ? "// Compiles as-is; fill in the // TODO spots before it runs.\n"
                     : "// Compiles and runs as-is; swap the sample executor bodies for your logic.\n");

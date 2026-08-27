@@ -37,6 +37,11 @@ verdicts:
 # nothing. These keep the panel cheap enough to run on every change.
 # ---------------------------------------------------------------------------
 limits:
+  # A full-roster pass costs several times a triggered one. Reserve it for
+  # pre-merge and release; let triggers do the routing on routine changes.
+  full_pass:
+    description: Run every non-disabled lens regardless of triggers.
+    when: pre-merge, pre-release, or when the change is hard to characterise
   trivial_change:
     description: Typo, comment, or pure rename with no behavioral or contractual effect.
     response: one-line acknowledgement
@@ -60,8 +65,17 @@ lessons: []
 # `triggered` lenses cost nothing until a change touches their surface.
 #
 #   mode: core       always dispatched
-#   mode: triggered  dispatched when a `triggers` glob matches, or on a full pass
+#   mode: triggered  dispatched ONLY when one of its `triggers` globs matches a
+#                    changed path -- or always, on an explicit full pass (--all).
+#                    Adapters MUST honour this. A panel that dispatches every
+#                    lens regardless makes `triggers` decoration and makes each
+#                    run cost several times what the change warrants, which ends
+#                    with the panel being skipped. That is the failure the
+#                    `limits` block below exists to prevent.
 #   mode: disabled   never dispatched (set this in panel.local.yaml to turn one off)
+#
+# A lens with mode: triggered and NO triggers list would never run. Give every
+# triggered lens at least one glob, or make it core.
 # ---------------------------------------------------------------------------
 reviewers:
   - name: correctness

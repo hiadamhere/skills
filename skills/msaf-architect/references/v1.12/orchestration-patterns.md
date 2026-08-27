@@ -4,9 +4,11 @@ The orchestration surface is **byte-identical to v1.11** by mechanical diff — 
 
 That includes the traps, which are unchanged in v1.12:
 
+<!-- shared:orchestration-traps -->
 - **`BuildConcurrent`'s aggregator is optional** despite reading as required in the surface dump.
 - **`GroupChatWorkflowBuilder` has no public constructor** (CS1729) — go through `AgentWorkflowBuilder.CreateGroupChatBuilderWith`.
 - **`HandoffWorkflowBuilder` and `HandoffsWorkflowBuilder` both exist and both work**; the facade returns the non-`s` one.
+<!-- /shared:orchestration-traps -->
 
 For single-agent iteration see [Agent Loops](agent-loops.md). Manager-led planning (Magentic) is **not documented before v1.16** — see [the v1.16 routing guide](../v1.16/hitl-and-routing.md).
 
