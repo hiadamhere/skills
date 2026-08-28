@@ -178,7 +178,7 @@
     {
       "name": "reviewers",
       "displayName": "Reviewers (configurable review panel)",
-      "description": "Configurable multi-lens review panel. Runs a roster of reviewer lenses in parallel over a change, each with its own stance and verdict vocabulary, then rolls the verdicts up worst-case-wins. Ships a default pack for code review; every lens is overridable and new lenses need no code change. Use before committing or opening a PR.",
+      "description": "Configurable multi-lens review panel for any artifact — code, docs, specs, migrations, infrastructure. Runs a roster of reviewer lenses in parallel over a change, each with its own stance and verdict vocabulary, then rolls the verdicts up worst-case-wins. Ships a starter pack of generic code-review lenses; the value is the overlay — encode your own rules and post-mortems as lenses with no code change. Use before committing or opening a PR.",
       "versions": [
         "Agent Skills standard"
       ],

@@ -49,6 +49,39 @@ limits:
     max_files: 50
     max_lines: 2000
     max_findings_per_reviewer: 10
+    # What an adapter does when a change exceeds the cap -- in order. First list
+    # generated artifacts (dumps, lockfiles, build output) and exclude them from the
+    # line count. If still over, state the overage in the brief and require every
+    # lens to say what it did not read. Over TWICE the cap, split by top-level path
+    # and run the panel per group. Never sample silently: a report over a partial
+    # read that does not say so reads as complete.
+    on_exceed: exclude-generated, then declare-overage, then split-by-path above 2x
+
+# ---------------------------------------------------------------------------
+# Facts -- read-only commands the ADAPTER runs once, before dispatch. Their output
+# goes into the shared brief verbatim, marked as verified by the adapter (not as
+# an author claim), so lenses judge the result instead of each re-running the
+# gate, the test suite, or the diff. One real run had six lenses independently
+# rebuild the same probes -- roughly 600k tokens of duplicated verification that
+# this block exists to remove. Every command MUST be read-only. Empty by default;
+# declare yours in panel.local.yaml as `- name: ...`, `command: ...`, `tail: N`.
+# Optional `timeout: N` seconds (default 300): a hung fact is killed and reported.
+# Quote a command that begins with & * ! % @ -- those are YAML syntax to a real
+# parser ('& ./gate.ps1'); a resolver that reads this file should refuse them bare.
+# ---------------------------------------------------------------------------
+facts: []
+
+# ---------------------------------------------------------------------------
+# Profiles -- named rosters for when the default (core lenses + triggered matches)
+# is the wrong size. `--all` is the full pass. A profile runs only the lenses it
+# lists, plus -- when `triggered: true` -- any triggered lens whose glob matched.
+# Overlays add or replace profiles per name.
+# ---------------------------------------------------------------------------
+profiles:
+  quick:
+    description: Cheap pass for a small change -- the listed lenses plus any triggered lens whose glob matched.
+    lenses: [correctness]
+    triggered: true
 
 # ---------------------------------------------------------------------------
 # Lessons -- paths every lens consults BEFORE hunting new findings, so a defect

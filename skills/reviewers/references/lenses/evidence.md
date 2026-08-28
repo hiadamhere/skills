@@ -1,7 +1,6 @@
 ---
 name: evidence
 description: Asks how we know the change works rather than whether it looks right. Judges test quality, not test count, and demands a resolution path for every open question.
-mode: core
 ---
 
 # Lens

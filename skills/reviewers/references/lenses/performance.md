@@ -1,7 +1,6 @@
 ---
 name: performance
 description: Judges work done per unit of work -- algorithmic shape, calls in loops, allocation on hot paths, and blocking where it must not block. Demands measurement before accepting or asserting a performance claim.
-mode: triggered
 ---
 
 # Lens

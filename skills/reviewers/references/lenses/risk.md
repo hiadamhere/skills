@@ -1,7 +1,6 @@
 ---
 name: risk
 description: Asks what happens when the change fails in production -- who notices, how fast, what it takes with it, and how it is undone. Owns blast radius, observability, and reversibility.
-mode: core
 ---
 
 # Lens

@@ -8,7 +8,6 @@ Copy this shape when adding a lens. Every lens uses the same nine sections — t
 ---
 name: <lowercase-hyphen>
 description: <what it owns and how it judges, one or two sentences>
-mode: core | triggered
 ---
 
 # Lens
@@ -43,6 +42,8 @@ Record out-of-lane concerns under `## Hand-off`, one line: `file:line` → lens 
 
 ## What makes a lens good
 
+**Declare `mode` in the roster, never in the lens.** The lens file carries `name` and `description` only; whether it is `core` or `triggered`, and on which globs, lives in the roster entry in `panel.yaml` (or your overlay). A `mode:` in the file is a second source of truth, and an overlay that retunes the lens would silently disagree with it.
+
 **Own exactly one thing.** If you cannot state it in one sentence without "and", it is two lenses. Overlap between lenses is fine; a lens with no distinct question is not.
 
 **Ground the stance in something that actually happened.** Every shipped lens names a real failure mode, not a virtue. A stance with no history behind it produces findings that read as opinion, and opinion gets ignored.
@@ -52,6 +53,8 @@ Record out-of-lane concerns under `## Hand-off`, one line: `file:line` → lens 
 **Say what you do not judge.** `# Not your lane` is what stops every lens filing the same finding. Name the other lens by name.
 
 **Give it a distinct blocking word,** and register it under `verdicts.block.words` in your overlay so the rollup can resolve it.
+
+**Keep the `One word:` line.** A resolver reads `# Verdict` for `One word:` or `End with one word:` followed by backticked words; phrase it differently and the registration check cannot see your vocabulary — and should say so.
 
 **Make it silent sometimes.** A lens that always has something to say is not a lens, it is noise with a title.
 
@@ -68,3 +71,6 @@ Record out-of-lane concerns under `## Hand-off`, one line: `file:line` → lens 
 - **Coupling to a harness.** No tool names, no vendor framing, no "use the X tool". Lenses describe *what to examine*; adapters decide how they run. This is what keeps them portable across agents.
 - **Mutating the tree.** Never run a command that rewrites tracked files — a test suite that edits in place, a formatter, a codegen step. Siblings are reading the same files at the same time. Copy to a temporary location first, or do not run it.
 - **Reporting what a linter owns.** Formatting and import order are already enforced by something cheaper. Report them and the panel gets muted.
+
+---
+*Reflects official Agent Skills specification (2026-08-27).*
