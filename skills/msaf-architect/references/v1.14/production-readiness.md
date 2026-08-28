@@ -24,8 +24,8 @@ When message injection is part of the host, migrate to the asynchronous methods 
 ## ⬆️ v1.14 migration checks
 
 - Replace synchronous message-injection calls with `EnqueueMessagesAsync` and `GetPendingMessagesAsync`.
-- Pass `ILoggerFactory` to the renamed approval middleware registrations.
+- Pass an `ILoggerFactory` to the renamed approval middleware registrations when you want their diagnostics; the parameter is optional (default `null`), not required.
 - Re-evaluate tool auto-approval policies using `ToolAutoApprovalRuleContext`; the wider context is a security feature, not merely a delegate rename.
 
 ---
-*Verified against MAF v1.14.0 DLL surface (2026-07-22). The Workflows production surface is byte-identical to v1.13 by mechanical diff.*
+*Verified against MAF v1.14.0 DLL surface and compile tests (2026-08-27). Originally verified 2026-07-22; the optional logger-factory parameter was re-verified by compile test against the pinned 1.14.0 packages on 2026-08-27. The Workflows production surface is byte-identical to v1.13 by mechanical diff.*

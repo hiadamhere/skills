@@ -2,7 +2,83 @@
 
 All notable changes to the **AI Agent Skills Catalog** are recorded here, newest first.
 
-Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver — skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.17), which is what you actually pin against.
+Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver — skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.19), which is what you actually pin against.
+
+---
+
+## 2026-08-27
+
+### Added
+
+- **`msaf-architect` now covers MAF v1.18 and v1.19** — both verified against the real NuGet assemblies (reflection surface dumps, compile tests, and executed probes), both **purely additive** by mechanical diff, and both new reference folders wired into the version map, the truth gate, and the eval suite.
+  - **v1.18** is agent-layer only (`Microsoft.Agents.AI.Abstractions` and `.Workflows` are byte-identical to v1.17): `ChatClientAgentOptions.AllowConcurrentInvocation` runs several returned function calls in parallel; `ToolApprovalAgentOptions.MaxAutoApprovalIterations` bounds the auto-approval re-invocation loop (default **40**, via a `const` the reflection dump cannot see — proven by CS0131); `EnableInvocableFunctionBypassing` / `UseInvocableFunctionBypassing` keep backend function calls from being orphaned when a frontend tool is in the same response; `BackgroundAgentsProvider.ReleaseSessionAsync` stops abandoned background work (idempotent, 30-second default wait).
+  - **v1.19** touches all three assemblies: `RoutePersistingRoutingChatClient` picks a named inner chat client **per session** and persists the choice in the session's state bag (it throws outside an agent run — established by execution); `WorkflowAgentMetadata` identifies a workflow-hosting agent through `GetService`, even behind middleware; `WorkflowHostingExtensions.WithCheckpointing` redirects a built workflow agent's checkpoints into your `CheckpointManager`; `WorkflowSessionCheckpointRecovery` positions a session on a checkpoint; `FeatureUsage` is process-wide feature tracking the package marks as infrastructure. MAF 1.19.0 also moves its `Microsoft.Extensions.AI` dependency from 10.7.0 to **10.9.0**.
+  - **The experimental gate is per member, and both releases are split.** `MAAI001` is a compile error on the invocable-function bypass, `BackgroundAgentsProvider`, the routing client and its options, `WorkflowSessionCheckpointRecovery`, and `FeatureUsage` — but **not** on `AllowConcurrentInvocation`, `MaxAutoApprovalIterations`, `WithCheckpointing`, or `WorkflowAgentMetadata`. A surface dump renders none of this; every cell came from a compile.
+  - Traps established by execution, not by reading metadata: `WithCheckpointing` returns the **same instance, unchanged** for a wrapped agent (silently), for a non-workflow agent, and when the environment already names a checkpoint manager; it also regenerates an auto-generated agent id while preserving an explicit one. `WorkflowSessionCheckpointRecovery.CurrentCheckpoint` is really `CheckpointInfo?` (CS8600), and `TryPrepare` **does not check that the id exists** — `"bogus"` is accepted and the next run throws a KeyNotFoundException (only an empty or whitespace id is rejected, with an ArgumentException). `AsAIAgent` accepts any `Workflow` but the first run throws unless the graph speaks the chat protocol (`List<ChatMessage>` + `TurnToken`) — the orchestration builders qualify, a bare `Executor<string, string>` does not.
+- **`msaf-architect` now documents hosting a workflow as an agent** (`WorkflowHostingExtensions.AsAIAgent`) — present since v1.10 and never mentioned until the v1.19 checkpoint controls made it unavoidable. The rule now sits in every version folder's state guide: all parameters are optional (reflected on 1.14.0, 1.17.0 and 1.19.0), without an `id` the agent gets a fresh identifier per call, and a workflow that does not speak the chat protocol throws on its first run (executed on the same three versions).
+- **The visualizer gains a v1.18 & v1.19 Additions view** and its blueprint generator now targets 1.19.0. The 24 generated programs were compile-tested at 1.17.0; the Workflows members they use are unchanged through 1.19.0 by mechanical diff, and the page says exactly that rather than claiming a 1.19.0 build.
+
+### Changed
+
+- **`reviewers` now says what it is: a framework for running *your* rules as reviewers, with a starter pack.** The shipped code-review lenses are described as generic starters rather than as the product — on a real run they produced restatements, while the lenses encoding the repository's own incidents found every defect that mattered. Three additions to the contract, each from that run: **`facts`** (read-only commands the adapter runs once, whose output every lens receives as verified — on one recorded run six lenses had independently rebuilt the same probes, roughly a third of that run's cost); **`profiles`** (`quick` for a small edit, `--all` for a release); and a defined **`on_exceed`** behaviour when a change is over the scope cap. Adapters are asked to report per-lens cost, and to script the deterministic half (merge, globs, verdict registration) rather than have a model do it from prose.
+
+### Fixed
+
+- **The `reviewers` body contradicted its own contract.** `SKILL.md` said "dispatch the whole roster"; `panel.yaml` and the adapter contract said a triggered lens runs only when a glob matches. The constraint now says the latter. A lens's `mode` is also declared in the roster only — the `mode:` line every shipped lens carried in its frontmatter was a second source of truth (an overlay that retuned a lens silently disagreed with the file) and is gone.
+- **The v1.14 guide said the approval builder extensions "require a logger factory". They do not.** `UseApprovalNotRequiredFunctionBypassing` and `UseApprovalResponseBinding` take `ILoggerFactory? loggerFactory = null` — the bare calls compile against the pinned 1.14.0 packages. The claim came from reading the surface dump, which renders an optional parameter identically to a required one; corrected in the v1.14 guides, the version-map trap table, the visualizer, and the eval case that had been grading models on the wrong answer.
+
+---
+
+## 2026-08-14
+
+### Added
+
+- **`msaf-architect` now documents declarative executors** — the attribute-driven way to write an executor that handles several message types, which the `Executor<TInput>` shape cannot express. All five attributes (`[MessageHandler]`, `[SendsMessage]`, `[StreamsMessage]`, `[YieldsMessage]`, `[YieldsOutput]`), plus `ProtocolBuilder` and `RouteBuilder`, had zero mentions.
+- **`ReflectingExecutor<TExecutor>` is `[Obsolete]`** — in v1.11 and every version since — and the skill would have taught it as the recommended path. Its own message points at "a partial class deriving from `Executor`". **A surface dump cannot show this**: the analyzer emits members, not the attributes on a type, so the reflected API presents a deprecated type as the natural choice. Only a compiler warning (CS0618) reveals it.
+  - The replacement is `Executor` + `protected abstract ConfigureProtocol` — also invisible to a dump, and **CS0534** if you omit it.
+  - The obsoletion message describes a source generator that **is not in the package**: `Microsoft.Agents.AI.Workflows` 1.17.0 ships no `analyzers/` folder, and a partial `Executor` subclass with only `[MessageHandler]` methods still fails with CS0534. Write `ConfigureProtocol` by hand.
+  - The working shape was **executed**, not merely compiled: the routed executor reports `InputTypes = System.String`, `OutputTypes = System.Int32`, and yields `5` for `"hello"`.
+
+- **`msaf-architect` now maps the workflow event stream** — 21 event types, of which **12 had zero mentions** anywhere in the skill, including every superstep and lifecycle event. Streaming a workflow is how you observe it, and the skill described the run but not what comes back. The set is identical across v1.11–v1.17.
+- Three traps in that taxonomy, all compile-established:
+  - **`WorkflowOutputEvent` must be the last `case` in a `switch`.** `AgentResponseEvent` and `AgentResponseUpdateEvent` derive from it, so placing it earlier silently swallows both — and it compiles, because the pattern order is legal. The symptom is "no agent responses" with nothing to explain it.
+  - **The Magentic events live in a different namespace** (`Microsoft.Agents.AI.Workflows.Specialized.Magentic`). Without that second `using` they are **CS0246 — not found**, which reads as "this version doesn't have them" rather than "you're missing an import".
+  - **The failure payload is spelled two ways**: `ExecutorFailedEvent` exposes its exception as `Data` (shadowing the base `object Data`), `WorkflowErrorEvent` as `Exception`.
+  - `InProcessExecution.StreamAsync` does not exist (**CS0117**) — the method is `RunStreamingAsync`, and its `checkpointManager`/`sessionId` are optional.
+
+- **`msaf-architect` now documents context compaction** — the shipped answer to a long-running agent outgrowing its context window, and until now an entire namespace (`Microsoft.Agents.AI.Compaction`, 15 types) with **zero mentions** anywhere in the skill. Strategies decide what to drop or summarise, triggers decide when, and `CompactionProvider` plugs the pair into an agent so it happens without a run loop of your own. The namespace is byte-identical from v1.10 through v1.17, and the probe program behind the guide compiles unmodified against pinned 1.11.0, 1.14.0 and 1.17.0 — so the optional-parameter forms are asserted across the range, not only at the newest end.
+- Four traps in that layer that a reflection dump cannot show, each established by a compiler error rather than by reading metadata:
+  - `CompactAsync` is **not** the override target — it is public but not virtual (**CS0506**). The member you implement is `protected abstract CompactCoreAsync`, which never appears in a surface dump because the dumper emits public members only. The base constructor is likewise protected and requires a trigger (**CS7036**).
+  - `ToolResultCompactionStrategy.ToolCallFormatter` reflects as `{ get; set; }` but is **`init`-only** (**CS8852**); reflection cannot tell an `init` accessor from a `set` accessor.
+  - `AIAgentBuilder.UseAIContextProviders` **rejects** a `CompactionProvider` (**CS1503**) — its parameter is `MessageAIContextProvider[]`. The name is shared by two methods that take different types.
+  - `ChatClientAgentOptions` has no `Instructions` property (**CS0117**).
+
+---
+
+## 2026-08-13
+
+### Changed
+
+- **The coverage ratchet now bounds the undocumented set, not just the documented one.** A floor on documented types cannot catch a package version that *adds* types nobody documented — `covered` is untouched, so the floor passes while coverage falls. `msaf-architect` would have gone from 37% to 27% on a version bump and passed. A second number now bounds the gap (`total − covered`), which grows both when a version adds types and when documentation is deleted. Floor may only rise; ceiling may only fall.
+- **The type counter stopped miscounting.** Nested types were truncated onto their container — `ContentBlock.Converter` became `ContentBlock`, a different real type, crediting the wrong one as documented. Compiler-generated types were padding the denominator with entries that cannot be documented because they are not API. Fixing both recovers 39 real types across the pinned surfaces. (Generic arities still collapse — `Executor`, `Executor<T>` and `Executor<T,U>` count once — which is deliberate: the metric counts whether a type is *mentioned*, and prose writes `Executor`.)
+- **Repeated guidance across version folders is now checked mechanically.** Some content is duplicated on purpose, because a reader lands in exactly one version folder and a rule that lives only in another prevents nothing. Nothing forced those copies to track their source — correct the original and stale copies remained. Marked blocks must now stay identical, and an unclosed marker fails rather than silently excluding the block.
+- **`msaf-architect`'s two orchestration homes are now linked.** The routing guide also demonstrates the orchestration builders, and the version chain sends readers there — but it carried none of the three traps the dedicated guide exists for. It now says so and points at them.
+
+---
+
+## 2026-08-12
+
+### Changed
+
+- **`reviewers`: `triggers` are now honoured, not decorative.** The manifest said a `triggered` lens fires when one of its globs matches a changed path; the adapter contract said dispatch every lens that is not disabled. Both were normative and they contradicted each other, so `triggers` were consumed by nothing and every run paid for the whole roster. The contract now selects the roster from the triggers, reports which lenses ran and which were skipped, and reserves the full pass for `--all` or a pre-merge review. Measured against four real changes in the repository that develops this skill, that is **~40% fewer lens dispatches**.
+- **The panel no longer lets one lens corrupt another's evidence.** Lenses run in parallel over a single working tree, so a lens that runs a test suite rewriting files in place changes what its siblings read. This is not hypothetical: a panel reported a finding about a value that existed for two seconds while a sibling rewrote a config file. Lenses may no longer run anything that mutates tracked files, and are told to check whether the tree is clean and state which version of a file they assessed.
+- **Re-runs verify instead of inheriting.** When a change claims to fix an earlier round's findings, each lens is now told which of its own findings are claimed fixed and to verify rather than trust. Adopted after panels caught a blocker inside the fix to the previous blocker, a stamp whose reasoning was circular, and a sentence broken by the edit that fixed the one before it.
+- **Disagreements are surfaced, not silently resolved.** When two lenses reach opposite conclusions while each cites the manifest correctly, the report carries both positions and the evidence for each. That call belongs to the author; one such disagreement exposed a design gap neither lens had named alone.
+
+### Notes
+
+- **Two behaviours the lenses had shown emergently are now in the lens template**: retract a finding once evidence shows it was churn, and never raise severity because a finding was declined — severity describes the defect, not the conversation about it.
+- **A `core` lens that also declares `triggers` is incoherent** and the guidance now says so: the triggers can never be consulted. Making every lens `core` is the same mistake as removing the cost controls — the roster runs in full on every change until nobody runs it at all.
 
 ---
 

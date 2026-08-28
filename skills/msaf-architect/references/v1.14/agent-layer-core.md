@@ -45,7 +45,7 @@ var options = new ChatClientAgentOptions
 };
 ```
 
-The direct builder extensions require a logger factory:
+The direct builder extensions take an **optional** logger factory — the parameter is `ILoggerFactory? loggerFactory = null`, so `UseApprovalNotRequiredFunctionBypassing()` and `UseApprovalResponseBinding()` compile bare. The surface dump renders the parameter as required; the default is a compile-test fact:
 
 ```csharp
 ChatClientBuilder builder = chatClient.AsBuilder()
@@ -56,4 +56,4 @@ ChatClientBuilder builder = chatClient.AsBuilder()
 Do not use the removed `EnableNonApprovalRequiredFunctionBypassing` option or `UseNonApprovalRequiredFunctionBypassing` extension in a 1.14 project.
 
 ---
-*Verified against MAF v1.14.0 DLL surface and compile tests (2026-07-22). The core agent and Workflows surfaces otherwise carry forward from v1.13.*
+*Verified against MAF v1.14.0 DLL surface and compile tests (2026-08-27). Originally verified 2026-07-22; the optional logger-factory parameter was re-verified by compile test against the pinned 1.14.0 packages on 2026-08-27. The core agent and Workflows surfaces otherwise carry forward from v1.13.*

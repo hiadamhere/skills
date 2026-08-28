@@ -3,7 +3,7 @@
 The Workflows routing and HITL public API is byte-identical to v1.16. Use [the v1.13 routing guide](../v1.13/hitl-and-routing.md) for typed edges, bindings, fan-out/fan-in, orchestration builders, and `RequestPort` patterns, [the v1.14 routing guide](../v1.14/hitl-and-routing.md) for the routing rules, [the v1.15 routing guide](../v1.15/hitl-and-routing.md) for the streaming/pending-request interaction, and [the v1.16 routing guide](../v1.16/hitl-and-routing.md) for Magentic manager prompt customization.
 
 > [!WARNING]
-> Magentic prompt customization is still gated behind the `MAAI001` experimental diagnostic in v1.17 — it remains a compile **error** until suppressed with `<NoWarn>$(NoWarn);MAAI001</NoWarn>`. Shipping two releases behind an experimental flag is not a promotion signal: treat `MagenticPromptOverrides`, `MagenticDefaultPrompts`, `WithPromptOverrides`, and `WithResponseLanguage` as subject to change, and keep them behind your own seam.
+> Magentic prompt customization is still gated behind the `MAAI001` experimental diagnostic in v1.17 — it remains a compile **error** until suppressed with `<NoWarn>$(NoWarn);MAAI001</NoWarn>`. Shipping two releases behind an experimental flag is not a promotion signal: treat `MagenticPromptOverrides`, `MagenticDefaultPrompts`, `WithPromptOverrides`, and `WithResponseLanguage` as subject to change, and keep them behind your own seam. The pre-existing builder methods (`AddParticipants`, `WithMaxRounds`, `Build`) are not gated.
 
 ## 🔀 Routing rules
 

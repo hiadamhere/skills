@@ -1,7 +1,6 @@
 ---
 name: correctness
 description: Asks whether the change does what it claims, especially at the inputs and sequences nobody tried. Constructs concrete counterexamples rather than raising doubts.
-mode: core
 ---
 
 # Lens

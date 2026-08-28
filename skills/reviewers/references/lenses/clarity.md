@@ -1,7 +1,6 @@
 ---
 name: clarity
 description: Asks whether the next person can change this safely without archaeology. Judges naming, structure, and misleading code -- never taste, and never formatting a linter already owns.
-mode: core
 ---
 
 # Lens

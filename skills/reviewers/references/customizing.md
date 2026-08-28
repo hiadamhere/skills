@@ -26,12 +26,13 @@ If `reviewers.local/` does not exist, the panel runs the defaults. That is the w
 
 1. Read the shipped `panel.yaml`.
 2. If `reviewers.local/panel.local.yaml` exists, merge it over the top:
-   - **`severity`, `limits`, `lessons`** — replaced wholesale if present.
+   - **`severity`, `limits`, `lessons`, `facts`** — replaced wholesale if present.
    - **`verdicts`** — merged per level; your `words` are added to the shipped ones.
+   - **`profiles`** — merged per name; a profile you declare under a shipped name replaces it.
    - **`reviewers`** — matched **by `name`**. A matching entry patches the shipped one field by field. A new name is appended. `mode: disabled` disables one without deleting anything.
 3. Resolve each lens's `file`: relative to `reviewers.local/` when the entry came from your overlay, relative to `references/` when it came from the shipped roster.
 
-A lens is just a markdown file. There is no schema to satisfy beyond the frontmatter — `name`, `description`, `mode`.
+A lens is just a markdown file. There is no schema to satisfy beyond the frontmatter — `name` and `description`, nothing else. `mode`, `triggers`, and every other registration detail live in the roster entry only; a lens file that repeats them is a second source of truth, and a resolver that checks the schema warns on it.
 
 > **Write `disabled`, never `off`.** YAML 1.1 parses `off`, `on`, `yes`, and `no` as *booleans*, so `mode: off` becomes `mode: false` and a comparison against the string `"off"` silently fails — the lens keeps running. The same trap applies to any value you add: quote it, or choose a word that is not a YAML boolean.
 
@@ -50,6 +51,8 @@ reviewers:
   - name: security
     mode: core          # was triggered; now always runs
 ```
+
+Mode is the main cost dial. `core` runs on every change; `triggered` runs only when one of its globs matches a changed path. Make a lens `core` when it has something to say about almost any change, and `triggered` otherwise — a lens that is `core` *and* declares `triggers` is incoherent, because the triggers will never be consulted. Honouring triggers cut a real repository's panel by roughly 40%.
 
 **Replace a shipped lens's content** — same name, your file:
 ```yaml
@@ -84,6 +87,32 @@ lessons:
     description: What has actually bitten us.
 ```
 
+## Facts and profiles
+
+**Facts** are read-only commands the adapter runs **once**, before any lens is dispatched. Their output goes into the shared brief verbatim, marked as verified by the adapter rather than claimed by the author — so lenses judge the result instead of each re-running your gate, your test suite, or your diff. This is the single biggest cost lever after triggers: one real run had six lenses independently rebuild the same verification.
+
+```yaml
+facts:
+  - name: tests
+    command: npm test      # one command; it runs in the adapter's shell
+    tail: 12               # lines of output carried into the brief (a failing fact keeps its full output)
+    timeout: 300           # seconds; a hung fact is killed and reported, never waited on
+```
+
+Quote a command that begins with `&`, `*`, `!`, `%`, or `@` — those characters are YAML syntax, so `command: '& ./gate.ps1'`, not `command: & ./gate.ps1`.
+
+Every facts command must be read-only. A command that rewrites tracked files here would do to the whole panel what the no-mutation rule forbids a single lens from doing.
+
+**Profiles** are named rosters for when the default — core lenses plus triggered matches — is the wrong size. The shipped `quick` profile runs `correctness` plus any triggered lens whose glob matched; `--all` runs everything. Declare your own, or replace `quick` with the lenses that own *your* founding promise:
+
+```yaml
+profiles:
+  quick:
+    description: Cheap pass for a small edit.
+    lenses: [correctness, migrations]   # a shipped lens and the one you added above
+    triggered: true        # also run triggered lenses whose glob matched
+```
+
 ## Verdicts and severity
 
 The rollup is **worst-case-wins**: one `block` outranks every approval. This is deliberate and you should think hard before changing it — averaging or majority voting dilutes the single specialist who saw what nobody else was looking for, which is the entire reason for running more than one lens.
@@ -102,7 +131,13 @@ Two failure modes end with the panel being ignored, and both are yours to avoid:
 
 - **A lens that never returns its one-line acknowledgement is not scoped** — it is a second opinion on everything, and it will be tuned out within a week. Give every lens a shape of change it says nothing about.
 - **Removing the cost controls to be "more thorough"** makes the panel expensive, which makes it skipped, which makes it catch nothing. `limits` in `panel.yaml` is load-bearing.
+- **Making everything `core`.** It is the same mistake wearing a different hat: the roster runs in full on every change, the cost multiplies by the roster size, and the panel stops being something anyone reaches for.
 
 ## Checking your overlay
 
 Before relying on it, confirm: the merged roster is what you expect, each lens file resolves, any new verdict word appears in `verdicts`, and a deliberately trivial change still produces one-line acknowledgements. If a lens you disabled still reports, the overlay is not being read — check the path and the `name` match.
+
+All of that is deterministic, so the right place for it is a script your adapter runs rather than a model reading YAML: merge the manifests, match the globs, resolve the files, check the verdict words, and print the selection. Then the model's only job is the one that needs a model — synthesis.
+
+---
+*Reflects official Agent Skills specification (2026-08-27).*

@@ -4,9 +4,11 @@ The orchestration surface is **byte-identical to v1.16** by mechanical diff — 
 
 That includes the traps, which are unchanged in v1.17:
 
+<!-- shared:orchestration-traps -->
 - **`BuildConcurrent`'s aggregator is optional** despite reading as required in the surface dump.
 - **`GroupChatWorkflowBuilder` has no public constructor** (CS1729) — go through `AgentWorkflowBuilder.CreateGroupChatBuilderWith`.
 - **`HandoffWorkflowBuilder` and `HandoffsWorkflowBuilder` both exist and both work**; the facade returns the non-`s` one.
+<!-- /shared:orchestration-traps -->
 
 For the manager-led topology see [Human-in-the-Loop and Routing](hitl-and-routing.md); for single-agent iteration see [Agent Loops](agent-loops.md).
 

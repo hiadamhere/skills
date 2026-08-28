@@ -1,7 +1,6 @@
 ---
 name: docs
 description: Checks that the prose explaining a change still tells the truth after it -- READMEs, references, examples, changelogs, and comments. Owns documentation that has quietly become wrong.
-mode: triggered
 ---
 
 # Lens

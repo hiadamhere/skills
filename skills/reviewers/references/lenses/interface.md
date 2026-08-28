@@ -1,7 +1,6 @@
 ---
 name: interface
 description: Protects anything someone else already depends on -- public API, schema, wire format, CLI, config, events, and stored data. Separates an intentional break with a migration from an accidental one.
-mode: triggered
 ---
 
 # Lens

@@ -1,7 +1,6 @@
 ---
 name: security
 description: Follows untrusted input to where it does damage, and checks the trust boundaries a change moves. Reports reachable vectors with a path, not categories of risk.
-mode: triggered
 ---
 
 # Lens
