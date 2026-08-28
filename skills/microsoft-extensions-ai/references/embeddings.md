@@ -73,4 +73,4 @@ services.AddEmbeddingGenerator(embeddingGenerator)
 - The generator is consumed from DI so caching and telemetry layers apply.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.8.1 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) and compile-tested against the pinned package (2026-08-05). The differing return types of the batch and single-input `GenerateAsync` overloads were confirmed by compile test.*
+*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) (2026-08-28): every type on this page is byte-identical to 10.8.1 by mechanical diff of the dumps, and base types, parameter defaults, accessors and `[Experimental]` gating are unchanged by a reflection shape diff of both pins; the patterns were compile-tested against 10.8.1 on 2026-08-05. The differing return types of the batch and single-input `GenerateAsync` overloads were confirmed by compile test.*

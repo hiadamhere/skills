@@ -1,6 +1,6 @@
 ---
 name: microsoft-extensions-ai
-description: Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling, structured output, embeddings, and the middleware/DI pipeline). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.
+description: Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling, structured output, embeddings, the middleware/DI pipeline, and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.
 ---
 
 # 🧩 Microsoft.Extensions.AI
@@ -18,16 +18,22 @@ Reach for this skill whenever generating C# against `Microsoft.Extensions.AI`. L
 
 | Task | Reference |
 |---|---|
+| Read what a response actually contains (reasoning, images, usage, errors) | [content-model.md](references/content-model.md) |
 | Call a model, stream, tune with `ChatOptions` | [chat-client.md](references/chat-client.md) |
 | Let the model call your code | [tool-calling.md](references/tool-calling.md) |
 | Get a typed value instead of prose | [structured-output.md](references/structured-output.md) |
 | Vectors for search/RAG | [embeddings.md](references/embeddings.md) |
+| Images, speech, realtime, provider-hosted files | [beyond-chat.md](references/beyond-chat.md) |
 | Compose caching/telemetry/function invocation; register in DI | [middleware-and-di.md](references/middleware-and-di.md) |
+| Send each request to the right client, or fail over when one is down | [routing-and-failover.md](references/routing-and-failover.md) |
 
 **Two rules that cause most silent failures:**
 
 1. **Tools need middleware.** `ChatOptions.Tools` declares tools; only `UseFunctionInvocation()` executes them. Without it the model asks for a call that nobody makes.
 2. **Pipeline order is behavior.** The first `Use…` registered is the outermost layer. Where the cache sits relative to function invocation decides whether a cache hit skips the entire tool loop.
+
+> [!IMPORTANT]
+> **`MEAI001` is a compile error, not a warning.** The non-chat client families (images, speech, realtime, hosted files), the chat reducers behind `UseChatReducer`, and the 10.9.0 routing/failover clients are `[Experimental("MEAI001")]`: code that uses them does not build until the diagnostic is suppressed — `<NoWarn>$(NoWarn);MEAI001</NoWarn>` in the project, or `#pragma warning disable MEAI001` in the file. Core chat, embeddings, function invocation, caching, logging and telemetry are not gated (the exceptions beside them are the `AIFunctionNameAttribute` / `AIParameterNameAttribute` naming attributes). Suppress deliberately and locally; experimental means the shape may change in a minor release.
 
 **Package split to keep in mind:** the **core** abstractions (the `Microsoft.Extensions.AI` packages) are GA and stable. **Provider adapter** packages are still **preview** and take breaking changes — pin them and re-verify provider-specific calls against the exact package version you use.
 
@@ -42,6 +48,9 @@ Reach for this skill whenever generating C# against `Microsoft.Extensions.AI`. L
 - Tool arguments are model-supplied input: validate them, and never let them carry authorization.
 - Consume `IChatClient` from DI rather than the raw provider client, or the pipeline layers are bypassed.
 - Do not write provider-adapter (preview) API from memory; verify against the pinned adapter version.
+- Suppress `MEAI001` only in the project that uses a gated type, never in a shared props file.
+- A stream through a failover client can end in an exception after partial output; consumers must tolerate it.
+- Routing and failover clients are root clients, not `Use…` layers — there is no `UseRouting()` or `UseFailover()`; build the pipeline on top of them.
 
 ---
 
@@ -49,4 +58,4 @@ Reach for this skill whenever generating C# against `Microsoft.Extensions.AI`. L
 
 The verifiable source is the **`Microsoft.Extensions.AI` NuGet assemblies** — `Microsoft.Extensions.AI.dll` and `Microsoft.Extensions.AI.Abstractions.dll` — reflected metadata-only into versioned API-surface dumps, plus compile tests against the pinned package. No source, no claim. Every reference doc carries a stamp: *Verified against Microsoft.Extensions.AI X.Y.Z DLL surface (YYYY-MM-DD).*
 
-Claims of **absence** are compile-tested, not merely grepped: `CompleteAsync`, `ChatOptions.MaxTokens`, and `ChatToolMode.Required` do not exist in the pinned surface, and each is recorded with the exact compiler error it produces.
+Claims of **absence** are compile-tested, not merely grepped: `CompleteAsync`, `ChatOptions.MaxTokens`, and `ChatToolMode.Required` do not exist in the pinned surface, and each is recorded with the exact compiler error it produces. Experimental status is established the same way: a reflection sweep of both assemblies lists every `[Experimental]` type and member, and the `MEAI001` compile error confirms the gate.

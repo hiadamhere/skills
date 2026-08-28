@@ -35,6 +35,8 @@ IChatClient client = raw.AsBuilder()
 
 `UseLogging` and `UseOpenTelemetry` also exist on the embedding, image-generator, speech-to-text, text-to-speech, and realtime builders.
 
+`UseChatReducer`, `ReducingChatClient` and the shipped reducers (`MessageCountingChatReducer`, `SummarizingChatReducer`) are `[Experimental("MEAI001")]` — a compile error until suppressed (both forms in [routing-and-failover.md](routing-and-failover.md)); every other layer in the table is stable. Routing and failover clients are *root* clients, not layers: there is no `UseRouting()` or `UseFailover()` — you construct one and build the pipeline on top of it.
+
 ## Registering with dependency injection
 
 `AddChatClient` returns the same `ChatClientBuilder`, so the pipeline is expressed inline at registration:
@@ -85,4 +87,4 @@ Delegate-based overloads of `Use` let you intercept `GetResponseAsync` (and stre
 - Telemetry and logging are registered as layers rather than scattered through call sites.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.8.1 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) and compile-tested against the pinned package (2026-08-05).*
+*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) (2026-08-28): every type on this page is byte-identical to 10.8.1 by mechanical diff of the dumps, and base types, parameter defaults, accessors and `[Experimental]` gating are unchanged by a reflection shape diff of both pins; the patterns were compile-tested against 10.8.1 on 2026-08-05. The `MEAI001` gate on this page's types was established on 10.9.0 by compile error and a reflection sweep of both assemblies for `[Experimental]`.*
