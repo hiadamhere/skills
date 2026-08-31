@@ -6,6 +6,18 @@ Entries are dated by the day the change landed on `main`. The catalog is not ver
 
 ---
 
+## 2026-08-31
+
+### Added
+
+- **`microsoft-extensions-ai` closes its real gaps** — coverage 98 → 125 of 239 public types, and every code fence in the skill now compiles against 10.9.0 in one harness. New page `hosted-tools-and-approval.md`: the provider-executed tools (`HostedWebSearchTool`, `HostedCodeInterpreterTool`, `HostedFileSearchTool`, `HostedImageGenerationTool`, `HostedMcpServerTool` with its approval modes) and the full `ApprovalRequiredAIFunction` round trip, executed — what the caller receives, what the provider sees, what a rejection says. Tool calling gains the parts a real tool needs: `IServiceProvider`/`CancellationToken`/`AIFunctionArguments` binding, `FunctionInvokingChatClient.CurrentContext` and `Terminate`, hiding a parameter from the model with `ExcludeFromSchema` + `BindParameter`, `FunctionInvoker`, `AdditionalTools` (executable, not advertised) versus declaration-only tools (advertised, handed back). Chat gains `ToChatResponseAsync`, conversation state (`ConversationId` — send only the new messages; the function-invoking client already does), background responses (`AllowBackgroundResponses`, `ContinuationToken`), reasoning options, finish reasons, usage aggregation and `ChatClientMetadata`. Structured output documents what is actually sent for each `useJsonSchemaResponseFormat` value, strict schemas via `AIJsonUtilities`, and how `.Result` throws (`JsonException` for malformed JSON, `InvalidOperationException` for an empty answer). Middleware gains the `DelegatingChatClient` base and `ConfigureOptions`; embeddings gain per-input caching and `GenerateAndZipAsync`; the content model gains annotations.
+
+### Fixed
+
+- **Two corrections in the same pass.** The structured-output flag is `useJsonSchemaResponseFormat`, not `useJsonSchema` (the name was read from the compiled assembly). And `[FromKeyedServices]` on a tool parameter is **not** a binding: `AIFunctionFactory` puts the parameter in the model-facing schema, and a call the model makes without it fails — take an `IServiceProvider` parameter instead.
+
+---
+
 ## 2026-08-28
 
 ### Added

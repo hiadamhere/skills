@@ -102,6 +102,26 @@ case ErrorContent error:
 
 `UsageContent` wraps a `UsageDetails`, and appears in streaming responses too — usually as the final update, which is why accumulating usage means scanning content rather than reading a property on the response.
 
+## 📎 Annotations
+
+Any content item can carry `Annotations` — `null` unless the provider attached some. The shipped annotation is the citation:
+
+```csharp
+foreach (AIContent content in response.Messages.SelectMany(m => m.Contents))
+{
+    foreach (CitationAnnotation citation in content.Annotations?.OfType<CitationAnnotation>() ?? [])
+    {
+        Console.WriteLine($"{citation.Title} {citation.Url} via {citation.ToolName}");
+        foreach (TextSpanAnnotatedRegion region in citation.AnnotatedRegions?.OfType<TextSpanAnnotatedRegion>() ?? [])
+        {
+            Console.WriteLine($"  covers characters {region.StartIndex}-{region.EndIndex}");
+        }
+    }
+}
+```
+
+`CitationAnnotation` carries `Title`, `Url`, `FileId`, `ToolName` and `Snippet`; its `AnnotatedRegions` say *which part* of the content it applies to, as `TextSpanAnnotatedRegion` (`StartIndex`/`EndIndex`, both `int?`). The types are the abstraction's; which of them a provider fills in is the provider's.
+
 ## 🧭 What To Match On
 
 | You want… | Match |
@@ -117,4 +137,4 @@ case ErrorContent error:
 | something the abstraction dropped | `content.RawRepresentation` |
 
 ---
-*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) (2026-08-28): every type on this page is byte-identical to 10.8.1 by mechanical diff of the dumps, and base types, parameter defaults, accessors and `[Experimental]` gating are unchanged by a reflection shape diff of both pins; the patterns were compile-tested against 10.8.1 on 2026-08-13. The surface dump records no base types, so the hierarchy here was established by compile test: `TextReasoningContent` is **not** assignable to `TextContent` (CS0029), while every `*ToolCallContent` (function, MCP server, web search, code interpreter, image generation) is assignable to `ToolCallContent`, every `*ToolResultContent` to `ToolResultContent`, and the approval/input/hosted content types to `AIContent` — each edge asserted by a direct assignment that compiles. `UriContent`'s optional `mediaType`, and the `LoadFromAsync`/`SaveToAsync` static-versus-instance split, are likewise compile-test facts a reflection dump cannot show.*
+*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. The surface dump records no base types, so the hierarchy here was established by compile test: `TextReasoningContent` is **not** assignable to `TextContent` (CS0029), while every `*ToolCallContent` (function, MCP server, web search, code interpreter, image generation) is assignable to `ToolCallContent`, every `*ToolResultContent` to `ToolResultContent`, and the approval/input/hosted content types to `AIContent` — each edge asserted by a direct assignment that compiles. `UriContent`'s optional `mediaType`, and the `LoadFromAsync`/`SaveToAsync` static-versus-instance split, are likewise compile-test facts. `Annotations` is `null` on a fresh content item; the citation and region types were compiled, not observed from a provider.*

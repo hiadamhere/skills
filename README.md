@@ -76,9 +76,9 @@ v1.15 to v1.19 are purely additive, so the traps are in adoption rather than mig
 
 ### 🧩 `microsoft-extensions-ai`
 
-[Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/), .NET's unified LLM layer: `IChatClient` calls and streaming, `ChatOptions`, tool calling, structured output, embeddings, the middleware/DI pipeline, the content model underneath `response.Text`, the five non-chat client families and — from 10.9.0 — routing and failover between chat clients. Written against the GA API, not the renamed preview one.
+[Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/), .NET's unified LLM layer: `IChatClient` calls and streaming, `ChatOptions`, tool calling — your functions, provider-hosted tools, and human approval before a tool runs — structured output, embeddings, the middleware/DI pipeline, conversation state and background responses, the content model underneath `response.Text`, the five non-chat client families and — from 10.9.0 — routing and failover between chat clients. Written against the GA API, not the renamed preview one.
 
-Its traps are the silent ones: `ChatOptions.Tools` without `UseFunctionInvocation()` (nobody executes the call), a cache placed on the wrong side of function invocation, `TextReasoningContent` not deriving from `TextContent`, a failover client that no longer fails over once a stream has started — and one loud one, `MEAI001`: the non-chat families, the chat reducers and the routing/failover clients are compile **errors** until that experimental gate is suppressed.
+Its traps are the silent ones: `ChatOptions.Tools` without `UseFunctionInvocation()` (nobody executes the call), a cache placed on the wrong side of function invocation, `TextReasoningContent` not deriving from `TextContent`, resending the whole history to a provider that already holds it, a `[FromKeyedServices]` tool parameter that the *model* is asked to fill in, a failover client that no longer fails over once a stream has started — and one loud one, `MEAI001`: the non-chat families, the chat reducers and the routing/failover clients are compile **errors** until that experimental gate is suppressed.
 
 ### 🔌 `mcp-sdk`
 
