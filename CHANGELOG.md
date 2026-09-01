@@ -6,6 +6,38 @@ Entries are dated by the day the change landed on `main`. The catalog is not ver
 
 ---
 
+## 2026-08-31
+
+### Added
+
+- **`microsoft-extensions-ai` closes its real gaps** — coverage 98 → 125 of 239 public types, and every code fence in the skill now compiles against 10.9.0 in one harness. New page `hosted-tools-and-approval.md`: the provider-executed tools (`HostedWebSearchTool`, `HostedCodeInterpreterTool`, `HostedFileSearchTool`, `HostedImageGenerationTool`, `HostedMcpServerTool` with its approval modes) and the full `ApprovalRequiredAIFunction` round trip, executed — what the caller receives, what the provider sees, what a rejection says. Tool calling gains the parts a real tool needs: `IServiceProvider`/`CancellationToken`/`AIFunctionArguments` binding, `FunctionInvokingChatClient.CurrentContext` and `Terminate`, hiding a parameter from the model with `ExcludeFromSchema` + `BindParameter`, `FunctionInvoker`, `AdditionalTools` (executable, not advertised) versus declaration-only tools (advertised, handed back). Chat gains `ToChatResponseAsync`, conversation state (`ConversationId` — send only the new messages; the function-invoking client already does), background responses (`AllowBackgroundResponses`, `ContinuationToken`), reasoning options, finish reasons, usage aggregation and `ChatClientMetadata`. Structured output documents what is actually sent for each `useJsonSchemaResponseFormat` value, strict schemas via `AIJsonUtilities`, and how `.Result` throws (`JsonException` for malformed JSON, `InvalidOperationException` for an empty answer). Middleware gains the `DelegatingChatClient` base and `ConfigureOptions`; embeddings gain per-input caching and `GenerateAndZipAsync`; the content model gains annotations.
+
+### Fixed
+
+- **Two corrections in the same pass.** The structured-output flag is `useJsonSchemaResponseFormat`, not `useJsonSchema` (the name was read from the compiled assembly). And `[FromKeyedServices]` on a tool parameter is **not** a binding: `AIFunctionFactory` puts the parameter in the model-facing schema, and a call the model makes without it fails — take an `IServiceProvider` parameter instead.
+
+---
+
+## 2026-08-28
+
+### Added
+
+- **`microsoft-extensions-ai` now covers the five non-chat client families** — image generation, speech-to-text, text-to-speech, realtime sessions, and provider-hosted files. Roughly 55 types, none previously mentioned. The useful part is that they are not five new APIs: each repeats the `IChatClient` shape exactly — interface, `…Builder`, `…Extensions`, `…BuilderServiceCollectionExtensions`, `…Metadata` — so wiring, DI registration and `AsBuilder()` transfer verbatim.
+- The cross-over worth knowing: **`UseImageGeneration` puts an `IImageGenerator` into a chat pipeline**, so an `ImageGenerationToolCallContent` is executed rather than handed back — the same middleware bargain as `UseFunctionInvocation`. `FunctionInvokingRealtimeClient` is the realtime analogue.
+- Convenience overloads that only a compile test reveals: `DataContent` forms of the speech and hosted-file calls, optional `options`/`ServiceLifetime`/`CancellationToken` throughout, `DownloadAsDataContentAsync`, and the `ReadOnlyMemory<byte>` form of `EditImageAsync`.
+
+- **`microsoft-extensions-ai` now documents the content model** — `response.Text` is a convenience, and underneath every message carries an `IList<AIContent>` where the interesting parts of a modern response live: reasoning traces, images, tool calls, citations, token usage, in-band errors. **24 of the 25 content types had zero mentions**, including `TextContent` itself.
+- The trap that motivated the page: **`TextReasoningContent` does not derive from `TextContent`** (CS0029). They are siblings, so a loop matching only `TextContent` drops the model's reasoning without a word. The surface dump **records no base types at all**, so the entire hierarchy on that page — every `*ToolCallContent` to `ToolCallContent`, every `*ToolResultContent` to `ToolResultContent`, the approval/input/hosted types to `AIContent` — was established edge by edge with compile tests rather than read off the dump.
+- Also documented: `ErrorContent` arriving as ordinary content rather than as an exception (a response that "succeeded" can carry a failure inside it), `DataContent` versus `UriContent` and when each is the right cost/privacy trade, `HasTopLevelMediaType`, and `RawRepresentation` as the deliberate escape hatch for provider fields the abstraction does not model.
+
+### Changed
+
+- **`microsoft-extensions-ai` bumped from 10.8.1 to 10.9.0.** The surface diff is purely additive — one new family, routing and failover between chat clients: `RoutingChatClient` / `RoutingContext`, `SemanticRoutingChatClient`, `FailoverChatClient` / `FailoverChatClientAttempt` / `OrderedFailoverChatClient`. A new reference documents them from execution, not description: a semantic router embeds the *last user message* only and caches its profile phrases on first use; `topK` selects phrases across all clients and the threshold applies to the per-client aggregate; the shipped `OrderedFailoverChatClient` rethrows the *last* client's exception and, on a stream, fails over only before the first update; a custom policy keys per-request state on the `RoutingContext` and throws — not returns `null` — to stop. The two `protected` members a policy overrides are compile-verified (CS0534, CS0122), since no public-members dump can show them.
+- **README rewritten.** Install instructions come first; each skill gets one summary and one paragraph of traps instead of a page; the four repeated "API Ground-Truth Alignment" callouts become a single *How the skills are verified* section. Nothing about scope or versions changed.
+- **The `MEAI001` experimental gate is now documented.** Every routing/failover type, all five non-chat client families (image generation, speech-to-text, text-to-speech, realtime, hosted files — every client type on the `beyond-chat` page; the content types they exchange are not gated) and the chat reducers behind `UseChatReducer` are `[Experimental("MEAI001")]`, a compile *error* until suppressed. The skill previously said nothing about it; it now names the gated families — 111 types and 8 members at 10.9.0, by a reflection sweep of both assemblies — and both suppression forms, in the always-loaded body and on the pages concerned.
+
+---
+
 ## 2026-08-27
 
 ### Added

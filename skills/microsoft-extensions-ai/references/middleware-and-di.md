@@ -31,9 +31,12 @@ IChatClient client = raw.AsBuilder()
 | `UseLogging(ILoggerFactory, Action<LoggingChatClient>)` | Logs requests and responses |
 | `UseOpenTelemetry(ILoggerFactory, string sourceName, Action<OpenTelemetryChatClient>)` | OpenTelemetry traces/metrics |
 | `UseChatReducer(IChatReducer, Action<ReducingChatClient>)` | Trims conversation history before the provider call |
+| `ConfigureOptions(Action<ChatOptions>)` | Fills in per-call defaults (model, temperature, instructions) on a *clone* of the caller's options |
 | `Use(Func<IChatClient, IChatClient>)` | Your own decorator |
 
 `UseLogging` and `UseOpenTelemetry` also exist on the embedding, image-generator, speech-to-text, text-to-speech, and realtime builders.
+
+`UseChatReducer`, `ReducingChatClient` and the shipped reducers (`MessageCountingChatReducer`, `SummarizingChatReducer`) are `[Experimental("MEAI001")]` — a compile error until suppressed (both forms in [routing-and-failover.md](routing-and-failover.md)); every other layer in the table is stable. Routing and failover clients are *root* clients, not layers: there is no `UseRouting()` or `UseFailover()` — you construct one and build the pipeline on top of it.
 
 ## Registering with dependency injection
 
@@ -62,13 +65,45 @@ Each `Add…` has an `IServiceProvider`-factory overload for when the inner clie
 
 ## Custom middleware
 
+A layer is a `DelegatingChatClient`: it wraps an inner client, forwards everything by default, and you override what you need.
+
 ```csharp
+using Microsoft.Extensions.AI;
+
+sealed class RedactingChatClient(IChatClient innerClient) : DelegatingChatClient(innerClient)
+{
+    public override Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        => base.GetResponseAsync(Redact(messages), options, cancellationToken);
+
+    public override IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        => base.GetStreamingResponseAsync(Redact(messages), options, cancellationToken);
+
+    private static IEnumerable<ChatMessage> Redact(IEnumerable<ChatMessage> messages) => messages;   // your policy here
+}
+
 IChatClient client = raw.AsBuilder()
-    .Use(inner => new MyPolicyChatClient(inner))
+    .Use(inner => new RedactingChatClient(inner))
+    .UseFunctionInvocation()
     .Build();
 ```
 
-Delegate-based overloads of `Use` let you intercept `GetResponseAsync` (and streaming) without writing a class — useful for redaction, prompt-shaping, or request metrics.
+- **Override both methods.** The base forwards `GetStreamingResponseAsync` straight to the inner client, so a layer that only overrides `GetResponseAsync` is bypassed by every streaming call.
+- `InnerClient` is `protected` — the wrapped client is yours to call from inside the layer and nobody else's (CS0122 from outside). `GetService` and `Dispose` forward to it by default (executed: metadata resolved through the layer, the inner client disposed with it).
+- Delegate-based overloads of `Use` intercept a call without a class, for one-off redaction, prompt-shaping or metrics.
+
+### Defaults for every call
+
+```csharp
+IChatClient client = raw.AsBuilder()
+    .ConfigureOptions(options =>
+    {
+        options.ModelId ??= "gpt-4o-mini";   // ??= fills only what the caller left null
+        options.Temperature ??= 0.2f;
+    })
+    .Build();
+```
+
+`ConfigureOptions` runs your callback on a **clone** of the caller's `ChatOptions` (or on a fresh instance when none was passed), so the caller's object is never mutated and a value the caller did set survives a `??=` (executed).
 
 ## Engineering guidance
 
@@ -83,6 +118,7 @@ Delegate-based overloads of `Use` let you intercept `GetResponseAsync` (and stre
 - `IChatClient` is consumed from DI, not the raw provider client.
 - The pipeline is built once at startup, not per request.
 - Telemetry and logging are registered as layers rather than scattered through call sites.
+- Custom layers derive from `DelegatingChatClient` and override *both* `GetResponseAsync` and `GetStreamingResponseAsync`.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.8.1 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) and compile-tested against the pinned package (2026-08-05).*
+*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. Execution facts: a `DelegatingChatClient` subclass forwards `GetService` and `Dispose` to its inner client and can sit in a `.Use(...)` layer; `InnerClient` is protected (CS0122 from outside); `ConfigureOptions` runs on a clone, so the caller's `ChatOptions` is never mutated and `??=` preserves caller-set values. The `MEAI001` gate on the chat reducers was established by reflection sweep and compile error.*

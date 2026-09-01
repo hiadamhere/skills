@@ -57,6 +57,20 @@ services.AddEmbeddingGenerator(embeddingGenerator)
 
 `UseDistributedCache`, `UseLogging`, and `UseOpenTelemetry` all have `EmbeddingGeneratorBuilder<TInput, TEmbedding>` overloads. See [middleware and DI](middleware-and-di.md).
 
+```csharp
+using Microsoft.Extensions.AI;
+
+IEmbeddingGenerator<string, Embedding<float>> cached = generator.AsBuilder().UseDistributedCache(cache).Build();
+
+// Pair each input with its vector -- the shape you store.
+foreach ((string input, Embedding<float> embedding) in await cached.GenerateAndZipAsync(documents))
+{
+    Console.WriteLine($"{input}: {embedding.Dimensions} dimensions");
+}
+```
+
+The cache is **per input and per options**, not per call — a different `Dimensions` or `ModelId` is a different entry, and a batch that mixes cached and new inputs sends only the new ones to the inner generator (executed — `alpha` embedded once across a single call, a repeat, and a batch that also contained it). A custom layer derives from `DelegatingEmbeddingGenerator<TInput, TEmbedding>` and overrides `GenerateAsync`, exactly like `DelegatingChatClient`.
+
 ## Engineering guidance
 
 - **Batch aggressively.** One call with 100 inputs is dramatically cheaper and faster than 100 calls. Use the `IEnumerable` overload wherever you control the loop.
@@ -73,4 +87,4 @@ services.AddEmbeddingGenerator(embeddingGenerator)
 - The generator is consumed from DI so caching and telemetry layers apply.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.8.1 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`) and compile-tested against the pinned package (2026-08-05). The differing return types of the batch and single-input `GenerateAsync` overloads were confirmed by compile test.*
+*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. Execution facts: `UseDistributedCache` on an embedding generator caches per input and options, so a batch mixing cached and new inputs sends only the new ones inward; `GenerateAndZipAsync` returns input/embedding pairs; a `DelegatingEmbeddingGenerator` subclass forwards to its inner generator. The differing return types of the batch and single-input `GenerateAsync` overloads were re-confirmed by compile test.*

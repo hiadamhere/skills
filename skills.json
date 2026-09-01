@@ -130,17 +130,21 @@
     {
       "name": "microsoft-extensions-ai",
       "displayName": "Microsoft.Extensions.AI (.NET LLM abstractions)",
-      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions: IChatClient, streaming, ChatOptions, tool/function calling, structured output, embeddings, and the middleware/DI pipeline.",
+      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families — images, speech, realtime, hosted files — and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.",
       "versions": [
-        "10.8.1"
+        "10.9.0"
       ],
       "files": [
         "microsoft-extensions-ai/SKILL.md",
+        "microsoft-extensions-ai/references/beyond-chat.md",
         "microsoft-extensions-ai/references/chat-client.md",
-        "microsoft-extensions-ai/references/tool-calling.md",
-        "microsoft-extensions-ai/references/structured-output.md",
+        "microsoft-extensions-ai/references/content-model.md",
         "microsoft-extensions-ai/references/embeddings.md",
-        "microsoft-extensions-ai/references/middleware-and-di.md"
+        "microsoft-extensions-ai/references/hosted-tools-and-approval.md",
+        "microsoft-extensions-ai/references/middleware-and-di.md",
+        "microsoft-extensions-ai/references/routing-and-failover.md",
+        "microsoft-extensions-ai/references/structured-output.md",
+        "microsoft-extensions-ai/references/tool-calling.md"
       ]
     },
     {
