@@ -253,7 +253,7 @@ if ($IsRemote) {
 
     # Kick off one background job per file. NOTE: capture the Start-Job objects into
     # $Jobs (do NOT pipe to Out-Null here, or $Jobs is empty and the wait below never
-    # runs — the original bug that made the installer report success before, and
+    # runs - the original bug that made the installer report success before, and
     # regardless of, any download completing).
     Write-Host "Downloading files in parallel..." -ForegroundColor Yellow
     $Jobs = foreach ($D in $Downloads) {
@@ -275,7 +275,7 @@ if ($IsRemote) {
         $Jobs | Remove-Job -Force
     }
 
-    # Disk state — not job exit state — is the source of truth for success: a file
+    # Disk state - not job exit state - is the source of truth for success: a file
     # present and non-empty in BOTH target dirs is installed. This ignores spurious
     # background-job teardown noise while still catching genuinely dropped files, any
     # of which get one sequential retry before the install is declared a failure.

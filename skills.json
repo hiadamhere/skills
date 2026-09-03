@@ -3,7 +3,7 @@
     {
       "name": "msaf-architect",
       "displayName": "MSAF Architect (Microsoft Agent Framework C#)",
-      "description": "Version-matched architecture and API guidance for Microsoft Agent Framework workflows — executors, edges, checkpointing, human-in-the-loop, the four orchestration builders (sequential, concurrent, group chat, handoff), and the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing, background agents). Every claim is checked against the real NuGet assemblies, v1.10 through v1.20.",
+      "description": "Version-matched architecture and API guidance for Microsoft Agent Framework workflows - executors, edges, checkpointing, human-in-the-loop, the four orchestration builders (sequential, concurrent, group chat, handoff), and the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing, background agents). Every claim is checked against the real NuGet assemblies, v1.10 through v1.20.",
       "versions": [
         "v1.10",
         "v1.11",
@@ -130,7 +130,7 @@
     {
       "name": "spectre-console",
       "displayName": "Spectre.Console Terminal-UI Expert",
-      "description": "Verified guidance for rich .NET terminal UIs with Spectre.Console: tables, panels, trees, markup & color, live displays (Status/Progress/Live), and interactive prompts — plus terminal-gating for CI/non-tty safety.",
+      "description": "Verified guidance for rich .NET terminal UIs with Spectre.Console: tables, panels, trees, markup & color, live displays (Status/Progress/Live), and interactive prompts - plus terminal-gating for CI/non-tty safety.",
       "versions": [
         "v0.57.2"
       ],
@@ -146,7 +146,7 @@
     {
       "name": "microsoft-extensions-ai",
       "displayName": "Microsoft.Extensions.AI (.NET LLM abstractions)",
-      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families — images, speech, realtime, hosted files — and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.",
+      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families - images, speech, realtime, hosted files - and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.",
       "versions": [
         "10.9.0"
       ],
@@ -182,7 +182,7 @@
     {
       "name": "maui-engineer",
       "displayName": ".NET MAUI Architect",
-      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, MVVM/DI, navigation, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing: signing, trimming/AOT, and store distribution — resolved against the project's real toolchain, not model memory.",
+      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, MVVM/DI, navigation, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing: signing, trimming/AOT, and store distribution - resolved against the project's real toolchain, not model memory.",
       "versions": [
         ".NET MAUI 8-10"
       ],
@@ -202,7 +202,7 @@
     {
       "name": "reviewers",
       "displayName": "Reviewers (configurable review panel)",
-      "description": "Configurable multi-lens review panel for any artifact — code, docs, specs, migrations, infrastructure. Runs a roster of reviewer lenses in parallel over a change, each with its own stance and verdict vocabulary, then rolls the verdicts up worst-case-wins. Ships a starter pack of generic code-review lenses; the value is the overlay — encode your own rules and post-mortems as lenses with no code change. Use before committing or opening a PR.",
+      "description": "Configurable multi-lens review panel for any artifact - code, docs, specs, migrations, infrastructure. Runs a roster of reviewer lenses in parallel over a change, each with its own stance and verdict vocabulary, then rolls the verdicts up worst-case-wins. Ships a starter pack of generic code-review lenses; the value is the overlay - encode your own rules and post-mortems as lenses with no code change. Use before committing or opening a PR.",
       "versions": [
         "Agent Skills standard"
       ],

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spectre.Console Skill — Verified Terminal-UI Reference (v0.57.2)</title>
+    <title>Spectre.Console Skill - Verified Terminal-UI Reference (v0.57.2)</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -84,7 +84,7 @@
         .badge.accent { background: rgba(20, 184, 166, 0.1); color: #5eead4; border-color: rgba(20, 184, 166, 0.25); }
         .badge.verified { background: rgba(139, 92, 246, 0.1); color: #c084fc; border-color: rgba(139, 92, 246, 0.25); }
 
-        /* The One Rule — flagship callout */
+        /* The One Rule - flagship callout */
         .rule-card {
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(139, 92, 246, 0.05));
             border: 1px solid rgba(245, 158, 11, 0.25);
@@ -167,7 +167,7 @@
 
         <header>
             <h1>🎨 Spectre.Console Skill</h1>
-            <p>Verified, version-matched guidance for building rich .NET terminal UIs — tables, panels, trees, markup &amp; color, live displays, and interactive prompts — with the terminal-gating discipline that keeps interactive features from hanging in CI or hosted contexts.</p>
+            <p>Verified, version-matched guidance for building rich .NET terminal UIs - tables, panels, trees, markup &amp; color, live displays, and interactive prompts - with the terminal-gating discipline that keeps interactive features from hanging in CI or hosted contexts.</p>
             <div class="badges">
                 <span class="badge accent">Spectre.Console v0.57.2</span>
                 <span class="badge">Spectre.Console.Ansi</span>
@@ -178,7 +178,7 @@
 
         <div class="rule-card">
             <h2>🚦 The one rule that prevents hangs</h2>
-            <p>Spectre's <strong>interactive</strong> features — every prompt and the <code>Status</code>/<code>Progress</code>/<code>Live</code> displays — assume a real terminal. Under redirected stdin, in CI, or in a hosted (non-tty) process they <strong>throw or block forever</strong> waiting for input that never comes. Always gate on capability first, with a non-interactive fallback.</p>
+            <p>Spectre's <strong>interactive</strong> features - every prompt and the <code>Status</code>/<code>Progress</code>/<code>Live</code> displays - assume a real terminal. Under redirected stdin, in CI, or in a hosted (non-tty) process they <strong>throw or block forever</strong> waiting for input that never comes. Always gate on capability first, with a non-interactive fallback.</p>
             <div class="code-block">
                 <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
 <pre>using Spectre.Console;
@@ -226,8 +226,8 @@ AnsiConsole.Write(new Panel(tree) { Header = new PanelHeader("Files") });</pre>
         </section>
 
         <section class="ref">
-            <h2><span class="ic">🎨</span>Markup &amp; color — escape untrusted text</h2>
-            <p class="lead">Spectre renders styled text from an inline <code>[style]…[/]</code> markup string. Any <code>[</code> or <code>]</code> in interpolated or user-supplied text is a control character and will throw or corrupt output — escape it.</p>
+            <h2><span class="ic">🎨</span>Markup &amp; color - escape untrusted text</h2>
+            <p class="lead">Spectre renders styled text from an inline <code>[style]…[/]</code> markup string. Any <code>[</code> or <code>]</code> in interpolated or user-supplied text is a control character and will throw or corrupt output - escape it.</p>
             <div class="code-block">
                 <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
 <pre>using Spectre.Console;
@@ -240,12 +240,12 @@ AnsiConsole.MarkupLine($"You typed: [grey]{Markup.Escape(userInput)}[/]");   <sp
 <span class="cm">// Or the interpolated helpers, which escape the holes for you:</span>
 AnsiConsole.MarkupLineInterpolated($"You typed: [grey]{userInput}[/]");</pre>
             </div>
-            <p class="note"><code>Markup.Escape</code> doubles brackets; <code>MarkupLineInterpolated</code> / <code>Markup.FromInterpolated</code> escape interpolation holes automatically — the safest option for dynamic text. <code>Color</code>, <code>Style</code>, and <code>Decoration</code> are value types for building styles without hand-written markup.</p>
+            <p class="note"><code>Markup.Escape</code> doubles brackets; <code>MarkupLineInterpolated</code> / <code>Markup.FromInterpolated</code> escape interpolation holes automatically - the safest option for dynamic text. <code>Color</code>, <code>Style</code>, and <code>Decoration</code> are value types for building styles without hand-written markup.</p>
         </section>
 
         <section class="ref">
-            <h2><span class="ic">⏳</span>Live displays — Status, Progress, Live</h2>
-            <p class="lead">Three widgets animate a console region. <strong>A live display owns the region exclusively</strong> — never write to the console directly or start a second live display from inside the callback; mutate through the supplied context instead.</p>
+            <h2><span class="ic">⏳</span>Live displays - Status, Progress, Live</h2>
+            <p class="lead">Three widgets animate a console region. <strong>A live display owns the region exclusively</strong> - never write to the console directly or start a second live display from inside the callback; mutate through the supplied context instead.</p>
             <div class="code-block">
                 <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
 <pre>using Spectre.Console;
@@ -274,7 +274,7 @@ AnsiConsole.Progress()
 
         <section class="ref">
             <h2><span class="ic">⌨️</span>Prompts</h2>
-            <p class="lead">Four interactive prompts: free-text (<code>TextPrompt&lt;T&gt;</code>), yes/no (<code>ConfirmationPrompt</code>), single-choice (<code>SelectionPrompt&lt;T&gt;</code>), and multi-choice (<code>MultiSelectionPrompt&lt;T&gt;</code>) — run via <code>AnsiConsole.Prompt(...)</code> or the <code>Ask</code>/<code>Confirm</code> shortcuts. All require a real terminal (gate first).</p>
+            <p class="lead">Four interactive prompts: free-text (<code>TextPrompt&lt;T&gt;</code>), yes/no (<code>ConfirmationPrompt</code>), single-choice (<code>SelectionPrompt&lt;T&gt;</code>), and multi-choice (<code>MultiSelectionPrompt&lt;T&gt;</code>) - run via <code>AnsiConsole.Prompt(...)</code> or the <code>Ask</code>/<code>Confirm</code> shortcuts. All require a real terminal (gate first).</p>
             <div class="code-block">
                 <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
 <pre>using Spectre.Console;
@@ -294,7 +294,7 @@ bool ok = AnsiConsole.Confirm("Deploy to [red]production[/]?", defaultValue: fal
 
         <section class="ref">
             <h2><span class="ic">🧪</span>Layout, DI &amp; testing</h2>
-            <p class="lead">Prefer an injected <code>IAnsiConsole</code> over the static <code>AnsiConsole</code> facade — it is the seam that makes output testable. The <code>Spectre.Console.Testing</code> package's <code>TestConsole</code> captures output and can feed scripted input.</p>
+            <p class="lead">Prefer an injected <code>IAnsiConsole</code> over the static <code>AnsiConsole</code> facade - it is the seam that makes output testable. The <code>Spectre.Console.Testing</code> package's <code>TestConsole</code> captures output and can feed scripted input.</p>
             <div class="code-block">
                 <div class="code-head"><span class="lang">C#</span><span class="dots"><span></span><span></span><span></span></span></div>
 <pre>using Spectre.Console;
@@ -307,12 +307,12 @@ console.Input.PushTextWithEnter("Alice");        <span class="cm">// scripted ke
 string name = console.Prompt(new TextPrompt&lt;string&gt;("Name?"));
 <span class="cm">// name == "Alice"; inspect rendered output via console.Output / console.Lines</span></pre>
             </div>
-            <p class="note">Static output (<code>Table</code>, <code>Panel</code>, <code>MarkupLine</code>) is safe everywhere — it renders without color/animation when unsupported. Only prompts and live displays need gating.</p>
+            <p class="note">Static output (<code>Table</code>, <code>Panel</code>, <code>MarkupLine</code>) is safe everywhere - it renders without color/animation when unsupported. Only prompts and live displays need gating.</p>
         </section>
 
         <footer>
             <p>Part of the <a href="./index.html" class="back-link" style="margin:0;display:inline;">AI Agent Skills Catalog</a>. Install with the catalog's one-line installer, then select <code style="font-family:var(--font-code)">spectre-console</code>.</p>
-            <p class="stamp" style="margin-top:10px;">✓ Every type, method, and property shown is verified against the actual Spectre.Console v0.57.2 assembly surface (Spectre.Console, Spectre.Console.Ansi, Spectre.Console.Testing) — reflection extraction plus compile tests against the pinned package. An automated gate rejects any unverified API identifier before release.</p>
+            <p class="stamp" style="margin-top:10px;">✓ Every type, method, and property shown is verified against the actual Spectre.Console v0.57.2 assembly surface (Spectre.Console, Spectre.Console.Ansi, Spectre.Console.Testing) - reflection extraction plus compile tests against the pinned package. An automated gate rejects any unverified API identifier before release.</p>
         </footer>
     </div>
 </body>
