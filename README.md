@@ -1,6 +1,6 @@
 # 🧠 AI Agent Skills Catalog
 
-Verified, version-matched skills for AI coding agents - Claude Code, OpenAI Codex, Cursor, Cline, Aider, GitHub Copilot, Gemini, Google Antigravity, and anything else that reads the Agent Skills format. Every API claim in the library skills is checked against the real assemblies or SDKs it describes, and an automated gate rejects an unverified identifier before release; the two methodology skills (`maui-engineer`, `reviewers`) pin no assembly and say so - they state their own ground truth and are dated to the official sources they reflect.
+Verified, version-matched skills for any AI coding agent that reads the Agent Skills format. Every API claim in the library skills is checked against the real assemblies or SDKs it describes, and an automated gate rejects an unverified identifier before release; the two methodology skills (`maui-engineer`, `reviewers`) pin no assembly and say so - they state their own ground truth and are dated to the official sources they reflect.
 
 🌐 **Browse the catalog: [hiadamhere.github.io/skills](https://hiadamhere.github.io/skills/)** - including the interactive MSAF Architect visualizer.
 
@@ -10,7 +10,7 @@ Verified, version-matched skills for AI coding agents - Claude Code, OpenAI Code
 
 ### With `spm` (recommended)
 
-[`spm`](https://www.npmjs.com/package/@hiadamhere/spm) installs skills into **every** coding agent on your machine at once - Claude Code, Codex, Cursor, Cline, Aider, GitHub Copilot, and more.
+[`spm`](https://www.npmjs.com/package/@hiadamhere/spm) installs skills into **every** coding agent on your machine at once.
 
 ```bash
 npm install -g @hiadamhere/spm      # or: dotnet tool install -g spm
