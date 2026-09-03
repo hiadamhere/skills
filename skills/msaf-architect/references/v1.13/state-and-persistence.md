@@ -67,6 +67,9 @@ Checkpoints are coordinated using the `CheckpointManager` class.
 * **JSON Store:** `CheckpointManager.CreateJson(ICheckpointStore<JsonElement> store, JsonSerializerOptions options)`.
 * **Default:** `CheckpointManager.Default`.
 
+> [!WARNING]
+> There is **no `IWorkflowStateStore` / `WorkflowState` abstraction and no `Microsoft.Agents.AI.Workflows.State` namespace** in any MAF version — those appear in some stale tutorials but were never shipped. Custom persistence is implemented through `ICheckpointStore<T>`.
+
 ### 2. Creating custom checkpoint stores
 To store workflow states in a persistent database, implement `ICheckpointStore<T>`:
 
@@ -120,8 +123,8 @@ var checkpointManager = CheckpointManager.CreateJson(fileStore, new JsonSerializ
 - **The workflow must speak the chat protocol.** `AsAIAgent` accepts any `Workflow`, but the first `RunAsync` throws an **InvalidOperationException** (*"Workflow does not support ChatProtocol: At least List<ChatMessage> and TurnToken must be supported as input"*) unless the start executor accepts `List<ChatMessage>` and `TurnToken`. A bare `Executor<string, string>` graph fails here; a `BuildSequential` workflow qualifies.
 - **Give it an explicit `id`.** Without one the agent gets a fresh identifier per call, and `Name` / `Description` are empty.
 
-Executed against pinned 1.14.0, 1.17.0 and 1.19.0; the signature is identical in every dump from 1.10.0. The v1.19 controls for where a hosted agent's checkpoints live are in [the v1.19 state guide](../v1.19/state-and-persistence.md).
+Executed against pinned 1.14.0, 1.17.0 and 1.19.0; the signature is identical in every dump from 1.10.0. The v1.19 controls for where a hosted agent's checkpoints live are in [the v1.19 hosting guide](../v1.19/workflow-hosting.md).
 <!-- /shared:workflow-hosting -->
 
 ---
-*Verified against MAF v1.13.0 DLL surface (2026-07-07). The Workflows checkpointing layer is byte-identical to v1.12 (mechanical surface diff), so the v1.12 compile-tested samples apply unchanged. Workflow-hosting block added 2026-08-27: `AsAIAgent` executed against pinned 1.14.0, 1.17.0 and 1.19.0.*
+*Verified against MAF v1.13.0 DLL surface (2026-07-07). The Workflows checkpointing layer is byte-identical to v1.12 (mechanical surface diff), so the v1.12 compile-tested samples apply unchanged. Workflow-hosting block added 2026-08-27: `AsAIAgent` executed against pinned 1.14.0, 1.17.0 and 1.19.0. Fixed in place on 2026-09-03: the never-shipped-state-store warning that v1.11 carries above the custom-store section was added here, where the same section had none; no other change.*

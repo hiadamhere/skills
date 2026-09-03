@@ -1,4 +1,4 @@
-# 🧠 Agent Layer Core (v1.19)
+# 🧠 Agent Layer Core (v1.20)
 
 MAF separates into two layers:
 
@@ -161,7 +161,7 @@ if (await run.GetStatusAsync() == RunStatus.Ended)
 
 ## 🛠️ Engineering guidance
 
-- Pin the agent, abstractions, and workflows packages to the same `1.19.0` version; the three ship in lockstep, and 1.19.0 additionally requires `Microsoft.Extensions.AI` 10.9.0 or later.
+- Pin the agent, abstractions, and workflows packages to the same `1.20.0` version; the three ship in lockstep, and 1.19.0 and 1.20.0 both require `Microsoft.Extensions.AI` 10.9.0 or later.
 - Keep agent identity, session identity, and run identity distinct in logs. Recovery and audit questions are asked in terms of all three; a routed agent adds the active route as a fourth dimension worth recording per turn.
 - An agent passed as a Magentic *manager* is an ordinary `AIAgent`; the orchestration behavior lives in the builder, not in a special agent type.
 - The v1.14 async migration is still the live one: await mode reads/writes and message injection, and propagate cancellation through both.
@@ -176,4 +176,4 @@ if (await run.GetStatusAsync() == RunStatus.Ended)
 - Output is read from `WorkflowOutputEvent` with the case-order rule respected.
 
 ---
-*Verified against MAF v1.19.0 DLL surface and compile tests (2026-08-27). The core `AIAgent`, `ChatClientAgent`, `AgentSession` and `AIAgentBinding` surfaces are byte-identical from v1.17 through v1.19 by mechanical diff. **Provenance:** the construction, session, binding and integration samples were compile-tested on pinned **1.12.0** (surface-verified 1.13.0); the asynchronous mode and message-injection contract on **1.14.0**, where the optional `ILoggerFactory` was re-verified by compile test on 2026-08-27 — optionality is asserted from that compile, since a dump renders no parameter defaults and byte-identity therefore cannot carry it. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14 and v1.18 guides, and split from [Agent Middleware and Routing](agent-middleware.md) to keep each page inside the per-page budget; no claim was re-dated.*
+*Verified against MAF v1.20.0 DLL surface and compile tests (2026-09-03). The core `AIAgent`, `ChatClientAgent`, `AgentSession` and `AIAgentBinding` surfaces are byte-identical from v1.17 through v1.20 by mechanical diff. **Provenance:** the construction, session, binding and integration samples were compile-tested on pinned **1.12.0** (surface-verified 1.13.0); the asynchronous mode and message-injection contract on **1.14.0**, where the optional `ILoggerFactory` was re-verified by compile test on 2026-08-27 — optionality is asserted from that compile, since a dump renders no parameter defaults and byte-identity therefore cannot carry it. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14 and v1.18 guides, and split from [Agent Middleware and Routing](agent-middleware.md) to keep each page inside the per-page budget; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated.*

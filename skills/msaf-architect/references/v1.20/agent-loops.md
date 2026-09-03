@@ -1,6 +1,6 @@
-# 🔁 Autonomous Agent Loops: `LoopAgent` & Evaluators (v1.19)
+# 🔁 Autonomous Agent Loops: `LoopAgent` & Evaluators (v1.20)
 
-`LoopAgent` wraps any `AIAgent` (it derives from `DelegatingAIAgent`) and re-invokes it until a `LoopEvaluator` decides the task is complete or `MaxIterations` is reached. Evaluator feedback is injected into the next iteration. The core family is unchanged since v1.11 (v1.12 added `BackgroundTaskCompletionLoopEvaluator`) and is **byte-identical from v1.13 through v1.19** by mechanical surface diff.
+`LoopAgent` wraps any `AIAgent` (it derives from `DelegatingAIAgent`) and re-invokes it until a `LoopEvaluator` decides the task is complete or `MaxIterations` is reached. Evaluator feedback is injected into the next iteration. The core family is unchanged since v1.11 (v1.12 added `BackgroundTaskCompletionLoopEvaluator`) and is **byte-identical from v1.13 through v1.20** by mechanical surface diff.
 
 > [!WARNING]
 > This entire API family is marked **experimental** — compiling against it raises diagnostic **`MAAI001`** ("for evaluation purposes only and is subject to change or removal"). Suppress it deliberately: `<NoWarn>$(NoWarn);MAAI001</NoWarn>` in the project, or `#pragma warning disable MAAI001` at the call site.
@@ -75,4 +75,4 @@ A workflow that must be driven like an agent — sessions, `RunAsync`, serializa
 5. Telemetry distinguishes successful completion, iteration exhaustion, cancellation, and failure.
 
 ---
-*Verified against MAF v1.19.0 DLL surface (2026-08-27). The loop-agent surface is byte-identical from v1.13 through v1.19 by mechanical diff. **Provenance:** the type and evaluator signatures above were compile-tested against pinned **1.12.0** (surface-verified on 1.13.0, 2026-07-07) and are carried here on that byte-identity, not re-executed on 1.19.0. Consolidated into this folder on 2026-09-01 from the v1.13 and v1.14 guides; no claim was re-dated.*
+*Verified against MAF v1.20.0 DLL surface (2026-09-03). The loop-agent surface is byte-identical from v1.13 through v1.20 by mechanical diff. **Provenance:** the type and evaluator signatures above were compile-tested against pinned **1.12.0** (surface-verified on 1.13.0, 2026-07-07) and are carried here on that byte-identity, not re-executed on 1.19.0 or 1.20.0. Consolidated into this folder on 2026-09-01 from the v1.13 and v1.14 guides; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated.*

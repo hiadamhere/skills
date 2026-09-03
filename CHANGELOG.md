@@ -2,7 +2,42 @@
 
 All notable changes to the **AI Agent Skills Catalog** are recorded here, newest first.
 
-Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver — skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.19), which is what you actually pin against.
+Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver — skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.20), which is what you actually pin against.
+
+---
+
+## 2026-09-03
+
+### Added
+
+- **`msaf-architect` now covers MAF v1.20** — verified against the real 1.20.0 assemblies. The entire 1.19.0 → 1.20.0 surface change is **one property**, `BackgroundAgentsProviderOptions.WaitTimeout`: it caps how long the background-agents wait tool blocks a run (default five minutes). It was executed, not just read off the dump — the options type validates nothing and the provider constructor throws `ArgumentOutOfRangeException` for zero, negative or `Timeout.InfiniteTimeSpan` values, while `ReleaseSessionAsync` beside it *accepts* infinite (executed on a session with no running task — and on that path a negative release timeout is accepted too, so the release timeout is evidently validated only when there is work to wait for); both the provider and its options type are `MAAI001`-gated; and the same probe fails to compile against 1.19.0. Nothing was removed or renamed, and the `Microsoft.Extensions.AI` floor stays at 10.9.0.
+- **A `background-agents.md` page.** Releasing a session and the new wait timeout are one subject, and it is not middleware; carrying it on the middleware page would have pushed that page a quarter past the per-page budget. The new page exists from v1.20 on; on v1.19 the release material is where it was, in `agent-middleware.md`.
+
+### Changed
+
+- **The v1.20 folder is the first authored by copy-forward.** Every v1.19 page was copied, the one changed member edited in, and each page re-stamped — with the re-stamp licensed by the mechanical surface diff rather than by the copy, so every compile and execution fact still names the pinned version it was actually tested on. The v1.19 folder is now frozen as authored — still self-contained, unlike the per-release deltas of v1.11–v1.18 — and the v1.19 background-agent section gains the security warning that the package documents for every version of the provider.
+- The visualizer's additions view becomes **v1.18–v1.20** with the wait-timeout shapes added, and its blueprint generator targets 1.20.0 — the generated programs' Workflows members are unchanged from the 1.17.0 they were compile-tested at, by mechanical diff, and the page still says exactly that.
+
+---
+
+## 2026-09-02
+
+### Changed
+
+- **`msaf-architect` now answers a question in one page instead of up to six.** The reference pages were per-release deltas that chained backwards — a v1.19 question about checkpointing meant reading `v1.19 → v1.15 → v1.13 → v1.18 → v1.14`, and the cost grew with every release, so the newest users paid the most. Every page in the current version folder is now **self-contained for its version**: resolve your MAF version, check the matrix, read one topic page. Older version folders keep their per-release structure and stay correct for their pin — three of them gain the adoption traps that previously lived only in the version map, and the hosted-workflow pointer in eight of them now resolves to the new hosting page.
+- **The skill body routes to a page, not a folder.** Its third step was a list of nine folder links; it is now a task → topic-page table, so an agent loads the one page its task needs rather than a whole folder. The error-preventing rules that were scattered through the surrounding prose are collected under one heading.
+- **The version map is a matrix again** — 18.7 KB down to 11.4 KB. It keeps the feature matrix, the flagship never-shipped-API warning, the removal/rename table and the fallback rules; the per-release *adoption* traps moved into the topic pages of the versions they concern, where the reader on that version will actually see them.
+- **Two topics split** because a merged page would have been too large to be one answer: agent middleware and routing (approval middleware, concurrent invocation, the invocable-function bypass, per-session routing, background sessions) separates from building an agent, and hosting a workflow as an agent (`AsAIAgent`, checkpoint redirection, run recovery) separates from workflow state and checkpoint stores.
+
+Nothing about scope, versions or API claims changed in this release — it is a restructure. Every carried-over claim keeps the provenance it was verified with: each page's stamp now names which pinned package version its compile and execution evidence came from, rather than implying it was all re-tested against the newest one.
+
+---
+
+## 2026-09-01
+
+### Fixed
+
+- **`maui-engineer`'s `inspect-maui.ps1` crashed on Linux and macOS** — every run, before producing any output, with *"This operation is not supported for a relative URI"*. The script computed each project's relative path through `System.Uri`, and a Unix path has no scheme, so it parsed as a *relative* URI that `MakeRelativeUri` rejects; a Windows path's drive letter made it absolute, which is why every Windows run passed. For a MAUI tool this meant the platform iOS builds happen on was the one it did not run on. Relative paths are now plain string arithmetic, case-sensitive on Unix and insensitive on Windows, and the script is covered by tests that run on both.
 
 ---
 
@@ -10,7 +45,12 @@ Entries are dated by the day the change landed on `main`. The catalog is not ver
 
 ### Added
 
+- **`maui-engineer` doubles its decision coverage.** Four new references: *project layout and platform code* (the single project, the escalation ladder from cross-platform API to custom handler with its scoping trap, resources as a pipeline, startup as composition root), *data and state* (a per-datum store decision table, the backup/restore traps — restored secure-storage entries can be undecryptable on a new device, iOS Keychain entries outlive uninstall, the OS may clear the cache directory — offline/sync policy, local-database migration discipline), *testing strategy* (the MAUI-shaped pyramid, the seams that keep code testable on a plain test host, what device/UI lanes actually cost, Appium as the documented automation route), and *publishing and distribution* (artifact and signing chain per platform, trimming/AOT as an architectural posture — iOS/Mac Catalyst forbid JIT, NativeAOT's contract — store gates, release-lane CI). Architecture gains the native-XAML vs Blazor Hybrid vs `HybridWebView` decision and an app-lifecycle section; version-and-sources gains workload-set pinning mechanics and the support-cliff warning now also in the body: **a MAUI major is supported for a minimum of six months past its successor**, and the published dates sit close to that floor — MAUI 9 left support 2026-05-12 while .NET 9 runs to 2026-11-10. Two platform traps are stated precisely because the imprecise version is the one that bites: JIT is forbidden on iOS devices and ARM64 Mac Catalyst but *available* in the x64 simulator, so dynamic-code failures surface only on shipped hardware; and iOS trims any device build regardless of configuration while Android and Mac Catalyst trim in Release, so a trim failure can appear in Debug and hide in Release. All doc-sourced facts verified against official pages on 2026-08-31.
 - **`microsoft-extensions-ai` closes its real gaps** — coverage 98 → 125 of 239 public types, and every code fence in the skill now compiles against 10.9.0 in one harness. New page `hosted-tools-and-approval.md`: the provider-executed tools (`HostedWebSearchTool`, `HostedCodeInterpreterTool`, `HostedFileSearchTool`, `HostedImageGenerationTool`, `HostedMcpServerTool` with its approval modes) and the full `ApprovalRequiredAIFunction` round trip, executed — what the caller receives, what the provider sees, what a rejection says. Tool calling gains the parts a real tool needs: `IServiceProvider`/`CancellationToken`/`AIFunctionArguments` binding, `FunctionInvokingChatClient.CurrentContext` and `Terminate`, hiding a parameter from the model with `ExcludeFromSchema` + `BindParameter`, `FunctionInvoker`, `AdditionalTools` (executable, not advertised) versus declaration-only tools (advertised, handed back). Chat gains `ToChatResponseAsync`, conversation state (`ConversationId` — send only the new messages; the function-invoking client already does), background responses (`AllowBackgroundResponses`, `ContinuationToken`), reasoning options, finish reasons, usage aggregation and `ChatClientMetadata`. Structured output documents what is actually sent for each `useJsonSchemaResponseFormat` value, strict schemas via `AIJsonUtilities`, and how `.Result` throws (`JsonException` for malformed JSON, `InvalidOperationException` for an empty answer). Middleware gains the `DelegatingChatClient` base and `ConfigureOptions`; embeddings gain per-input caching and `GenerateAndZipAsync`; the content model gains annotations.
+
+### Changed
+
+- **`inspect-maui.ps1` now reads the files that usually hold the real pins:** `Directory.Build.props` (`MauiVersion`, `UseMaui`) and `Directory.Packages.props` (central `PackageVersion` entries), plus `VersionOverride` on project references — previously the snapshot missed centrally-managed versions entirely, which its own policy doc told you to collect. It also reports per-platform OS floors and runtime identifiers with the conditions that select them, and no longer renders a *conditioned* property as an XML type name: a `UseMaui` set under a condition now reads `true (when: …)` instead of vanishing.
 
 ### Fixed
 

@@ -53,7 +53,7 @@ ChatClientBuilder builder = chatClient.AsBuilder()
     .UseApprovalResponseBinding(loggerFactory);
 ```
 
-Do not use the removed `EnableNonApprovalRequiredFunctionBypassing` option or `UseNonApprovalRequiredFunctionBypassing` extension in a 1.14 project.
+Do not use the removed `EnableNonApprovalRequiredFunctionBypassing` option or `UseNonApprovalRequiredFunctionBypassing` extension in a 1.14 project. The full v1.13 → v1.14 rename table stays in [the version map](../version-map.md#-migration-traps-apis-that-were-removed-or-renamed): it names shapes that no longer exist in any current surface, and the version map is the one document checked against every version's dump.
 
 ---
 *Verified against MAF v1.14.0 DLL surface and compile tests (2026-08-27). Originally verified 2026-07-22; the optional logger-factory parameter was re-verified by compile test against the pinned 1.14.0 packages on 2026-08-27. The core agent and Workflows surfaces otherwise carry forward from v1.13.*

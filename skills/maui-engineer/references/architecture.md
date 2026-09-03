@@ -2,7 +2,19 @@
 
 The structural decisions to make while planning a .NET MAUI app, and how to keep them honest with evidence. Resolve the project's toolchain first ([version and sources](version-and-sources.md)).
 
-## Ownership split
+## 🧭 Native XAML, Blazor Hybrid, or embedded web app
+
+MAUI offers three UI strategies, and the choice is the first architecture decision — it decides what your team writes every day and what your dependency tree looks like:
+
+| Strategy | Fits | Costs you |
+|---|---|---|
+| **Native MAUI XAML/C#** | Teams invested in XAML/MVVM; UI that must feel native per platform | No reuse of web UI assets |
+| **Blazor Hybrid (`BlazorWebView`)** | Teams with Razor components to share across web and native apps | UI renders in a web view: styling is platform-dependent, and native look/feel is your CSS's job |
+| **Embedded web app (`HybridWebView`)** | An existing JS SPA (React, etc.) that needs device access via C# interop | You maintain two stacks and an interop boundary; historically constrained under full trimming/NativeAOT — verify against the project's .NET version |
+
+They compose — a mostly native app can host one Blazor screen — but pick a *primary* strategy the way you pick a primary navigation model: mixing two as equals doubles every UI competence the team needs. The shared-logic layers ([layout](project-layout-and-platform-code.md), [data](data-and-state.md), [testing seams](testing-strategy.md)) are the same under all three.
+
+## 🧩 Ownership split
 
 Classify where a concern (or a failure) lives before designing or editing:
 
@@ -15,7 +27,7 @@ Classify where a concern (or a failure) lives before designing or editing:
 | Handler/native | platform-only behavior or regression | handler mapper, native view lifetime, target-specific logs |
 | Lifecycle/navigation | duplicate loads, leaks, lost state | subscriptions, cancellation, activation/background transitions |
 
-## Layering
+## 🧱 Layering
 
 - Keep domain and application logic independent of pages and native controls.
 - Put device services behind narrow interfaces and register platform implementations in app startup.
@@ -23,7 +35,7 @@ Classify where a concern (or a failure) lives before designing or editing:
 - Treat lifecycle callbacks as re-entrant. Guard initialization, cancel obsolete work, and unsubscribe symmetrically.
 - Model offline behavior explicitly: cache ownership, freshness, retries, conflict policy, and user-visible state.
 
-## XAML, bindings, and layout
+## 🎨 XAML, bindings, and layout
 
 - Prefer compiled bindings with an explicit data type. Fix binding diagnostics rather than suppressing them.
 - Keep resource keys and theme variants centralized; plan for both themes and runtime theme changes.
@@ -31,14 +43,21 @@ Classify where a concern (or a failure) lives before designing or editing:
 - Use a virtualized collection for large/unbounded lists. Give it bounded space and stable item identity.
 - Design for safe areas, keyboard occlusion, RTL, text scaling, screen readers, and pointer/keyboard input where the target platforms support them.
 
-## Platform work
+## 🔄 Lifecycle
 
-- Start with MAUI cross-platform APIs, then reach for platform folders, partial classes, handlers, or dependency-injected services when native behavior is genuinely required.
+- MAUI models app lifecycle cross-platform: a small set of states with events raised on the `Window`, each mapped from the platform's own lifecycle; platform-specific lifecycle delegates remain available at startup (`ConfigureLifecycleEvents`) for the cases the abstraction doesn't carry.
+- **Architect against the cross-platform events first** and drop to platform delegates only for genuinely platform-only moments — every platform delegate is code the other platforms don't execute and tests don't see.
+- The state machine is not symmetric across platforms: Android process death, iOS scene transitions, Mac Catalyst windowing, and Windows activation are distinct runtime paths. The expensive one is **Android process death** — see [data and state](data-and-state.md) for the restoration contract.
+- Pause/resume is where subscriptions leak and timers double-fire: whatever a lifecycle callback starts, its counterpart stops — symmetrically, idempotently, and under re-entry.
+
+## 📲 Platform work
+
+- Start with MAUI cross-platform APIs, then reach for platform folders, partial classes, handlers, or dependency-injected services when native behavior is genuinely required — the escalation ladder, with scope rules, is in [project layout and platform code](project-layout-and-platform-code.md).
+- **Your product's platform floor is a decision, not an inheritance.** MAUI documents its own per-release minimum OS versions; your floor is usually higher and driven by the device base you actually serve. Record it per platform, set it in the project, and re-check it at each major upgrade (majors raise minimums).
 - Tie permission request timing to a user action and handle denied/restricted states.
-- Treat Android activity recreation, iOS scene transitions, Mac Catalyst windowing, and Windows activation as distinct runtime paths.
 - Do not place server credentials in the app. Assume binaries and bundled resources are inspectable.
 
-## Validation ladder
+## ✅ Validation ladder
 
 1. Restore the pinned toolchain.
 2. Build the affected target framework/configuration.
@@ -50,4 +69,4 @@ Classify where a concern (or a failure) lives before designing or editing:
 Report which rungs ran and which remain unverified.
 
 ---
-*Reflects official .NET MAUI documentation and dotnet/maui engineering guidance (2026-07-23); version-specific APIs must still be resolved from the target project.*
+*Reflects official .NET MAUI documentation and dotnet/maui engineering guidance, including the app-lifecycle and Blazor Hybrid / HybridWebView docs (2026-08-31); version-specific APIs must still be resolved from the target project.*
