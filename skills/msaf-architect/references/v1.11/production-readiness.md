@@ -50,6 +50,7 @@ public static class WorkflowServiceExtensions
 MAF emits OpenTelemetry-compliant traces for the run, each superstep, and each executor execution, propagating Activity context so LLM client calls link back to the graph.
 
 ```csharp
+using OpenTelemetry;          // Sdk lives here
 using OpenTelemetry.Trace;
 
 var tracerProvider = Sdk.CreateTracerProviderBuilder()
@@ -57,6 +58,8 @@ var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddOtlpExporter(opt => opt.Endpoint = new Uri("http://localhost:4317"))
     .Build();
 ```
+
+`AddOtlpExporter` comes from the `OpenTelemetry.Exporter.OpenTelemetryProtocol` package, which MAF does not pull in for you; `Sdk` is `OpenTelemetry.Sdk`, so the first `using` is not optional.
 
 ---
 
@@ -152,4 +155,4 @@ public async Task Integration_FullWorkflowRun_Succeeds()
 ```
 
 ---
-*Verified against MAF v1.11.0 DLL surface (2026-07-03).*
+*Verified against MAF v1.11.0 DLL surface (2026-07-03). Fixed in place on 2026-09-03: the OpenTelemetry sample lacked `using OpenTelemetry;` (`Sdk` is in that namespace, CS0103 without it, established by compiling the sample against pinned 1.20.0 packages) and never named the exporter package it needs; both corrected, no other change.*

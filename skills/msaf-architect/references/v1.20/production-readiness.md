@@ -85,6 +85,7 @@ Since v1.15 the pending-request behavior is an explicit argument rather than a d
 ## 📈 OpenTelemetry instrumentation
 
 ```csharp
+using OpenTelemetry;          // Sdk lives here
 using OpenTelemetry.Trace;
 
 var tracerProvider = Sdk.CreateTracerProviderBuilder()
@@ -92,6 +93,8 @@ var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddOtlpExporter()
     .Build();
 ```
+
+`AddOtlpExporter` comes from the `OpenTelemetry.Exporter.OpenTelemetryProtocol` package, which MAF does not pull in for you; `Sdk` is `OpenTelemetry.Sdk`, so the first `using` is not optional. Compile-tested with `OpenTelemetry.Exporter.OpenTelemetryProtocol` 1.15.3, which matches the `OpenTelemetry.Api` version the 1.20.0 packages declare in their nuspec (compiled against pinned 1.20.0).
 
 ## 🛠️ Operational guidance
 
@@ -189,4 +192,4 @@ public async Task Integration_WorkflowCompletesSuccessfully()
 **From v1.18:** nothing was removed or renamed — v1.19 is purely additive by mechanical surface diff across all three assemblies: `Microsoft.Agents.AI.Abstractions` gains `FeatureUsage`; `Microsoft.Agents.AI` gains `RoutePersistingRoutingChatClient` and `RoutePersistingRoutingChatClientOptions`; `Microsoft.Agents.AI.Workflows` gains `WorkflowAgentMetadata`, `WorkflowHostingExtensions.WithCheckpointing`, and `WorkflowSessionCheckpointRecovery`. v1.18 code compiles unchanged. The one thing that *does* move under existing code is the transitive `Microsoft.Extensions.AI` version.
 
 ---
-*Verified against MAF v1.20.0 DLL surface and compile tests (2026-09-03). The six v1.19 members were compiled and executed against the pinned 1.19.0 packages and fail to compile against 1.18.0; the `MAAI001` split and the dependency versions are compile-test and package-metadata facts a reflection dump cannot express. **Provenance of the carried-forward material:** the DI, streaming and testing samples were compile-tested on pinned **1.12.0/1.13.0**; the `WatchStreamAsync(blockOnPendingRequest, …)` overload and its optional token on **1.15.0**; the v1.18 operational items on **1.18.0**. The Workflows production surface is byte-identical from v1.13 through v1.20 by mechanical diff, which is what carries them here — they were not re-executed on 1.19.0 or 1.20.0 or 1.20.0. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14, v1.15 and v1.18 guides; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated.*
+*Verified against MAF v1.20.0 DLL surface and compile tests (2026-09-03). The six v1.19 members were compiled and executed against the pinned 1.19.0 packages and fail to compile against 1.18.0; the `MAAI001` split and the dependency versions are compile-test and package-metadata facts a reflection dump cannot express. **Provenance of the carried-forward material:** the DI, streaming and testing samples were compile-tested on pinned **1.12.0/1.13.0**; the `WatchStreamAsync(blockOnPendingRequest, …)` overload and its optional token on **1.15.0**; the v1.18 operational items on **1.18.0**. The Workflows production surface is byte-identical from v1.13 through v1.20 by mechanical diff, which is what carries them here — they were not re-executed on 1.19.0 or 1.20.0. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14, v1.15 and v1.18 guides; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated. Fixed in place on 2026-09-03: the OpenTelemetry sample lacked `using OpenTelemetry;` (`Sdk` is in that namespace, CS0103 without it) and never named the exporter package; both corrected, compile-tested in the catalog's private compile harness (`probe-visualizer-views`) against pinned 1.20.0 with `OpenTelemetry.Exporter.OpenTelemetryProtocol` 1.15.3.*

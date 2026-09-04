@@ -24,15 +24,15 @@ The agent-skills system feeds reusable skill definitions (`AgentSkill`) into an 
 
 ## 🧬 Composable Skill Sources *(new in v1.13)*
 
-v1.13 adds a decorator family over `AgentSkillsSource`. `DelegatingAgentSkillsSource` is the abstract base that forwards to an inner source; the concrete decorators wrap any source (including your own):
+v1.13 adds a family of composable sources over `AgentSkillsSource`. `DelegatingAgentSkillsSource` is the abstract base that forwards to an inner source, and exactly three concrete decorators derive from it and wrap any source, including your own. The last two rows below are **not** decorators: they derive from `AgentSkillsSource` directly — as does the `AgentFileSkillsSource` above — and take a collection rather than an `innerSource` (surface dump).
 
-| Decorator | Constructor | Purpose |
-|---|---|---|
-| `CachingAgentSkillsSource` | `(AgentSkillsSource innerSource, CachingAgentSkillsSourceOptions options)` | Cache skills, optionally per agent/session and with a `RefreshInterval`. |
-| `DeduplicatingAgentSkillsSource` | `(AgentSkillsSource innerSource, ILoggerFactory loggerFactory)` | Drop duplicate skills. |
-| `FilteringAgentSkillsSource` | `(AgentSkillsSource innerSource, Func<AgentSkill, AgentSkillsSourceContext, bool> predicate, ILoggerFactory loggerFactory)` | Keep only skills matching a context-aware predicate. |
-| `AggregatingAgentSkillsSource` | `(IEnumerable<AgentSkillsSource> sources)` | Merge several sources into one. |
-| `AgentInMemorySkillsSource` | `(IEnumerable<AgentSkill> skills)` | Serve a fixed in-memory skill list. |
+| Source | Derives from | Constructor | Purpose |
+|---|---|---|---|
+| `CachingAgentSkillsSource` | `DelegatingAgentSkillsSource` | `(AgentSkillsSource innerSource, CachingAgentSkillsSourceOptions options)` | Cache skills, optionally per agent/session and with a `RefreshInterval`. |
+| `DeduplicatingAgentSkillsSource` | `DelegatingAgentSkillsSource` | `(AgentSkillsSource innerSource, ILoggerFactory loggerFactory)` | Drop duplicate skills. |
+| `FilteringAgentSkillsSource` | `DelegatingAgentSkillsSource` | `(AgentSkillsSource innerSource, Func<AgentSkill, AgentSkillsSourceContext, bool> predicate, ILoggerFactory loggerFactory)` | Keep only skills matching a context-aware predicate. |
+| `AggregatingAgentSkillsSource` | `AgentSkillsSource` | `(IEnumerable<AgentSkillsSource> sources)` | Merge several sources into one. |
+| `AgentInMemorySkillsSource` | `AgentSkillsSource` | `(IEnumerable<AgentSkill> skills)` | Serve a fixed in-memory skill list. |
 
 The builder's `UseFilter` / `UseCachingOptions` wire the equivalent decorators for you; construct them directly when you need explicit ordering.
 
@@ -145,4 +145,4 @@ Adopting `IDisposable` is source-compatible — existing code keeps working — 
 The v1.11 → v1.12 context-awareness break (source/filter signatures gaining `AgentSkillsSourceContext`; `UseScriptApproval(bool)` replaced by `DisableCaching()` / `UseCachingOptions(...)`) is documented in [`v1.12/agent-skills.md`](../v1.12/agent-skills.md). <!-- v1.11 -->
 
 ---
-*Verified against MAF v1.13.0 DLL surface (2026-07-07). Every v1.13 API usage pattern shown — the decorator sources, granular approval flags, the `ownsSource` constructor, `IDisposable` disposal, and the renamed `AgentFileStore` calls — was compile-tested against the pinned 1.13.0 packages; the v1.12 → v1.13 removals were confirmed by mechanical surface diff.*
+*Verified against MAF v1.13.0 DLL surface (2026-07-07). Every v1.13 API usage pattern shown — the decorator sources, granular approval flags, the `ownsSource` constructor, `IDisposable` disposal, and the renamed `AgentFileStore` calls — was compile-tested against the pinned 1.13.0 packages; the v1.12 → v1.13 removals were confirmed by mechanical surface diff. Fixed in place on 2026-09-04: the composable-sources table had called all five entries decorators; `AggregatingAgentSkillsSource` and `AgentInMemorySkillsSource` derive from `AgentSkillsSource`, not `DelegatingAgentSkillsSource` (v1.13.0 surface dump), and the table now names each source's base type; no other change.*
