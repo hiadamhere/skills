@@ -1,0 +1,12 @@
+{
+  "name": "agent-skills",
+  "description": "Verified, version-matched Agent Skills for .NET and AI-agent development: msaf-architect, microsoft-extensions-ai, mcp-sdk, spectre-console, maui-engineer, reviewers.",
+  "author": {
+    "name": "Adam Kuroczycki",
+    "url": "https://github.com/hiadamhere"
+  },
+  "homepage": "https://hiadamhere.github.io/skills/",
+  "repository": "https://github.com/hiadamhere/skills",
+  "license": "MIT",
+  "keywords": ["dotnet", "csharp", "microsoft-agent-framework", "microsoft-extensions-ai", "mcp", "spectre-console", "maui", "code-review"]
+}

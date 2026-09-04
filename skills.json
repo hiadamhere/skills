@@ -182,7 +182,7 @@
     {
       "name": "maui-engineer",
       "displayName": ".NET MAUI Architect",
-      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, MVVM/DI, navigation, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing: signing, trimming/AOT, and store distribution - resolved against the project's real toolchain, not model memory.",
+      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, MVVM/DI, navigation, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing (signing, trimming/AOT, and store distribution) - resolved against the project's real toolchain, not model memory.",
       "versions": [
         ".NET MAUI 8-10"
       ],

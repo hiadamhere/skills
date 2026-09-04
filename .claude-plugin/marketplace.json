@@ -1,0 +1,65 @@
+{
+  "name": "hiadamhere",
+  "owner": {
+    "name": "Adam Kuroczycki",
+    "url": "https://github.com/hiadamhere"
+  },
+  "metadata": {
+    "description": "Verified, version-matched Agent Skills for .NET and AI-agent development. Every API claim is checked against the real assemblies or SDKs it describes.",
+    "pluginRoot": "./"
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": "./",
+      "description": "The whole catalog as one plugin: msaf-architect, spectre-console, microsoft-extensions-ai, mcp-sdk, maui-engineer, reviewers. Install one skill instead by picking it from the list below.",
+      "category": "development",
+      "keywords": [
+        "dotnet",
+        "csharp",
+        "microsoft-agent-framework",
+        "microsoft-extensions-ai",
+        "mcp",
+        "spectre-console",
+        "maui",
+        "code-review"
+      ]
+    },
+    {
+      "name": "msaf-architect",
+      "source": "./skills/msaf-architect",
+      "description": "",
+      "category": "development"
+    },
+    {
+      "name": "spectre-console",
+      "source": "./skills/spectre-console",
+      "description": "Verified guidance for rich .NET terminal UIs with Spectre.Console: tables, panels, trees, markup & color, live displays (Status/Progress/Live), and interactive prompts - plus terminal-gating for CI/non-tty safety.",
+      "category": "development"
+    },
+    {
+      "name": "microsoft-extensions-ai",
+      "source": "./skills/microsoft-extensions-ai",
+      "description": "",
+      "category": "development"
+    },
+    {
+      "name": "mcp-sdk",
+      "source": "./skills/mcp-sdk",
+      "description": "Verified, version-matched guidance for building against the MCP SDKs in C#, TypeScript, and Python: tools, transports, and a minimal server -- each verified against its own pinned SDK.",
+      "category": "development"
+    },
+    {
+      "name": "maui-engineer",
+      "source": "./skills/maui-engineer",
+      "description": "",
+      "category": "development"
+    },
+    {
+      "name": "reviewers",
+      "source": "./skills/reviewers",
+      "description": "Configurable multi-lens review panel for any artifact - code, docs, specs, migrations, infrastructure.",
+      "category": "development"
+    }
+  ]
+}

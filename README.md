@@ -8,16 +8,24 @@ Verified, version-matched skills for any AI coding agent that reads the Agent Sk
 
 ## 🚀 Install
 
-### With `spm` (recommended)
+Every skill here is a folder with a `SKILL.md`, in the Agent Skills format that coding agents read natively. Pick the route you already use.
 
-[`spm`](https://www.npmjs.com/package/@hiadamhere/spm) installs skills into **every** coding agent on your machine at once.
+### The way you already use
+
+| Route | How |
+|---|---|
+| The `skills` CLI | `npx skills add hiadamhere/skills` detects the agents on your machine and installs into each of them. `--list` shows the six skills, `--skill <name>` picks one, `-g` installs for your user instead of the current project. |
+| Claude Code | `/plugin marketplace add hiadamhere/skills`, then `/plugin install agent-skills@hiadamhere` for the whole catalog, or `/plugin install msaf-architect@hiadamhere` (any skill name) for one skill. |
+| By hand | Copy a skill folder into `.agents/skills/` in your project, the folder most agents read, or into your agent's user-level skills folder for every project. |
+
+### One command for every agent on your machine: `spm`
+
+[`spm`](https://www.npmjs.com/package/@hiadamhere/spm) is this catalog's own installer. It installs skills into **every** coding agent on your machine at once, and can subscribe to the catalog so you install by name.
 
 ```bash
 npm install -g @hiadamhere/spm      # or: dotnet tool install -g spm
 spm install hiadamhere/skills        # every skill in this catalog
 ```
-
-Or subscribe to the catalog and install by name:
 
 ```bash
 spm catalog add hiadamhere https://github.com/hiadamhere/skills.git
@@ -29,7 +37,7 @@ spm install spectre-console          # one skill; `spm list` shows them all
 
 ### One-line remote install (no Node or .NET)
 
-Deploys every skill to your user-level agent folders (`~/.agents/skills` for Codex/Gemini, `~/.claude/skills` for Claude Code):
+Deploys every skill to your user-level agent folders (`~/.agents/skills` and `~/.claude/skills`):
 
 ```powershell
 irm https://raw.githubusercontent.com/hiadamhere/skills/main/install.ps1 | iex     # Windows

@@ -1,6 +1,6 @@
 ---
 name: maui-engineer
-description: Version-aware architecture and planning guidance for .NET MAUI apps. Use when planning, structuring, or architecting a .NET MAUI application — target platforms, SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, Shell/stack navigation and deep links, MVVM and DI lifetimes, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing: signing, trimming/AOT, and store distribution. Resolve the project SDK, target frameworks, workloads, and MAUI package versions before giving API guidance.
+description: Version-aware architecture and planning guidance for .NET MAUI apps. Use when planning, structuring, or architecting a .NET MAUI application — target platforms, SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, Shell/stack navigation and deep links, MVVM and DI lifetimes, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing (signing, trimming/AOT, and store distribution). Resolve the project SDK, target frameworks, workloads, and MAUI package versions before giving API guidance.
 ---
 
 # 📱 .NET MAUI Architect
