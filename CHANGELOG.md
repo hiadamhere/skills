@@ -8,6 +8,10 @@ Entries are dated by the day the change landed on `main`. The catalog is not ver
 
 ## 2026-09-04
 
+### Changed
+
+- **The README was rewritten.** The catalog table now comes first, so the six skills are visible before the install instructions rather than after fifty lines of them, and the install routes beyond the one-line default are collapsed. Every heading loses its emoji, no sentence runs past forty words where eight did, and each skill's traps are a short list instead of a paragraph. Every install route and the verification method survive. What was cut is descriptive prose, including the paragraph detailing the visualizer's views, which the catalog page covers itself.
+
 ### Added
 
 - **Install the way you already do.** The README now leads with the routes people already know: the `skills` CLI (`npx skills add hiadamhere/skills`), the Claude Code plugin marketplace, and copying a skill folder into `.agents/skills`. `spm`, this catalog's own installer, stays as the one command that installs into every agent at once.
