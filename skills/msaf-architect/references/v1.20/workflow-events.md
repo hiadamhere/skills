@@ -1,8 +1,8 @@
-# 📡 Workflow Events (v1.19)
+# 📡 Workflow Events (v1.20)
 
 Streaming a workflow hands you a sequence of `WorkflowEvent`s. There are **21 event types** in a shallow hierarchy, and which one you get tells you what happened: an executor started, a superstep closed, a subworkflow warned, the run wants human input. Observability, progress reporting, and the human-in-the-loop pause all read from this one stream.
 
-The event set is **identical across v1.11–v1.19** by mechanical surface diff — 21 types, unchanged.
+The event set is **identical across v1.11–v1.20** by mechanical surface diff — 21 types, unchanged.
 
 ## 🌊 Reading the Stream
 
@@ -128,4 +128,4 @@ A workflow hosted as an agent (`AsAIAgent`, see [Workflow Hosting](workflow-host
 For the run/resume mechanics see [State and Persistence](state-and-persistence.md) and [Workflow Hosting](workflow-hosting.md); for `RequestInfoEvent` and the pause-for-human path see [Human-in-the-Loop and Routing](hitl-and-routing.md).
 
 ---
-*Verified against MAF v1.19.0 DLL surface (2026-08-27). The 21-type event taxonomy is identical across v1.11–v1.19 by mechanical diff, so the 1.19.0 surface this page targets is unchanged. **Provenance:** the compile- and execution-test facts on this page (the `WorkflowOutputEvent` case-order trap, the Magentic namespace split, and the two spellings of the failure payload) come from a probe compiled against pinned 1.11.0, 1.14.0 and 1.17.0 and are carried here on surface byte-identity, not re-executed on 1.19.0. Consolidated into this folder on 2026-09-01 from the v1.11 guide; no claim was re-dated.*
+*Verified against MAF v1.20.0 DLL surface (2026-09-03). The 21-type event taxonomy is identical across v1.11–v1.20 by mechanical diff, so the 1.20.0 surface this page targets is unchanged. **Provenance:** the compile- and execution-test facts on this page (the `WorkflowOutputEvent` case-order trap, the Magentic namespace split, and the two spellings of the failure payload) come from a probe compiled against pinned 1.11.0, 1.14.0 and 1.17.0 and are carried here on surface byte-identity, not re-executed on 1.19.0 or 1.20.0. Consolidated into this folder on 2026-09-01 from the v1.11 guide; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated.*

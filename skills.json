@@ -3,7 +3,7 @@
     {
       "name": "msaf-architect",
       "displayName": "MSAF Architect (Microsoft Agent Framework C#)",
-      "description": "Version-matched architecture and API guidance for Microsoft Agent Framework workflows — executors, edges, checkpointing, human-in-the-loop, the four orchestration builders (sequential, concurrent, group chat, handoff), and the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing). Every claim is checked against the real NuGet assemblies, v1.10 through v1.19.",
+      "description": "Version-matched architecture and API guidance for Microsoft Agent Framework workflows - executors, edges, checkpointing, human-in-the-loop, the four orchestration builders (sequential, concurrent, group chat, handoff), and the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing, background agents). Every claim is checked against the real NuGet assemblies, v1.10 through v1.20.",
       "versions": [
         "v1.10",
         "v1.11",
@@ -14,7 +14,8 @@
         "v1.16",
         "v1.17",
         "v1.18",
-        "v1.19"
+        "v1.19",
+        "v1.20"
       ],
       "files": [
         "msaf-architect/SKILL.md",
@@ -100,6 +101,7 @@
         "msaf-architect/references/v1.18/workflow-events.md",
         "msaf-architect/references/v1.19/agent-layer-core.md",
         "msaf-architect/references/v1.19/agent-loops.md",
+        "msaf-architect/references/v1.19/agent-middleware.md",
         "msaf-architect/references/v1.19/agent-skills.md",
         "msaf-architect/references/v1.19/context-compaction.md",
         "msaf-architect/references/v1.19/declarative-executors.md",
@@ -108,13 +110,27 @@
         "msaf-architect/references/v1.19/production-readiness.md",
         "msaf-architect/references/v1.19/state-and-persistence.md",
         "msaf-architect/references/v1.19/workflow-events.md",
+        "msaf-architect/references/v1.19/workflow-hosting.md",
+        "msaf-architect/references/v1.20/agent-layer-core.md",
+        "msaf-architect/references/v1.20/agent-loops.md",
+        "msaf-architect/references/v1.20/agent-middleware.md",
+        "msaf-architect/references/v1.20/agent-skills.md",
+        "msaf-architect/references/v1.20/background-agents.md",
+        "msaf-architect/references/v1.20/context-compaction.md",
+        "msaf-architect/references/v1.20/declarative-executors.md",
+        "msaf-architect/references/v1.20/hitl-and-routing.md",
+        "msaf-architect/references/v1.20/orchestration-patterns.md",
+        "msaf-architect/references/v1.20/production-readiness.md",
+        "msaf-architect/references/v1.20/state-and-persistence.md",
+        "msaf-architect/references/v1.20/workflow-events.md",
+        "msaf-architect/references/v1.20/workflow-hosting.md",
         "msaf-architect/references/version-map.md"
       ]
     },
     {
       "name": "spectre-console",
       "displayName": "Spectre.Console Terminal-UI Expert",
-      "description": "Verified guidance for rich .NET terminal UIs with Spectre.Console: tables, panels, trees, markup & color, live displays (Status/Progress/Live), and interactive prompts — plus terminal-gating for CI/non-tty safety.",
+      "description": "Verified guidance for rich .NET terminal UIs with Spectre.Console: tables, panels, trees, markup & color, live displays (Status/Progress/Live), and interactive prompts - plus terminal-gating for CI/non-tty safety.",
       "versions": [
         "v0.57.2"
       ],
@@ -130,7 +146,7 @@
     {
       "name": "microsoft-extensions-ai",
       "displayName": "Microsoft.Extensions.AI (.NET LLM abstractions)",
-      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families — images, speech, realtime, hosted files — and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.",
+      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families - images, speech, realtime, hosted files - and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.",
       "versions": [
         "10.9.0"
       ],
@@ -166,15 +182,19 @@
     {
       "name": "maui-engineer",
       "displayName": ".NET MAUI Architect",
-      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy, project layout, MVVM/DI, navigation, state and offline data, platform-abstraction boundaries, performance budgets, accessibility, and publish/signing constraints — resolved against the project's real toolchain, not model memory.",
+      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, MVVM/DI, navigation, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing: signing, trimming/AOT, and store distribution - resolved against the project's real toolchain, not model memory.",
       "versions": [
         ".NET MAUI 8-10"
       ],
       "files": [
         "maui-engineer/SKILL.md",
         "maui-engineer/references/architecture.md",
+        "maui-engineer/references/data-and-state.md",
         "maui-engineer/references/navigation-and-mvvm.md",
         "maui-engineer/references/performance-budgets.md",
+        "maui-engineer/references/project-layout-and-platform-code.md",
+        "maui-engineer/references/publish-and-distribution.md",
+        "maui-engineer/references/testing-strategy.md",
         "maui-engineer/references/version-and-sources.md",
         "maui-engineer/scripts/inspect-maui.ps1"
       ]
@@ -182,7 +202,7 @@
     {
       "name": "reviewers",
       "displayName": "Reviewers (configurable review panel)",
-      "description": "Configurable multi-lens review panel for any artifact — code, docs, specs, migrations, infrastructure. Runs a roster of reviewer lenses in parallel over a change, each with its own stance and verdict vocabulary, then rolls the verdicts up worst-case-wins. Ships a starter pack of generic code-review lenses; the value is the overlay — encode your own rules and post-mortems as lenses with no code change. Use before committing or opening a PR.",
+      "description": "Configurable multi-lens review panel for any artifact - code, docs, specs, migrations, infrastructure. Runs a roster of reviewer lenses in parallel over a change, each with its own stance and verdict vocabulary, then rolls the verdicts up worst-case-wins. Ships a starter pack of generic code-review lenses; the value is the overlay - encode your own rules and post-mortems as lenses with no code change. Use before committing or opening a PR.",
       "versions": [
         "Agent Skills standard"
       ],

@@ -60,8 +60,17 @@ if (latest is null)
 - **The workflow must speak the chat protocol.** `AsAIAgent` accepts any `Workflow`, but the first `RunAsync` throws an **InvalidOperationException** (*"Workflow does not support ChatProtocol: At least List<ChatMessage> and TurnToken must be supported as input"*) unless the start executor accepts `List<ChatMessage>` and `TurnToken`. A bare `Executor<string, string>` graph fails here; a `BuildSequential` workflow qualifies.
 - **Give it an explicit `id`.** Without one the agent gets a fresh identifier per call, and `Name` / `Description` are empty.
 
-Executed against pinned 1.14.0, 1.17.0 and 1.19.0; the signature is identical in every dump from 1.10.0. The v1.19 controls for where a hosted agent's checkpoints live are in [the v1.19 state guide](../v1.19/state-and-persistence.md).
+Executed against pinned 1.14.0, 1.17.0 and 1.19.0; the signature is identical in every dump from 1.10.0. The v1.19 controls for where a hosted agent's checkpoints live are in [the v1.19 hosting guide](../v1.19/workflow-hosting.md).
 <!-- /shared:workflow-hosting -->
 
+## ⚠️ Adoption traps
+
+<!-- shared:v115-checkpoint-adoption-traps -->
+| Trap | Reality |
+| --- | --- |
+| Hand-tracking the newest `CheckpointInfo` on v1.15+ | `CheckpointManager.GetLatestCheckpointAsync(sessionId)` resolves it; the token is optional. It resolves *identity*, not compatibility — still validate before resuming. |
+| Assigning the result to a non-nullable `CheckpointInfo` | The return is **`CheckpointInfo?`** — a session with no checkpoints yields `null`. `CheckpointInfo latest = await …` raises CS8600 and sets up a null dereference on resume. The surface dump cannot show this; only a compile test does. |
+<!-- /shared:v115-checkpoint-adoption-traps -->
+
 ---
-*Verified against MAF v1.15.0 DLL surface and compile tests (2026-08-05). The optional token and the **nullable** `CheckpointInfo?` return are compile-test facts — a reflection surface dump renders neither. The rest of the Workflows checkpointing surface is byte-identical to v1.14 by mechanical diff. Workflow-hosting block added 2026-08-27: `AsAIAgent` executed against pinned 1.14.0, 1.17.0 and 1.19.0.*
+*Verified against MAF v1.15.0 DLL surface and compile tests (2026-08-05). The optional token and the **nullable** `CheckpointInfo?` return are compile-test facts — a reflection surface dump renders neither. The rest of the Workflows checkpointing surface is byte-identical to v1.14 by mechanical diff. Workflow-hosting block added 2026-08-27: `AsAIAgent` executed against pinned 1.14.0, 1.17.0 and 1.19.0. The adoption-trap table was relocated here from `version-map.md` on 2026-09-01, unchanged in substance.*

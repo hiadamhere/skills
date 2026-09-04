@@ -1,6 +1,6 @@
 ---
 name: msaf-architect
-description: C# architecture and version-specific API guidance for Microsoft Agent Framework (MAF/MSAF) agent workflows. Use when building or debugging multi-agent workflows with the Microsoft.Agents.AI / Microsoft.Agents.AI.Workflows NuGet packages in .NET — executors, edges, checkpointing, human-in-the-loop, and the four orchestration builders (sequential, concurrent, group chat, handoff), plus the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing). Always resolve the installed package version first and load the matching references/vX.X folder. Not for the Microsoft 365 Agents SDK (Microsoft.Agents.Builder).
+description: C# architecture and version-specific API guidance for Microsoft Agent Framework (MAF/MSAF) agent workflows. Use when building or debugging multi-agent workflows with the Microsoft.Agents.AI / Microsoft.Agents.AI.Workflows NuGet packages in .NET — executors, edges, checkpointing, human-in-the-loop, and the four orchestration builders (sequential, concurrent, group chat, handoff), plus the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing, background agents). Always resolve the installed package version first, then load the matching `references/vX.X/<topic>.md` page for the task in hand. Not for the Microsoft 365 Agents SDK (Microsoft.Agents.Builder).
 ---
 
 # 🏛️ Microsoft Agent Framework (MAF) C# Architect Skill
@@ -11,26 +11,44 @@ This skill embeds the architectural guidelines, design principles, and API mappi
 
 ## 🧭 Getting Started: Version Resolution
 
-The Workflows layer was API-stable across v1.10–v1.14, adds members in v1.15, v1.16 and v1.19, and is unchanged in v1.17 and v1.18; the agent layer (`Microsoft.Agents.AI`) changes between the earlier releases and adds again in v1.18 and v1.19 — and stale tutorials/model memory describe APIs that were **never shipped** (e.g. `WorkflowSuspendedException`). **Resolve the version, then trust only the matching reference folder and the version map.**
+The Workflows layer was API-stable across v1.10–v1.14, adds members in v1.15, v1.16 and v1.19, and is unchanged in v1.17, v1.18 and v1.20; the agent layer (`Microsoft.Agents.AI`) changes between the earlier releases, adds again in v1.18 and v1.19, and adds a single property in v1.20 — and stale tutorials/model memory describe APIs that were **never shipped** (e.g. `WorkflowSuspendedException`). **Resolve the version, then trust only the matching reference page and the version map.**
 
-1. Check the local project's `.csproj` or dependency files to resolve the installed version of `Microsoft.Agents.AI.Workflows` or `Microsoft.Agents.AI`.
-   * *Note:* If the project references `Microsoft.Agents.Builder` or `Microsoft.Agents.Hosting.AspNetCore` (v1.6.x), that belongs to the separate **Microsoft 365 Agents SDK**—this skill does not apply to that SDK.
-2. Consult the **[Version Compatibility Matrix](references/version-map.md)** to see feature availability.
-   * Writing an executor that handles several message types: **[Declarative Executors](references/v1.11/declarative-executors.md)** — and note `ReflectingExecutor<T>` is `[Obsolete]` in every documented version.
-   * Observing a run: the 21-type event stream is mapped in **[Workflow Events](references/v1.11/workflow-events.md)** (identical v1.11–v1.19) — including why `WorkflowOutputEvent` must be the last `case` in a `switch`.
-   * Long-running agents: history growth is handled by the shipped compaction layer — see **[Context Compaction](references/v1.11/context-compaction.md)** (unchanged v1.10–v1.19), not by hand-rolled trimming.
-   * Hosting a workflow as an agent: every version's `state-and-persistence.md` carries the rule — `AsAIAgent` throws on first run unless the workflow speaks the chat protocol, and an agent without an explicit `id` gets a fresh one per call. Continuing a hosted run from a checkpoint is v1.19: **[State and Persistence (v1.19)](references/v1.19/state-and-persistence.md)** — `WithCheckpointing` silently returns a wrapped agent unchanged, and `WorkflowSessionCheckpointRecovery.TryPrepare` does not check that the id exists.
-   * Anything behind **`MAAI001`** is a compile *error* until suppressed, and the gate is per member: the version map's ⚗️ cells list exactly which v1.16, v1.18 and v1.19 members are gated and which siblings are not.
-3. Load the matching reference folder:
-   * **[v1.11 Reference Guides](references/v1.11/)**
-   * **[v1.12 Reference Guides](references/v1.12/)**
-   * **[v1.13 Reference Guides](references/v1.13/)** — composable/disposable agent skills + renamed `AgentFileStore` contract
-   * **[v1.14 Reference Guides](references/v1.14/)** — async agent modes, contextual tool auto-approval, async message injection, and approval middleware changes
-   * **[v1.15 Reference Guides](references/v1.15/)** — latest-checkpoint resolution + the `blockOnPendingRequest` streaming overload
-   * **[v1.16 Reference Guides](references/v1.16/)** — Magentic manager prompt overrides and response language (experimental, `MAAI001`)
-   * **[v1.17 Reference Guides](references/v1.17/)** — API-identical to v1.16; nothing to migrate
-   * **[v1.18 Reference Guides](references/v1.18/)** — concurrent tool invocation, the auto-approval iteration cap (default 40), the invocable-function bypass (experimental, `MAAI001`; in a custom pipeline it sits *below* approval-response binding or its stored calls are silently dropped), background-session release
-   * **[v1.19 Reference Guides (Latest)](references/v1.19/)** — session-persisted chat-client routing (experimental, `MAAI001`), hosted-workflow checkpoint controls (`WithCheckpointing`, `WorkflowAgentMetadata`, experimental `WorkflowSessionCheckpointRecovery`), `Microsoft.Extensions.AI` 10.9.0
+1. **Resolve the version.** Read the project's `.csproj` or dependency files for the installed `Microsoft.Agents.AI.Workflows` / `Microsoft.Agents.AI` version.
+   * *Note:* a project referencing `Microsoft.Agents.Builder` or `Microsoft.Agents.Hosting.AspNetCore` (v1.6.x) belongs to the separate **Microsoft 365 Agents SDK** — this skill does not apply to it.
+2. **Check feature availability** in the **[Version Compatibility Matrix](references/version-map.md)**: which versions have the feature, and which cells are `MAAI001`-gated.
+3. **Read the one page your task needs**, from the folder matching the resolved version.
+
+| Your task | Page |
+| --- | --- |
+| Build an agent: `ChatClientAgent` construction, sessions, workflow binding, modes | [`agent-layer-core.md`](references/v1.20/agent-layer-core.md) |
+| Wrap an agent: approval middleware, concurrent invocation, per-session routing | [`agent-middleware.md`](references/v1.20/agent-middleware.md) **(v1.19+)** |
+| Background agents: releasing a session, the wait-tool timeout | [`background-agents.md`](references/v1.20/background-agents.md) **(v1.20+)** |
+| Autonomous iteration: `LoopAgent` and loop evaluators | [`agent-loops.md`](references/v1.20/agent-loops.md) |
+| Agent skills, tool approval, file stores | [`agent-skills.md`](references/v1.20/agent-skills.md) |
+| Keep a long conversation inside the window | [`context-compaction.md`](references/v1.20/context-compaction.md) |
+| Write an executor: message handlers, protocol configuration | [`declarative-executors.md`](references/v1.20/declarative-executors.md) |
+| Human-in-the-loop, request ports, Magentic manager-led planning | [`hitl-and-routing.md`](references/v1.20/hitl-and-routing.md) |
+| Choose an orchestration: sequential, concurrent, group chat, handoff | [`orchestration-patterns.md`](references/v1.20/orchestration-patterns.md) |
+| Ship it: streaming, observability, error handling, cancellation | [`production-readiness.md`](references/v1.20/production-readiness.md) |
+| Workflow state, scopes, checkpoint stores | [`state-and-persistence.md`](references/v1.20/state-and-persistence.md) |
+| Host a workflow as an agent: `AsAIAgent`, checkpoint redirection, run recovery | [`workflow-hosting.md`](references/v1.20/workflow-hosting.md) **(v1.19+)** |
+| Observe a run: the event taxonomy and typed output | [`workflow-events.md`](references/v1.20/workflow-events.md) |
+
+> [!IMPORTANT]
+> **Read the single page your task needs, not the folder.** The links above resolve to `v1.20`, the newest verified version; on any other pin, substitute your version folder in the path (`references/v1.16/hitl-and-routing.md`). **The rows marked with a version are the exception** — those pages exist from that version on: the two **(v1.19+)** pages have their material in `agent-layer-core.md` and `state-and-persistence.md` on v1.11–v1.18, and the **(v1.20+)** page's release material is in `agent-middleware.md` on v1.19 and in `agent-layer-core.md` on v1.18 (the wait timeout itself exists only from v1.20; before v1.18 there is no release API). Pages from v1.19 on are self-contained: it does not require reading a second page to be understood, and any link it carries to another version's folder is labelled historical context. Older folders are frozen per-release deltas and may still chain. Loading a whole folder buys you every other topic in it.
+
+---
+
+## ⛔ Rules that outrank any example you have seen
+
+* **`WorkflowSuspendedException` does not exist in any MAF version.** Human-in-the-loop is `RequestPort` + `RunStatus.PendingRequests` + `Run.ResumeAsync(responses)` in every supported release. If you are writing `throw new WorkflowSuspendedException(...)`, stop — it will not compile.
+* **Anything behind `MAAI001` is a compile *error* until suppressed**, and the gate is applied **per member**, not per release: a version's additions can be half gated and half not (v1.18 and v1.19 both are; v1.20's single addition is gated). The version map's ⚗️ cells name exactly which members. Suppress with `<NoWarn>$(NoWarn);MAAI001</NoWarn>`, scoped to the project that needs it.
+* **`ReflectingExecutor<T>` is `[Obsolete]`** in every documented version.
+* **`WorkflowOutputEvent` must be the last `case`** when switching over the event stream — earlier cases would shadow it.
+* **`AsAIAgent` throws on the first run** unless the workflow's start executor speaks the chat protocol (`List<ChatMessage>` + `TurnToken`); a hosted agent given no explicit `id` gets a fresh identifier on every call.
+* **Two hosted-workflow failures are silent, not loud.** `WithCheckpointing` returns the agent **unchanged** when it is behind a wrapper or already has a manager, and `WorkflowSessionCheckpointRecovery.TryPrepare` accepts a checkpoint id that does not exist — the `KeyNotFoundException` arrives on the next run. Assert, do not assume.
+* **Use the shipped compaction layer** for history growth, never hand-rolled trimming.
+* **Versions newer than the newest reference folder are unverified.** Treat every signature as unproven until a surface dump and compile test exist for it.
 
 ---
 

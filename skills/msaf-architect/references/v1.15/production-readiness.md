@@ -50,5 +50,13 @@ Both forms are available in v1.15:
 
 Nothing was removed or renamed — v1.15 is purely additive over v1.14 by mechanical surface diff. Existing calls compile unchanged; adopt the new overload only where the pending-request behavior matters.
 
+## ⚠️ Adoption traps
+
+<!-- shared:v115-streaming-adoption-trap -->
+| Trap | Reality |
+| --- | --- |
+| Assuming `WatchStreamAsync(blockOnPendingRequest, …)` exists before v1.15 | It is new in v1.15. On v1.14 and earlier there is only `WatchStreamAsync(cancellationToken)`. |
+<!-- /shared:v115-streaming-adoption-trap -->
+
 ---
-*Verified against MAF v1.15.0 DLL surface and compile tests (2026-08-01). The remaining Workflows production surface is byte-identical to v1.14 by mechanical diff.*
+*Verified against MAF v1.15.0 DLL surface and compile tests (2026-08-01). The remaining Workflows production surface is byte-identical to v1.14 by mechanical diff. The adoption-trap table was relocated here from `version-map.md` on 2026-09-01, unchanged in substance.*

@@ -83,5 +83,15 @@ Do not use `WorkflowSuspendedException`; that type is not part of the shipped AP
 - Overridden prompts are version-pinned and diffed against `MagenticDefaultPrompts` at upgrade time.
 - Round/stall bounds remain in place after any `ProgressLedgerPrompt` override.
 
+## ⚠️ Adoption traps
+
+<!-- shared:v116-magentic-adoption-traps -->
+| Trap | Reality |
+| --- | --- |
+| Writing `overrides.ProgressLedgerPrompt = "…"` after construction | `MagenticPromptOverrides` properties are **`init`-only**. Use an object initializer; the surface dump's `{ get; set; }` cannot distinguish `init` from `set`. |
+| Expecting the v1.16 Magentic prompt API to just compile | It raises **`MAAI001` as an error**. Add `<NoWarn>$(NoWarn);MAAI001</NoWarn>`. The pre-existing `MagenticWorkflowBuilder` methods are not gated. |
+| Copying a default prompt once and freezing it | `MagenticDefaultPrompts` values are shipped defaults that evolve. Diff your overrides against them at every upgrade. |
+<!-- /shared:v116-magentic-adoption-traps -->
+
 ---
-*Verified against MAF v1.16.0 DLL surface and compile tests (2026-08-01). The `init`-only accessors, the optional/nullable parameters, the `MagenticDefaultPrompts` members, and the `MAAI001` error severity are compile-test facts — a metadata surface dump cannot express any of them.*
+*Verified against MAF v1.16.0 DLL surface and compile tests (2026-08-01). The `init`-only accessors, the optional/nullable parameters, the `MagenticDefaultPrompts` members, and the `MAAI001` error severity are compile-test facts — a metadata surface dump cannot express any of them. The adoption-trap table was relocated here from `version-map.md` on 2026-09-01, unchanged in substance.*

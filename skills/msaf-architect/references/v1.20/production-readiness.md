@@ -1,6 +1,6 @@
-# 🚀 Production Readiness, Telemetry & Testing (v1.19)
+# 🚀 Production Readiness, Telemetry & Testing (v1.20)
 
-Getting a MAF workflow into production is three jobs: wiring it through DI, observing the run honestly, and testing the graph rather than only its parts. The Workflows runtime, streaming, cancellation, and execution surfaces are **byte-identical to v1.18** by mechanical diff; what v1.19 adds is a routed-agent dimension in telemetry and one startup assertion.
+Getting a MAF workflow into production is three jobs: wiring it through DI, observing the run honestly, and testing the graph rather than only its parts. The Workflows runtime, streaming, cancellation, and execution surfaces are **byte-identical to v1.18** by mechanical diff, and v1.20 changes nothing in the Workflows assembly at all; what v1.19 adds is a routed-agent dimension in telemetry and one startup assertion, and v1.20 adds one knob on the background-agents provider.
 
 ---
 
@@ -107,11 +107,12 @@ var tracerProvider = Sdk.CreateTracerProviderBuilder()
 - **From v1.18:** treat `AllowConcurrentInvocation = true` as a load-test item, not a flag. Tools that were only ever exercised one at a time have not been exercised at all under this setting.
 - **New in v1.19:** record the **active route** on every turn of an agent whose chat client routes per session. Cost, latency, and quality all vary by route; a dashboard that cannot split by it cannot explain either.
 - **New in v1.19:** at startup, read `WorkflowAgentMetadata` from every hosted workflow agent and assert `UsesOwnCheckpointStorage` matches what the host believes. A `false` where you expected `true` means checkpoints are in the session blob, not in your store — and `WithCheckpointing` returns the agent *unchanged* when it is behind a wrapper, so this is the check that catches a silent no-op.
-- **New in v1.19:** MAF 1.19.0 moves its `Microsoft.Extensions.AI` dependency to 10.9.0 (1.17 and 1.18 referenced 10.7.0). A project that also references `Microsoft.Extensions.AI` directly needs a version of at least 10.9.0 alongside the 1.19.0 packages.
+- **New in v1.19:** MAF 1.19.0 moves its `Microsoft.Extensions.AI` dependency to 10.9.0 (1.17 and 1.18 referenced 10.7.0). A project that also references `Microsoft.Extensions.AI` directly needs a version of at least 10.9.0 alongside the 1.19.0 packages. 1.20.0 keeps the 10.9.0 floor; its only dependency moves are `Microsoft.Extensions.VectorData.Abstractions` 10.7.0 → 10.8.2 and `Microsoft.Extensions.FileSystemGlobbing` 10.0.6 → 10.0.11 (package metadata).
+- **New in v1.20:** if a host lets the parent agent wait on background tasks, set `BackgroundAgentsProviderOptions.WaitTimeout` deliberately — the default is **five minutes** of the wait tool blocking the run, and it is validated in the provider constructor, not where you set it. Details and the executed bounds are on the [Background Agents](background-agents.md) page.
 
 ## ⚗️ Experimental surface in production
 
-The `MAAI001` inventory grows again. Gated in v1.19: the Magentic prompt customization from v1.16 (see [Human-in-the-Loop and Routing](hitl-and-routing.md)), the v1.18 invocable-function bypass and `BackgroundAgentsProvider`, and now `RoutePersistingRoutingChatClient` with its options, `WorkflowSessionCheckpointRecovery`, and `FeatureUsage`. **Not** gated: `WorkflowAgentMetadata`, `WithCheckpointing`, `AllowConcurrentInvocation`, `MaxAutoApprovalIterations`. Before shipping anything gated:
+The `MAAI001` inventory grows again. Gated in v1.19: the Magentic prompt customization from v1.16 (see [Human-in-the-Loop and Routing](hitl-and-routing.md)), the v1.18 invocable-function bypass and `BackgroundAgentsProvider`, and now `RoutePersistingRoutingChatClient` with its options, `WorkflowSessionCheckpointRecovery`, and `FeatureUsage`. v1.20 adds nothing to the list: its one new member, `WaitTimeout`, sits on `BackgroundAgentsProviderOptions`, which is gated at the type level (compile-tested unsuppressed against 1.20.0 — the diagnostic names the options type, not just the provider). **Not** gated: `WorkflowAgentMetadata`, `WithCheckpointing`, `AllowConcurrentInvocation`, `MaxAutoApprovalIterations`. Before shipping anything gated:
 
 - Scope the suppression to the project that needs it, never the whole solution.
 - Record which experimental APIs a release depends on, so the next MAF upgrade has a known blast radius.
@@ -169,7 +170,7 @@ public async Task Integration_WorkflowCompletesSuccessfully()
 1. Unit-test executor input/output and state changes without a network model where possible.
 2. Build the real graph in integration tests so incompatible edges fail early.
 3. Exercise streaming status, cancellation, checkpoint/resume, and human-request paths.
-4. Compile-test every version-specific snippet against exact `1.19.0` packages.
+4. Compile-test every version-specific snippet against exact `1.20.0` packages.
 5. Run a bounded live-model smoke test only after deterministic tests pass.
 
 ## ✅ Review checklist
@@ -181,9 +182,11 @@ public async Task Integration_WorkflowCompletesSuccessfully()
 - The active route is recorded per turn for routed agents; `UsesOwnCheckpointStorage` is asserted at startup for hosted workflow agents.
 - Experimental (`MAAI001`) usage is inventoried per release and isolated behind a project seam.
 
-## ⬆️ Upgrading from v1.18
+## ⬆️ Upgrading from v1.19 or v1.18
 
-Nothing was removed or renamed — v1.19 is purely additive by mechanical surface diff across all three assemblies: `Microsoft.Agents.AI.Abstractions` gains `FeatureUsage`; `Microsoft.Agents.AI` gains `RoutePersistingRoutingChatClient` and `RoutePersistingRoutingChatClientOptions`; `Microsoft.Agents.AI.Workflows` gains `WorkflowAgentMetadata`, `WorkflowHostingExtensions.WithCheckpointing`, and `WorkflowSessionCheckpointRecovery`. v1.18 code compiles unchanged. The one thing that *does* move under existing code is the transitive `Microsoft.Extensions.AI` version.
+**From v1.19:** the entire 1.19.0 → 1.20.0 surface diff across all three assemblies is one added property, `BackgroundAgentsProviderOptions.WaitTimeout`; nothing was removed, renamed or re-gated, and v1.19 code compiles unchanged (the probe on the [Background Agents](background-agents.md) page fails against 1.19.0 only where it names the new member, CS1061). The `Microsoft.Extensions.AI` floor stays at 10.9.0.
+
+**From v1.18:** nothing was removed or renamed — v1.19 is purely additive by mechanical surface diff across all three assemblies: `Microsoft.Agents.AI.Abstractions` gains `FeatureUsage`; `Microsoft.Agents.AI` gains `RoutePersistingRoutingChatClient` and `RoutePersistingRoutingChatClientOptions`; `Microsoft.Agents.AI.Workflows` gains `WorkflowAgentMetadata`, `WorkflowHostingExtensions.WithCheckpointing`, and `WorkflowSessionCheckpointRecovery`. v1.18 code compiles unchanged. The one thing that *does* move under existing code is the transitive `Microsoft.Extensions.AI` version.
 
 ---
-*Verified against MAF v1.19.0 DLL surface and compile tests (2026-08-27). The six v1.19 members were compiled and executed against the pinned 1.19.0 packages and fail to compile against 1.18.0; the `MAAI001` split and the dependency versions are compile-test and package-metadata facts a reflection dump cannot express. **Provenance of the carried-forward material:** the DI, streaming and testing samples were compile-tested on pinned **1.12.0/1.13.0**; the `WatchStreamAsync(blockOnPendingRequest, …)` overload and its optional token on **1.15.0**; the v1.18 operational items on **1.18.0**. The Workflows production surface is byte-identical from v1.13 through v1.19 by mechanical diff, which is what carries them here — they were not re-executed on 1.19.0. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14, v1.15 and v1.18 guides; no claim was re-dated.*
+*Verified against MAF v1.20.0 DLL surface and compile tests (2026-09-03). The six v1.19 members were compiled and executed against the pinned 1.19.0 packages and fail to compile against 1.18.0; the `MAAI001` split and the dependency versions are compile-test and package-metadata facts a reflection dump cannot express. **Provenance of the carried-forward material:** the DI, streaming and testing samples were compile-tested on pinned **1.12.0/1.13.0**; the `WatchStreamAsync(blockOnPendingRequest, …)` overload and its optional token on **1.15.0**; the v1.18 operational items on **1.18.0**. The Workflows production surface is byte-identical from v1.13 through v1.20 by mechanical diff, which is what carries them here — they were not re-executed on 1.19.0 or 1.20.0 or 1.20.0. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14, v1.15 and v1.18 guides; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated.*

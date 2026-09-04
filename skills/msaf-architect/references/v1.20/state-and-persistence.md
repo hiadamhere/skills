@@ -1,8 +1,8 @@
-# 💾 Workflow State and Persistence (v1.19)
+# 💾 Workflow State and Persistence (v1.20)
 
 Scoped state inside a running workflow, and the checkpoint stores that let a run survive a process. Running a *workflow as an agent* — `AsAIAgent`, checkpoint redirection, and continuing an interrupted run — is in [Workflow Hosting](workflow-hosting.md).
 
-The scoped-state, checkpoint-store, and serialization surfaces are byte-identical from v1.15 through v1.19 by mechanical diff.
+The scoped-state, checkpoint-store, and serialization surfaces are byte-identical from v1.15 through v1.20 by mechanical diff.
 
 ---
 
@@ -160,4 +160,4 @@ Treat custom Magentic prompts as deployment configuration: pin the text with the
 - Agent-mode access uses the asynchronous contract introduced in v1.14.
 
 ---
-*Verified against MAF v1.19.0 DLL surface (2026-08-27). The scoped-state and checkpointing surfaces are byte-identical from v1.15 through v1.19 by mechanical diff. **Provenance:** the scoped-state and checkpoint-store samples were compile-tested against pinned **1.12.0** (surface-verified 1.13.0); `GetLatestCheckpointAsync` and its optional token against **1.15.0**, with the **nullable** `CheckpointInfo?` return (CS8600) re-confirmed by compile test on **1.17.0**. Nullability, like optionality, is absent from a reflection dump, so those two are asserted from those compiles and not from the 1.19.0 surface. Consolidated into this folder on 2026-09-01 from the v1.13 and v1.15 guides, and split from [Workflow Hosting](workflow-hosting.md) to keep each page inside the per-page budget; no claim was re-dated.*
+*Verified against MAF v1.20.0 DLL surface (2026-09-03). The scoped-state and checkpointing surfaces are byte-identical from v1.15 through v1.20 by mechanical diff. **Provenance:** the scoped-state and checkpoint-store samples were compile-tested against pinned **1.12.0** (surface-verified 1.13.0); `GetLatestCheckpointAsync` and its optional token against **1.15.0**, with the **nullable** `CheckpointInfo?` return (CS8600) re-confirmed by compile test on **1.17.0**. Nullability, like optionality, is absent from a reflection dump, so those two are asserted from those compiles and not from the 1.19.0 surface. Consolidated into this folder on 2026-09-01 from the v1.13 and v1.15 guides, and split from [Workflow Hosting](workflow-hosting.md) to keep each page inside the per-page budget; no claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated.*
