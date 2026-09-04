@@ -8,6 +8,11 @@ Entries are dated by the day the change landed on `main`. The catalog is not ver
 
 ## 2026-09-04
 
+### Added
+
+- **Install the way you already do.** The README now leads with the routes people already know: the `skills` CLI (`npx skills add hiadamhere/skills`), the Claude Code plugin marketplace, and copying a skill folder into `.agents/skills`. `spm`, this catalog's own installer, stays as the one command that installs into every agent at once.
+- **The repository is a Claude Code plugin marketplace.** `/plugin marketplace add hiadamhere/skills` then `/plugin install agent-skills@hiadamhere` installs the whole catalog as one plugin, or `/plugin install <skill>@hiadamhere` installs a single skill - the marketplace lists each of the six on its own as well. The manifests (`.claude-plugin/marketplace.json`, `.claude-plugin/plugin.json`) pass `claude plugin validate`.
+
 ### Fixed
 
 - **The `agent-skills` decorator correction had missed v1.13, and was itself imprecise.** The correction below reached v1.19 and v1.20 only; the v1.13 page had called all five composable sources decorators since it was written on 2026-07-08, and the v1.13.0 surface dump that disproves it is the one that version was verified against. Exactly three of the five - `Caching`, `Deduplicating`, `Filtering` - derive from `DelegatingAgentSkillsSource` and wrap an inner source, while `AggregatingAgentSkillsSource` and `AgentInMemorySkillsSource` derive from `AgentSkillsSource` directly and take a collection, not an `innerSource`. All three pages now carry each source's base type as a table column, so the distinction no longer rests on one sentence, and none of them now implies those two are the only sources deriving directly - the file-backed `AgentFileSkillsSource` is another.
