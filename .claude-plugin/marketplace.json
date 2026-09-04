@@ -28,7 +28,7 @@
     {
       "name": "msaf-architect",
       "source": "./skills/msaf-architect",
-      "description": "",
+      "description": "C# architecture and version-specific API guidance for Microsoft Agent Framework workflows: executors, edges, checkpointing, human-in-the-loop, the four orchestration builders, and the agent layer. Covers MAF v1.10 to v1.20.",
       "category": "development"
     },
     {
@@ -40,7 +40,7 @@
     {
       "name": "microsoft-extensions-ai",
       "source": "./skills/microsoft-extensions-ai",
-      "description": "",
+      "description": "Version-matched guidance for the Microsoft.Extensions.AI abstractions: IChatClient, streaming, tool and function calling, structured output, embeddings, the middleware and DI pipeline, and routing between chat clients.",
       "category": "development"
     },
     {
@@ -52,7 +52,7 @@
     {
       "name": "maui-engineer",
       "source": "./skills/maui-engineer",
-      "description": "",
+      "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target platforms, SDK and workload pinning, project structure, MVVM, navigation, platform-specific code, performance, and publishing.",
       "category": "development"
     },
     {
