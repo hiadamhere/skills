@@ -35,7 +35,7 @@ The Workflows layer was API-stable across v1.10–v1.14, adds members in v1.15, 
 | Observe a run: the event taxonomy and typed output | [`workflow-events.md`](references/v1.20/workflow-events.md) |
 
 > [!IMPORTANT]
-> **Read the single page your task needs, not the folder.** The links above resolve to `v1.20`, the newest verified version; on any other pin, substitute your version folder in the path (`references/v1.16/hitl-and-routing.md`). **The rows marked with a version are the exception** — those pages exist from that version on: the two **(v1.19+)** pages have their material in `agent-layer-core.md` and `state-and-persistence.md` on v1.11–v1.18, and the **(v1.20+)** page's release material is in `agent-middleware.md` on v1.19 and in `agent-layer-core.md` on v1.18 (the wait timeout itself exists only from v1.20; before v1.18 there is no release API). Pages from v1.19 on are self-contained: it does not require reading a second page to be understood, and any link it carries to another version's folder is labelled historical context. Older folders are frozen per-release deltas and may still chain. Loading a whole folder buys you every other topic in it.
+> **Read the single page your task needs, not the folder.** The links above resolve to `v1.20`, the newest verified version; on any other pin, substitute your version folder in the path (`references/v1.16/hitl-and-routing.md`). **The rows marked with a version are the exception** — those pages exist from that version on: the two **(v1.19+)** pages have their material in `agent-layer-core.md` and `state-and-persistence.md` on v1.11–v1.18, and the **(v1.20+)** page's release material is in `agent-middleware.md` on v1.19 and in `agent-layer-core.md` on v1.18 (the wait timeout itself exists only from v1.20; before v1.18 there is no release API). Pages from v1.19 on are self-contained: each is understood without reading a second page, and any link it carries to another version's folder is labelled historical context. Older folders are frozen per-release deltas and may still chain. Loading a whole folder buys you every other topic in it.
 
 ---
 
@@ -54,7 +54,7 @@ The Workflows layer was API-stable across v1.10–v1.14, adds members in v1.15, 
 
 ## 🧩 Core Architectural Blueprint (All Versions)
 
-MAF orchestrates multi-agent systems as a directed graph where processing nodes (**Executors**) communicate over directed paths (**Edges**). The engine processes messages using a **Bulk-Synchronous-Parallel (Pregel-style) execution model** structured in discrete **supersteps**:
+MAF orchestrates multi-agent systems as a directed graph where processing nodes (**Executors**) communicate over directed paths (**Edges**). The engine processes messages in discrete **supersteps**, a bulk-synchronous model (the framework's own term is *superstep*; the design is the one Google's Pregel paper describes, but *Pregel* and *BSP* are our labels, not the framework's):
 
 1. **Superstep Initialization:** Collects all pending messages in queues.
 2. **Execution Barrier:** Runs all targeted executors concurrently.

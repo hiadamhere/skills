@@ -10,12 +10,12 @@
             --bg-dark: #090b0e;
             --bg-card: #11141a;
             --bg-border: #1d232c;
-            --color-primary: #6366f1;
-            --color-primary-glow: rgba(99, 102, 241, 0.15);
-            --color-secondary: #a855f7;
-            --color-secondary-glow: rgba(168, 85, 247, 0.15);
-            --color-accent: #06b6d4;
-            --color-accent-glow: rgba(6, 182, 212, 0.15);
+            --color-primary: #38bdf8;
+            --color-primary-glow: rgba(56, 189, 248, 0.15);
+            --color-secondary: #2dd4bf;
+            --color-secondary-glow: rgba(45, 212, 191, 0.15);
+            --color-accent: #fb923c;
+            --color-accent-glow: rgba(251, 146, 60, 0.15);
             --color-success: #10b981;
             --color-warning: #f59e0b;
             --text-main: #f3f4f6;
@@ -101,7 +101,7 @@
         }
 
         .version-badge {
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(56, 189, 248, 0.1);
             border: 1px solid var(--color-primary);
             color: var(--color-primary);
             padding: 4px 12px;
@@ -118,8 +118,15 @@
             margin: 0 auto;
             padding: 0 40px;
             display: grid;
-            grid-template-columns: 320px 1fr;
+            /* minmax(0, 1fr), not 1fr: a grid track's implicit minimum is min-content, so one long
+               unwrapped code line would widen the column past the centred container and body's
+               overflow-x: hidden would clip the right edge (empty space left, missing content right). */
+            grid-template-columns: 320px minmax(0, 1fr);
             gap: 40px;
+        }
+        @media (max-width: 960px) {
+            main { grid-template-columns: minmax(0, 1fr); padding: 0 20px; }
+            header { padding: 0 20px; flex-wrap: wrap; gap: 12px; }
         }
 
         /* Left Navigation Bar */
@@ -148,6 +155,7 @@
             border-bottom: 1px solid var(--bg-border);
             padding-bottom: 8px;
         }
+        .nav-group { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 14px 0 6px 4px; }
 
         .nav-list {
             list-style: none;
@@ -182,9 +190,9 @@
 
         .nav-btn.active {
             color: var(--text-main);
-            background: linear-gradient(135deg, var(--color-primary-glow) 0%, rgba(168, 85, 247, 0.05) 100%);
+            background: linear-gradient(135deg, var(--color-primary-glow) 0%, rgba(45, 212, 191, 0.05) 100%);
             border-color: var(--color-primary);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
         }
 
         .nav-btn-icon {
@@ -196,6 +204,7 @@
             display: flex;
             flex-direction: column;
             gap: 30px;
+            min-width: 0;   /* let the code panels shrink instead of widening the column */
         }
 
         .viewport-card {
@@ -228,16 +237,19 @@
         }
 
         /* Interactive Canvas */
+        .diagram-container svg { width: 100%; max-width: 920px; height: auto; }   /* the SVGs are drawn at 650px; let them scale up */
         .diagram-container {
             background: rgba(0, 0, 0, 0.2);
             border: 1px dashed var(--bg-border);
             border-radius: 12px;
             padding: 40px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 380px;
             position: relative;
+            overflow-x: auto;
         }
 
         /* SVG Architecture Styling */
@@ -271,10 +283,11 @@
         /* Split Code Panel */
         .code-split {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
+        .code-split > div { min-width: 0; }
 
         .code-header {
             display: flex;
@@ -433,6 +446,13 @@
             transform: translateY(0);
             pointer-events: all;
         }
+        .view-notes { width: 100%; margin-top: 18px; font-size: 0.85rem; color: var(--text-muted); }
+        .view-notes table { width: 100%; border-collapse: collapse; }
+        .view-notes th, .view-notes td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--bg-border); vertical-align: top; }
+        .view-notes th { color: var(--text-main); font-weight: 600; }
+        .view-notes td:first-child { color: var(--text-main); font-family: var(--font-code); font-size: 0.8rem; white-space: nowrap; }
+        .view-notes .group td { color: var(--color-primary); font-weight: 600; padding-top: 12px; font-family: var(--font-main); }
+        .node-overlay-hint { margin-top: 10px; font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; }
 
         .node-overlay h4 {
             font-size: 0.95rem;
@@ -466,11 +486,18 @@
         <div class="sidebar">
             <div class="nav-card">
                 <h3>View Blueprint</h3>
+                <p class="nav-group">Concepts</p>
                 <ul class="nav-list">
                     <li>
-                        <button class="nav-btn active" onclick="switchView('bsp', this)">
+                        <button class="nav-btn active" onclick="switchView('basics', this)">
+                            <span class="nav-btn-icon">🧱</span>
+                            The Building Blocks
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" onclick="switchView('bsp', this)">
                             <span class="nav-btn-icon">🔄</span>
-                            Pregel Superstep Engine
+                            How a Workflow Runs
                         </button>
                     </li>
                     <li>
@@ -491,6 +518,51 @@
                             Autonomous Loop Agents
                         </button>
                     </li>
+                </ul>
+                <p class="nav-group">Topics</p>
+                <ul class="nav-list">
+                    <li>
+                        <button class="nav-btn" onclick="switchView('compaction', this)">
+                            <span class="nav-btn-icon">🗜️</span>
+                            Context Compaction
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" onclick="switchView('declarative', this)">
+                            <span class="nav-btn-icon">🏷️</span>
+                            Declarative Executors
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" onclick="switchView('events', this)">
+                            <span class="nav-btn-icon">📡</span>
+                            Workflow Events
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" onclick="switchView('skills', this)">
+                            <span class="nav-btn-icon">🧰</span>
+                            Skills &amp; Tool Approval
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn" onclick="switchView('production', this)">
+                            <span class="nav-btn-icon">🚀</span>
+                            Production Readiness
+                        </button>
+                    </li>
+                </ul>
+                <p class="nav-group">Generator</p>
+                <ul class="nav-list">
+                    <li>
+                        <button class="nav-btn" onclick="switchView('generator', this)">
+                            <span class="nav-btn-icon">🛠️</span>
+                            Architecture Generator
+                        </button>
+                    </li>
+                </ul>
+                <p class="nav-group">Releases</p>
+                <ul class="nav-list">
                     <li>
                         <button class="nav-btn" onclick="switchView('v114', this)">
                             <span class="nav-btn-icon">1.14</span>
@@ -509,10 +581,13 @@
                             v1.18-v1.20 Additions
                         </button>
                     </li>
+                </ul>
+                <p class="nav-group">About this skill</p>
+                <ul class="nav-list">
                     <li>
-                        <button class="nav-btn" onclick="switchView('generator', this)">
-                            <span class="nav-btn-icon">🛠️</span>
-                            Architecture Generator
+                        <button class="nav-btn" onclick="switchView('routing', this)">
+                            <span class="nav-btn-icon">🧭</span>
+                            How the Skill Routes
                         </button>
                     </li>
                 </ul>
@@ -525,7 +600,7 @@
                     <p><strong>The slowest branch sets the pace</strong><br>Parallel paths re-sync every round - a long chain next to a short one makes the short one wait. Keep sequential work consolidated.</p>
                     <p><strong>State lands between rounds</strong><br>Updates queue up during a round and commit at the barrier, so concurrent nodes never race each other.</p>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Everything on this page is checked against the real MAF v1.10-v1.20 binaries - no invented APIs.</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Every name on this page exists in the real MAF v1.10-v1.20 assemblies, and every C# sample was compiled against them.</p>
             </div>
         </div>
 
@@ -536,8 +611,8 @@
             <div class="viewport-card">
                 <!-- Section Header -->
                 <div class="viewport-header">
-                    <h2 id="view-title">Pregel Superstep Engine (BSP Model)</h2>
-                    <p id="view-desc">Visualizing bulk-synchronous-parallel execution and step barriers in the MAF engine.</p>
+                    <h2 id="view-title">The Building Blocks: executors, messages, edges</h2>
+                    <p id="view-desc">Executors are the nodes, edges are the paths, and messages travel along them.</p>
                 </div>
 
                 <!-- Interactive SVG Canvas -->
@@ -546,10 +621,14 @@
                         <!-- SVG content will be injected dynamically -->
                     </div>
 
+                    <!-- Optional notes a view renders under its diagram (a table, a list) -->
+                    <div id="view-notes" class="view-notes" hidden></div>
+
                     <!-- Overlay description panel for clicked nodes -->
                     <div id="node-info-overlay" class="node-overlay">
                         <h4 id="node-overlay-title">Node Title</h4>
                         <p id="node-overlay-desc">Select an architecture node in the diagram to inspect its execution properties, state rules, and API interfaces.</p>
+                        <p class="node-overlay-hint">Click anywhere, or press Esc, to close.</p>
                     </div>
                 </div>
 
@@ -571,15 +650,598 @@
     <script>
         // Database of views
         const views = {
+            basics: {
+                file: "BuildingBlocks.cs",
+                title: "The Building Blocks: executors, messages, edges",
+                principlesTitle: "The Idea in Short",
+                principles: [
+                    ["A workflow is a graph of workers", "The workers are called executors. The paths between them are edges. Build the graph once, then run it as many times as you like with different inputs."],
+                    ["A message is just an object", "Whatever travels along an edge is a message: a string, a ChatMessage, a class you wrote. Nothing special about it."],
+                    ["An executor takes one message type and does one job", "Derive from Executor<TInput>, or Executor<TInput, TOutput> when it produces something for the next executor. Override HandleAsync. That's the whole contract."],
+                    ["Types are checked when you build", "Every executor declares what it accepts and what it produces. If an edge connects a producer of strings to a consumer of ints, Build() throws. And an executor can only send or yield the types it declared: the first version of the sample below yielded a string from an Executor<int> and failed at run time."],
+                    ["The context is how an executor reaches the outside", "Inside HandleAsync you get an IWorkflowContext: SendMessageAsync passes a message on, YieldOutputAsync produces a result of the whole workflow, AddEventAsync reports progress, and the state methods read and write shared state."]
+                ],
+                desc: "Start here if executors are new to you. A workflow is a graph: executors are the nodes, edges are the paths, and messages (plain .NET objects) travel along them. The sample below is the smallest complete workflow: one executor counts the words in a string and hands the number to a second executor, which turns it into the result. It was run against 1.20.0: the quick brown fox gives '4 words'.",
+                code: `using Microsoft.Agents.AI.Workflows;
+
+// An executor receives ONE kind of message, does its work, and passes something on.
+sealed class WordCounter : Executor<string, int>
+{
+    public WordCounter() : base("counter") { }
+
+    public override ValueTask<int> HandleAsync(string message, IWorkflowContext context, CancellationToken cancellationToken = default)
+        => ValueTask.FromResult(message.Split(' ').Length);   // the int travels along the outgoing edges
+}
+
+// A second executor accepts what the first one sends. Its TOutput is declared too: an executor may
+// only send or yield the types it declares (an Executor<int> that yields a string fails at run time).
+sealed class Reporter : Executor<int, string>
+{
+    public Reporter() : base("reporter") { }
+
+    public override ValueTask<string> HandleAsync(int message, IWorkflowContext context, CancellationToken cancellationToken = default)
+        => ValueTask.FromResult($"{message} words");
+}
+
+// Wire them: an edge is a path a message travels. Build() checks the types line up (string -> int -> output).
+var counter  = ExecutorBindingExtensions.BindExecutor(new WordCounter());
+var reporter = ExecutorBindingExtensions.BindExecutor(new Reporter());
+Workflow workflow = new WorkflowBuilder(counter).AddEdge(counter, reporter).WithOutputFrom(reporter).Build();
+
+// Run it: the string enters WordCounter, the int crosses the edge to Reporter, Reporter yields the output.
+Run run = await InProcessExecution.RunAsync(workflow, "the quick brown fox", "s-1", ct);
+foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>()) Console.WriteLine(evt.As<string>());   // 4 words`,
+                svg: `<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 135 95 H 165" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 305 95 H 335" stroke="#2dd4bf" stroke-width="2"/>
+    <path class="animated-line" d="M 475 95 H 505" stroke="#34d399" stroke-width="2"/>
+    <path class="animated-line" d="M 235 129 V 178" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5 5"/>
+    <path class="animated-line" d="M 405 129 V 178" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5 5"/>
+
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('The input message', 'Any .NET object can be a message. Here it is the string the quick brown fox, handed to the first executor when the run starts. The workflow only accepts it because the first executor declared that it takes a string.')">
+        <rect x="15" y="62" width="120" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="75" y="90" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">the message</text>
+        <text x="75" y="109" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">a 4-word string</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('WordCounter: Executor of string, producing int', 'Derives from Executor of string and int. Its HandleAsync receives the string, counts the words and returns 4. Because it declared int as its output, that 4 travels along the outgoing edge to whatever is connected next.')">
+        <rect x="165" y="62" width="140" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="235" y="90" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">WordCounter</text>
+        <text x="235" y="109" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Executor&lt;string, int&gt;</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Reporter: Executor of int, producing string', 'Accepts the int the counter sent and turns it into the text "4 words". It is marked as the workflow output source, so what it produces becomes the result of the run. In the first version of this sample it derived from Executor of int alone and tried to yield a string: the framework refused at run time, because an executor may only produce the types it declared.')">
+        <rect x="335" y="62" width="140" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="405" y="90" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Reporter</text>
+        <text x="405" y="109" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Executor&lt;int, string&gt;</text>
+    </g>
+    <g class="node" style="--glow-color: #34d399;" onclick="showNodeDetails('The output', 'WithOutputFrom(reporter) marks the reporter as the executor whose results are the workflow output. After the run, read them from run.NewEvents as WorkflowOutputEvent, or watch them arrive on the event stream. Executed: 4 words.')">
+        <rect x="505" y="62" width="130" height="66" rx="9" fill="#090b0e" stroke="#34d399" stroke-width="2"/>
+        <text x="570" y="90" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">the output</text>
+        <text x="570" y="109" fill="#34d399" font-family="Outfit" font-size="9" text-anchor="middle">'4 words'</text>
+    </g>
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('The edge, and the check at Build()', 'AddEdge(counter, reporter) says messages from the counter go to the reporter. When you call Build(), the framework checks that what the counter produces (int) is something the reporter accepts (int). Connect a string producer to an int consumer and Build() throws, so a wiring mistake is caught before anything runs.')">
+        <rect x="165" y="178" width="310" height="50" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="320" y="199" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">the edge: AddEdge(counter, reporter)</text>
+        <text x="320" y="217" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">Build() checks the types match: int out, int in</text>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Inside HandleAsync, the IWorkflowContext is how an executor sends, yields, reports and reads state</text>
+</svg>`
+            },
+            routing: {
+                title: "How the Skill Answers a Question",
+                principlesTitle: "Three Reads, Not a Folder",
+                principles: [
+                    ["Find the version first", "Everything in the skill is checked per MAF version against the real assemblies, so nothing is answered until the project's Microsoft.Agents.AI version is known."],
+                    ["Then one page", "Each topic page for the current version stands on its own. Loading the whole folder means reading twelve answers to get one."],
+                    ["Older versions stay as they were", "Pages for v1.11 to v1.19 are correct for those versions and are only fixed when something in them is wrong. New topics go into the current version's folder."],
+                    ["It also says what does not exist", "The matrix names the API that never shipped: WorkflowSuspendedException does not exist in any MAF version. Waiting for a human is RequestPort, PendingRequests and ResumeAsync, in every version."]
+                ],
+                desc: "This page is about the framework; this last view is about the skill behind it. When an agent uses the skill to answer a question, it reads three things: the project file to learn which MAF version is installed, one compatibility matrix, and one topic page written for that version. Never a whole folder.",
+                file: "SKILL.md",
+                code: `# How this skill answers a question -- three reads, never a folder
+
+1. RESOLVE the version.
+   Read the .csproj: Microsoft.Agents.AI.Workflows / Microsoft.Agents.AI  ->  e.g. 1.20.0
+   (Microsoft.Agents.Builder / Microsoft.Agents.Hosting.AspNetCore is the M365 Agents SDK: not this skill.)
+
+2. CHECK the matrix.
+   references/version-map.md: which versions have the feature, which cells are MAAI001-gated,
+   what was removed or renamed, and the one API that never shipped (WorkflowSuspendedException).
+
+3. READ one page, from the folder matching the resolved version.
+
+   Your task                                                        Page
+   -----------------------------------------------------------------  ------------------------------
+   Build an agent: ChatClientAgent, sessions, binding, modes          agent-layer-core.md
+   Wrap an agent: approval middleware, concurrency, routing           agent-middleware.md   (v1.19+)
+   Background agents: releasing a session, the wait-tool timeout      background-agents.md  (v1.20+)
+   Autonomous iteration: LoopAgent and evaluators                     agent-loops.md
+   Agent skills, tool approval, file stores                           agent-skills.md
+   Keep a long conversation inside the window                         context-compaction.md
+   Write an executor: message handlers, protocol configuration        declarative-executors.md
+   Human-in-the-loop, request ports, Magentic planning                hitl-and-routing.md
+   Choose an orchestration: sequential / concurrent / group / handoff orchestration-patterns.md
+   Ship it: streaming, observability, errors, cancellation            production-readiness.md
+   Workflow state, scopes, checkpoint stores                          state-and-persistence.md
+   Host a workflow as an agent: AsAIAgent, checkpoint redirection     workflow-hosting.md   (v1.19+)
+   Observe a run: the event taxonomy and typed output                 workflow-events.md
+
+A v1.19 or v1.20 page is self-contained: it needs no second page to be understood.
+Loading a whole folder buys you every other topic in it (13 pages, ~135 KB) for nothing.`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 175 80 H 235" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 415 80 H 475" stroke="#2dd4bf" stroke-width="2"/>
+    <path class="animated-line" d="M 325 113 V 175" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 5"/>
+
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('1. Find the version', 'Read the .csproj for Microsoft.Agents.AI.Workflows or Microsoft.Agents.AI. A project using Microsoft.Agents.Builder or Microsoft.Agents.Hosting.AspNetCore is on the separate Microsoft 365 Agents SDK, which this skill does not cover.')">
+        <rect x="25" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="100" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">1. Resolve version</text>
+        <text x="100" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">.csproj: 1.20.0</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('2. Check the matrix', 'references/version-map.md: one table of features by version, with experimental cells marked, what was removed or renamed, and the fallback rules.')">
+        <rect x="235" y="47" width="180" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="325" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">2. Check the matrix</text>
+        <text x="325" y="94" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">version-map.md</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('3. Read one topic page', 'references/v1.20/ has one page per topic, picked from the task table in the skill body. Each page stands on its own; a link to another version is background, never required. The skill measures this: 13 topics, one file each.')">
+        <rect x="475" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">3. Read ONE page</text>
+        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">references/v1.20/topic.md</text>
+    </g>
+
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('Not this: the whole folder', 'The current folder is 13 pages, about 135 KB. Loading all of it to answer one question means reading twelve answers you did not ask for. The skill body links pages, never folders, for exactly this reason.')">
+        <rect x="205" y="175" width="240" height="56" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="325" y="199" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">the whole folder</text>
+        <text x="325" y="217" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">13 pages, ~135 KB: never the route</text>
+        <line x1="215" y1="185" x2="435" y2="221" stroke="#ef4444" stroke-width="1.5" opacity="0.6"/>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Older folders (v1.11 to v1.19) are frozen historical record - correct for their pin, fixed in place, never restructured</text>
+</svg>`
+            },
+            compaction: {
+                title: "Context Compaction: keeping a long chat inside the window",
+                principlesTitle: "The Idea in Short",
+                principles: [
+                    ["Trigger, strategy, provider", "The trigger decides when (too many tokens, too many turns). The strategy decides what to do about it (drop the oldest, summarise, shrink tool output). The provider runs the pair for you, so compaction isn't something you call from your own loop."],
+                    ["Nothing is deleted, only hidden", "A strategy doesn't remove messages. It marks groups of them as excluded, and the model simply stops seeing them. That's why tool calls and their results never get separated by accident."],
+                    ["Set the formatter when you create the strategy", "ToolResultCompactionStrategy lets you decide how a shrunk tool result looks, but only in the object initializer. Setting it later won't compile."],
+                    ["Write your own by overriding CompactCoreAsync", "Not CompactAsync, which can't be overridden. Your class gets the index, marks what it wants hidden, and returns true if it changed anything."],
+                    ["Same in every version", "These 15 types haven't changed from v1.10 to v1.20, so what you learn here works on any version you're pinned to."]
+                ],
+                desc: "A long conversation eventually stops fitting the model's context window. Instead of writing your own code to trim history, you plug in three small pieces: a trigger that says when to compact, a strategy that says what to drop or summarise, and a provider that runs them inside the agent. Click a node to see how each piece behaves.",
+                file: "ContextCompaction.cs",
+                code: `using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Compaction;
+using Microsoft.Extensions.AI;
+
+// Triggers decide WHEN; strategies decide WHAT; the provider plugs the pair into an agent.
+CompactionTrigger byTokens = CompactionTriggers.TokensExceed(100_000);
+CompactionTrigger hasTools = CompactionTriggers.HasToolCalls();
+CompactionTrigger both     = CompactionTriggers.All(byTokens, hasTools);   // params -- no array ceremony
+
+// Every strategy takes its trigger first; the rest is optional.
+var sliding     = new SlidingWindowCompactionStrategy(byTokens);            // keep the last N turns
+var toolResults = new ToolResultCompactionStrategy(hasTools)                // shrink tool output, keep the call visible
+{
+    ToolCallFormatter = g => $"[{g.MessageCount} tool messages elided]",  // init-only: object initializer or CS8852
+};
+var summarizing = new SummarizationCompactionStrategy(chatClient, byTokens); // summarise instead of dropping
+var pipeline    = new PipelineCompactionStrategy(new CompactionStrategy[] { toolResults, sliding });
+
+// Attach through the agent options, or ChatClientBuilder.UseAIContextProviders.
+var provider = new CompactionProvider(pipeline);
+var options  = new ChatClientAgentOptions
+{
+    Name = "researcher",
+    AIContextProviders = new AIContextProvider[] { provider },
+};
+AIAgent agent = new ChatClientAgent(chatClient, options);
+
+// Writing your own: CompactAsync is NOT virtual (CS0506). Override the protected CompactCoreAsync -- absent from the surface dump.
+sealed class DropFailedToolCalls : CompactionStrategy
+{
+    public DropFailedToolCalls(CompactionTrigger trigger) : base(trigger) { }
+
+    protected override ValueTask<bool> CompactCoreAsync(
+        CompactionMessageIndex index,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        foreach (CompactionMessageGroup group in index.Groups)
+        {
+            if (group.Kind == CompactionGroupKind.ToolCall)
+            {
+                group.IsExcluded = true;
+                group.ExcludeReason = "failed tool call";
+            }
+        }
+        return ValueTask.FromResult(true);   // true = the index changed
+    }
+}`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 145 80 H 190" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 460 80 H 505" stroke="#2dd4bf" stroke-width="2"/>
+    <path class="animated-line" d="M 325 122 V 168" stroke="#f59e0b" stroke-width="2"/>
+    <path class="animated-line" d="M 565 113 V 168" stroke="#10b981" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('The conversation so far', 'The agent itself keeps no history. It lives in the AgentSession, and that is what compaction works on. If your agent switches between chat clients per session, they all see the same compacted history.')">
+        <rect x="25" y="47" width="120" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="85" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Session history</text>
+        <text x="85" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">grows every turn</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('The index: messages sorted into groups', 'The strategy never sees raw messages. It sees groups, each labelled System, User, AssistantText, ToolCall or Summary, with a message count, a byte count and a token count. It hides a group by marking it excluded, and the index reports both the full totals and what is left. A summarising strategy writes its summary back in as a new group.')">
+        <rect x="190" y="38" width="270" height="84" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="325" y="60" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">CompactionMessageIndex</text>
+        <rect x="203" y="70" width="46" height="18" rx="4" fill="#1d232c"/><text x="226" y="83" fill="#9ca3af" font-family="Outfit" font-size="9" text-anchor="middle">System</text>
+        <rect x="253" y="70" width="40" height="18" rx="4" fill="#1d232c"/><text x="273" y="83" fill="#9ca3af" font-family="Outfit" font-size="9" text-anchor="middle">User</text>
+        <rect x="297" y="70" width="70" height="18" rx="4" fill="#1d232c"/><text x="332" y="83" fill="#9ca3af" font-family="Outfit" font-size="9" text-anchor="middle">AssistantText</text>
+        <rect x="371" y="70" width="46" height="18" rx="4" fill="#3b1d1d" stroke="#ef4444" stroke-width="1"/><text x="394" y="83" fill="#fca5a5" font-family="Outfit" font-size="9" text-anchor="middle">ToolCall</text>
+        <rect x="421" y="70" width="34" height="18" rx="4" fill="#1d232c"/><text x="438" y="83" fill="#9ca3af" font-family="Outfit" font-size="9" text-anchor="middle">Sum.</text>
+        <text x="325" y="108" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">groups are MARKED IsExcluded, never deleted</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Trigger: when to compact', 'A small function that looks at the index and answers yes or no. Ready-made ones: TokensExceed, MessagesExceed, TurnsExceed, GroupsExceed, HasToolCalls. Combine them with All or Any. TokensBelow is the mirror image, used as a target: keep going until the history is small enough. Any lambda with the right shape works too.')">
+        <rect x="505" y="47" width="120" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="565" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Trigger</text>
+        <text x="565" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">TokensExceed(100k)</text>
+    </g>
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Strategy: what to do', 'Every strategy takes its trigger first; everything else is optional. SlidingWindow keeps the last N turns. Truncation drops the oldest groups. ToolResult shrinks tool output but keeps the call visible. ContextWindow works out a budget from the model window and output size. Summarization asks a model to condense old history. Pipeline runs several in order. ChatReducer wraps an existing IChatReducer.')">
+        <rect x="205" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="325" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">CompactionStrategy</text>
+        <text x="325" y="215" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">SlidingWindow, ToolResult, Summarization, Pipeline...</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Provider: plugs it into the agent', 'Give it a strategy and add it to the agent through ChatClientAgentOptions.AIContextProviders or ChatClientBuilder.UseAIContextProviders. From then on the history is compacted automatically. For a one-off, the static CompactAsync compacts a list of messages without any provider.')">
+        <rect x="475" y="168" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">CompactionProvider</text>
+        <text x="550" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">an AIContextProvider</text>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">15 types, byte-identical v1.10 to v1.20 - the override target and the init-only accessor are compile facts, not dump facts</text>
+</svg>`
+            },
+            declarative: {
+                title: "Declarative Executors: one executor that handles several message types",
+                principlesTitle: "The Recipe",
+                principles: [
+                    ["Start from Executor, not Executor<T>", "Executor<TIn> handles one message type, and that's the normal case. When one executor has to accept two or more types, derive from the non-generic Executor and follow the three steps below."],
+                    ["1. One method per message type", "Write a method for each type you accept. It takes the message and the IWorkflowContext. Mark it [MessageHandler]. The attribute only says what the method is for; on its own it changes nothing."],
+                    ["2. Say what comes out", "Declare what the executor produces: [YieldsOutput] and [SendsMessage] on the class, or YieldsOutput<T>() and SendsMessage<T>() inside ConfigureProtocol. The framework checks the edges of your graph against these types when it builds it."],
+                    ["3. Connect them in ConfigureProtocol", "Override ConfigureProtocol. Read the attributes in (AddClassAttributeTypes, AddMethodAttributeTypes), then connect each message type to its method (ConfigureRoutes, AddHandler). This is the step that makes it work, and it's required: the build fails without it."],
+                    ["Don't reach for ReflectingExecutor", "It's the old way, marked obsolete since v1.11. It still compiles, so nothing stops you, but it will be removed."]
+                ],
+                desc: "If executors are new to you, read The Building Blocks first. Most executors handle one message type: you derive from Executor<TIn> and override HandleAsync. This page is about the other case, one executor that accepts several types. You write a method per type, label each with [MessageHandler], and connect them in one required method, ConfigureProtocol. The Router below was run against 1.20.0: given the text hello, it outputs 5, the length.",
+                file: "DeclarativeExecutor.cs",
+                code: `using Microsoft.Agents.AI.Workflows;
+
+internal sealed class Router : Executor
+{
+    public Router(string id) : base(id) { }
+
+    [MessageHandler]
+    public ValueTask HandleText(string message, IWorkflowContext context)
+        => context.YieldOutputAsync(message.Length);
+
+    protected override ProtocolBuilder ConfigureProtocol(ProtocolBuilder protocol)
+        => protocol
+            .AddClassAttributeTypes(typeof(Router))
+            .AddMethodAttributeTypes(typeof(Router).GetMethod(nameof(HandleText))!)
+            .YieldsOutput<int>()
+            .ConfigureRoutes(routes => routes.AddHandler<string>(HandleText));
+}`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 175 80 H 235" stroke="#2dd4bf" stroke-width="2"/>
+    <path class="animated-line" d="M 415 80 H 475" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 550 113 V 168" stroke="#10b981" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Step 1: label the methods ([MessageHandler] and friends)', '[MessageHandler] goes on a method and says it handles a message. The other four go on the class: [SendsMessage], [YieldsMessage], [StreamsMessage] and [YieldsOutput], each naming a type. They describe intent. Nothing reads them until ConfigureProtocol does.')">
+        <rect x="25" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="100" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">[MessageHandler]</text>
+        <text x="100" y="94" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">metadata, not registration</text>
+    </g>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Step 3: connect them (ConfigureProtocol)', 'You get a ProtocolBuilder. AddClassAttributeTypes and AddMethodAttributeTypes read the attributes in, YieldsOutput and SendsMessage let you declare types directly, and ConfigureRoutes gives you the RouteBuilder where you connect each message type to a method. It is protected and abstract: you must write it, and it does not appear in a listing of public members.')">
+        <rect x="235" y="47" width="180" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="325" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">ConfigureProtocol</text>
+        <text x="325" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">protected abstract - not in the dump</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Routes: which message type goes to which method', 'AddHandler connects a message type to a method. It accepts a plain or async method, with or without a cancellation token, and returns a result or not. AddCatchAll is the fallback for anything no typed route claims.')">
+        <rect x="475" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">RouteBuilder</text>
+        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">AddHandler / AddCatchAll</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('What the sample does when run', 'Running the Router against 1.20.0: it reports that it takes System.String and outputs System.Int32, and the text hello comes out as 5, its length.')">
+        <rect x="475" y="168" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">string in, int out</text>
+        <text x="550" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">hello yields 5 (executed)</text>
+    </g>
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('ReflectingExecutor is on its way out', 'Marked obsolete since v1.11. It still compiles, with a warning you may have silenced, and still runs. An API listing does not show the obsolete marker, so it looks like a normal choice. It is not: use Executor with ConfigureProtocol.')">
+        <rect x="25" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="145" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">ReflectingExecutor&lt;T&gt;</text>
+        <text x="145" y="215" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">[Obsolete] since v1.11 - CS0618</text>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">One message type: Executor&lt;TInput&gt; / Executor&lt;TInput, TOutput&gt; and HandleAsync. Several: Executor + ConfigureProtocol + [MessageHandler]</text>
+</svg>`
+            },
+            events: {
+                title: "Workflow Events: what a running workflow tells you",
+                principlesTitle: "The Idea in Short",
+                principles: [
+                    ["Put the output case last", "AgentResponseEvent and AgentResponseUpdateEvent are kinds of WorkflowOutputEvent. If your switch lists WorkflowOutputEvent first, it catches them too and the agent cases never run. It compiles fine, so nothing warns you."],
+                    ["The Magentic events need an extra using", "MagenticPlanCreatedEvent and friends live in Microsoft.Agents.AI.Workflows.Specialized.Magentic. Without that namespace the compiler says they don't exist, which is easy to misread as 'my version doesn't have them'."],
+                    ["Two ways to spell a failure", "ExecutorFailedEvent gives you the exception as Data. WorkflowErrorEvent gives it as Exception. Both are easy to get backwards."],
+                    ["The method is RunStreamingAsync", "There is no StreamAsync. RunAsync runs to completion; RunStreamingAsync gives you the event stream. RunToCompletionAsync drains the stream for you and lets a callback answer requests."],
+                    ["You can add your own events", "WorkflowEvent isn't sealed. Derive from it and call AddEventAsync inside an executor, and your progress rides the same stream as everything else."]
+                ],
+                desc: "When you run a workflow as a stream, it hands you a sequence of events: an executor started, a round finished, the run needs a human, here is the output. There are 21 event types, all small, all deriving from one base. Progress bars, logging and the human-in-the-loop pause all read from this one stream. Same 21 types from v1.11 to v1.20.",
+                file: "WorkflowEvents.cs",
+                notes: '<table><tr><th>All 21 event types</th><th>What it tells you</th></tr><tr class="group"><td colspan="2">Lifecycle</td></tr><tr><td>WorkflowEvent</td><td>the base of all 21: one Data object, a readable ToString; derive from it for your own events</td></tr><tr><td>WorkflowStartedEvent</td><td>the run started; Data is the input</td></tr><tr class="group"><td colspan="2">Rounds (supersteps)</td></tr><tr><td>SuperStepEvent</td><td>base of the two round events; StepNumber</td></tr><tr><td>SuperStepStartedEvent</td><td>a round began; StartInfo says which executors are sending and whether external messages arrived</td></tr><tr><td>SuperStepCompletedEvent</td><td>a round ended; CompletionInfo says which executors ran, whether state changed, whether messages or a human request are pending, and the checkpoint if one was taken</td></tr><tr class="group"><td colspan="2">Executors</td></tr><tr><td>ExecutorEvent</td><td>base of the three executor events; ExecutorId</td></tr><tr><td>ExecutorInvokedEvent</td><td>an executor started</td></tr><tr><td>ExecutorCompletedEvent</td><td>an executor finished</td></tr><tr><td>ExecutorFailedEvent</td><td>an executor threw; the exception is in Data</td></tr><tr class="group"><td colspan="2">Output</td></tr><tr><td>WorkflowOutputEvent</td><td>a result: Is&lt;T&gt;, As&lt;T&gt;, HasTag, IsIntermediate; list this case last in a switch</td></tr><tr><td>AgentResponseEvent</td><td>a finished agent reply (a kind of WorkflowOutputEvent)</td></tr><tr><td>AgentResponseUpdateEvent</td><td>one streamed piece of an agent reply; AsResponse folds them (a kind of WorkflowOutputEvent)</td></tr><tr class="group"><td colspan="2">Errors and warnings</td></tr><tr><td>WorkflowErrorEvent</td><td>the workflow failed; the exception is in Exception</td></tr><tr><td>SubworkflowErrorEvent</td><td>a nested workflow failed</td></tr><tr><td>WorkflowWarningEvent</td><td>something worth knowing that did not stop the run</td></tr><tr><td>SubworkflowWarningEvent</td><td>a warning from a nested workflow</td></tr><tr class="group"><td colspan="2">Waiting for a human</td></tr><tr><td>RequestInfoEvent</td><td>the run is waiting on a person; carries the ExternalRequest to answer</td></tr><tr class="group"><td colspan="2">Magentic (namespace Specialized.Magentic)</td></tr><tr><td>MagenticOrchestratorEvent</td><td>base of the three manager events; carries the ledger</td></tr><tr><td>MagenticPlanCreatedEvent</td><td>the manager made a plan</td></tr><tr><td>MagenticReplannedEvent</td><td>the manager changed the plan</td></tr><tr><td>MagenticProgressLedgerUpdatedEvent</td><td>the manager updated its progress ledger</td></tr></table>',
+                code: `using Microsoft.Agents.AI.Workflows;
+
+StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, input);
+
+await foreach (WorkflowEvent evt in run.WatchStreamAsync())
+{
+    switch (evt)
+    {
+        case ExecutorInvokedEvent invoked:   Console.WriteLine($"-> {invoked.ExecutorId}"); break;
+        case ExecutorCompletedEvent done:    Console.WriteLine($"<- {done.ExecutorId}");    break;
+        case ExecutorFailedEvent failed:     Console.WriteLine(failed.Data);              break;   // .Data, not .Exception
+        case SuperStepCompletedEvent step:
+            Console.WriteLine($"step {step.StepNumber}: pendingRequests={step.CompletionInfo.HasPendingRequests}");
+            break;
+        case RequestInfoEvent request:       Console.WriteLine("waiting on a human");     break;
+        case WorkflowOutputEvent output:                                                            // keep LAST
+            if (output.IsIntermediate()) { break; }
+            if (output.Is<string>(out string? summary)) { Console.WriteLine(summary); }
+            bool tagged = output.HasTag(someTag);
+            break;
+    }
+}
+
+// Put your own progress on the same stream: WorkflowEvent is not sealed.
+sealed class ProgressEvent : WorkflowEvent
+{
+    public ProgressEvent(int percent) : base(percent) { }
+}
+// inside an executor: await context.AddEventAsync(new ProgressEvent(50));`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 325 62 V 90 H 70 V 118" stroke="#6b7280" stroke-width="1.5"/>
+    <path class="animated-line" d="M 325 90 H 190 V 118" stroke="#6b7280" stroke-width="1.5"/>
+    <path class="animated-line" d="M 325 90 V 118" stroke="#6b7280" stroke-width="1.5"/>
+    <path class="animated-line" d="M 325 90 H 460 V 118" stroke="#f59e0b" stroke-width="2"/>
+    <path class="animated-line" d="M 325 90 H 580 V 118" stroke="#6b7280" stroke-width="1.5"/>
+    <path class="animated-line" d="M 460 176 V 200" stroke="#f59e0b" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('WorkflowEvent: the base of all 21', 'Carries one Data object and a readable ToString. It is not sealed, so you can derive your own event and raise it from an executor with AddEventAsync. The branch types are open too; the leaf types are sealed.')">
+        <rect x="245" y="20" width="160" height="42" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="325" y="46" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">WorkflowEvent</text>
+    </g>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Lifecycle and rounds', 'WorkflowStartedEvent carries the input. SuperStepStartedEvent and SuperStepCompletedEvent bracket each round: the completed one tells you which executors ran, whether state changed, whether messages or requests are pending, and the checkpoint if one was taken. Its HasPendingRequests flag is how you know a human is needed.')">
+        <rect x="15" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="70" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Lifecycle</text>
+        <text x="70" y="158" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">Started, SuperStep x2</text>
+    </g>
+    <g class="node" style="--glow-color: #fb923c;" onclick="showNodeDetails('Executors', 'ExecutorInvokedEvent, ExecutorCompletedEvent and ExecutorFailedEvent, each with the executor id. On the failed one, the exception is in Data, not in a property called Exception.')">
+        <rect x="135" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#fb923c" stroke-width="2"/>
+        <text x="190" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Executors</text>
+        <text x="190" y="158" fill="#fb923c" font-family="Outfit" font-size="9" text-anchor="middle">Invoked, Completed, Failed</text>
+    </g>
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('Errors, warnings and the human request', 'WorkflowErrorEvent and WorkflowWarningEvent, with Subworkflow variants for nested workflows; the error exposes Exception. RequestInfoEvent carries the request the workflow is waiting on a human to answer. See the RequestPort view for what to do with it.')">
+        <rect x="270" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2"/>
+        <text x="325" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Trouble + HITL</text>
+        <text x="325" y="158" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">Error, Warning, RequestInfo</text>
+    </g>
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Output: the one branch you inspect', 'WorkflowOutputEvent knows which executor produced it and carries tags. Is<T> tests the type, As<T> casts, HasTag checks a tag, and IsIntermediate (an extension method) tells you it is not the final answer. The two agent events derive from it, which is why it goes last in a switch.')">
+        <rect x="405" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="460" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Output</text>
+        <text x="460" y="158" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">Is&lt;T&gt;, As&lt;T&gt;, HasTag</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Magentic events', 'MagenticPlanCreatedEvent, MagenticReplannedEvent and MagenticProgressLedgerUpdatedEvent report what a Magentic manager planned. They live in the Specialized.Magentic namespace, so add that using or the compiler will not find them.')">
+        <rect x="525" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="580" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Magentic</text>
+        <text x="580" y="158" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Specialized.Magentic ns</text>
+    </g>
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('The two agent events', 'AgentResponseEvent is a finished agent reply; AgentResponseUpdateEvent is the token stream, with AsResponse to fold the pieces back together. Both are kinds of WorkflowOutputEvent, so a switch must list them before it.')">
+        <rect x="385" y="200" width="150" height="50" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="460" y="220" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">AgentResponse(Update)Event</text>
+        <text x="460" y="238" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">derive from Output: case order matters</text>
+    </g>
+
+    <text x="325" y="278" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">21 types, identical v1.11 to v1.20 - a workflow hosted as an agent is observed through the agent surface instead</text>
+</svg>`
+            },
+            skills: {
+                title: "Agent Skills, File Stores and Tool Approval",
+                principlesTitle: "The Idea in Short",
+                principles: [
+                    ["This whole area is marked experimental", "Compiling against it gives you the MAAI001 diagnostic until you suppress it. Do that in the one project that uses it, not for the whole solution."],
+                    ["The Disable switches remove a human check quietly", "Each Disable...Approval flag turns off a prompt for a whole class of operations. Nothing in the transcript says a prompt was skipped. Combined with a broad auto-approval rule, everything goes through and nothing is recorded."],
+                    ["Auto-approval can't loop forever", "Each round of auto-approved calls is a fresh call to the inner agent, so a per-call limit wouldn't help. MaxAutoApprovalIterations is the cap; leave it null and you get 40, a constant you won't find in an API listing."],
+                    ["Dispose the chain", "Sources, the skills provider and the file provider all implement IDisposable. Pass ownsSource: true and disposing the provider disposes everything it wraps."],
+                    ["Rules see the whole situation", "An approval rule doesn't just get the function name. It gets the call plus the agent, the session, the request messages and the run options, so policy can depend on who is asking."]
+                ],
+                desc: "Three things an agent host has to decide: where the agent's reusable skills come from, how the agent reads and writes files, and who approves a tool call before it runs. The first two are providers you plug in. The third is a small set of rules and switches that are easy to combine badly. Same shapes from v1.18 to v1.20.",
+                file: "SkillsAndApproval.cs",
+                code: `using Microsoft.Agents.AI;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+public sealed class DbSkillsSource : AgentSkillsSource
+{
+    public override Task<IList<AgentSkill>> GetSkillsAsync(AgentSkillsSourceContext context, CancellationToken ct)
+        => LoadSkillsForAgentAsync(context.Agent.Id, ct);
+}
+
+ILoggerFactory lf = NullLoggerFactory.Instance;
+AgentSkillsSource source = new DbSkillsSource();
+
+// Compose sources: filter -> dedupe -> cache (the three decorators derive from DelegatingAgentSkillsSource).
+AgentSkillsSource filtered = new FilteringAgentSkillsSource(
+    source,
+    (AgentSkill s, AgentSkillsSourceContext ctx) => s.Frontmatter.Name != "dangerous",
+    lf);
+AgentSkillsSource deduped = new DeduplicatingAgentSkillsSource(filtered, lf);
+AgentSkillsSource cached = new CachingAgentSkillsSource(deduped, new CachingAgentSkillsSourceOptions
+{
+    RefreshInterval = TimeSpan.FromMinutes(5),
+    CacheIsolationKeySelector = ctx => ctx.Agent.Id,
+});
+
+// The provider is IDisposable; ownsSource:true disposes the composed chain with it.
+using var skills = new AgentSkillsProvider(
+    cached,
+    new AgentSkillsProviderOptions { IncludeDetailedErrors = true },   // leave every Disable*Approval flag off in production
+    lf,
+    ownsSource: true);
+
+// Tool approval composes on top, and the auto-approval loop is bounded (v1.18+).
+var gated = new ToolApprovalAgent(innerAgent, new ToolApprovalAgentOptions
+{
+    AutoApprovalRules =
+    [
+        context => new ValueTask<bool>(context.FunctionCallContent.Name == "read_file")
+    ],
+    MaxAutoApprovalIterations = 8,   // null = ToolApprovalAgent.DefaultMaxAutoApprovalIterations (const 40)
+});`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 125 80 H 160" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 260 80 H 290" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 390 80 H 420" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 550 113 V 168" stroke="#2dd4bf" stroke-width="2"/>
+    <path class="animated-line" d="M 475 201 H 445" stroke="#f59e0b" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Where skills come from', 'An abstract source you can implement: return a list of AgentSkill for the agent and session asking. Built-ins read skills from files or from a fixed in-memory list. It is disposable, so release any handles you open.')">
+        <rect x="15" y="47" width="110" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="70" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Source</text>
+        <text x="70" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">files, memory, your DB</text>
+    </g>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Combining sources', 'Three wrappers each take an inner source and add one behaviour: Filtering keeps skills that pass a test, Deduplicating removes duplicates, Caching remembers results per agent or session and refreshes on a timer. Aggregating merges several sources into one. The builder can wire filter and cache for you; build them by hand when the order matters.')">
+        <rect x="160" y="47" width="100" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="210" y="70" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">filter</text>
+        <text x="210" y="84" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">dedupe</text>
+        <text x="210" y="98" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">cache</text>
+    </g>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('The skills provider', 'Wraps a source and feeds its skills into the agent. Options: detailed errors on or off, a custom instruction prompt, and three Disable flags that switch off the approval prompt for loading a skill, reading a skill resource, or running a skill script. Pass ownsSource: true so disposing the provider disposes the source too.')">
+        <rect x="290" y="47" width="100" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="340" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Provider</text>
+        <text x="340" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">ownsSource: true</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('The agent', 'Skills arrive in the agent context through the provider, and tool calls go through the approval rules. Approval is enforced per agent and per route: if the agent switches chat clients per session, there is still one approval pipeline, and a Magentic manager prompt cannot widen what a participant may call.')">
+        <rect x="420" y="47" width="205" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="522" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Agent (MAAI001 scoped here)</text>
+        <text x="522" y="94" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">skills in context, tools gated</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('ToolApprovalAgent: who approves a tool call', 'Wraps an agent. Its AutoApprovalRules each see the full context and answer yes or no; ready-made rules exist for all tools or read-only tools on the skills and file providers. When every request in a round is auto-approved the inner agent is called again, so only MaxAutoApprovalIterations (default 40) bounds the loop; on reaching it, one last call surfaces the remaining request to you instead of approving it.')">
+        <rect x="475" y="168" width="150" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="550" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">ToolApprovalAgent</text>
+        <text x="550" y="215" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">cap: null = const 40 (v1.18+)</text>
+    </g>
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('The Disable flags', 'AgentSkillsProviderOptions has DisableLoadSkillApproval, DisableReadSkillResourceApproval and DisableRunSkillScriptApproval. FileAccessProviderOptions has DisableWriteTools, DisableReadOnlyToolApproval and DisableWriteToolApproval. Each removes a human check with no prompt and no record. Never combine one with a broad auto-approval rule.')">
+        <rect x="205" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="325" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Disable*Approval flags</text>
+        <text x="325" y="215" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">no prompt, no record - fail open</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('AgentFileStore: how agents touch files', 'The interface behind FileSystemAgentFileStore and InMemoryAgentFileStore, used by FileAccessProvider. WriteAsync, ReadAsync, FileExistsAsync, DeleteAsync, SearchAsync, and ListChildrenAsync, which returns entries with a Name and a Type for files and folders alike. The method names changed in v1.13; the old ones are gone.')">
+        <rect x="15" y="168" width="160" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="95" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">AgentFileStore</text>
+        <text x="95" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">Write/Read/ListChildren/Search</text>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Log the rule that approved a call, and log when the cap ends a run - that is the signal a model is looping on a tool</text>
+</svg>`
+            },
+            production: {
+                title: "Production Readiness: DI, telemetry, streaming",
+                principlesTitle: "The Idea in Short",
+                principles: [
+                    ["Decide what happens when a human is needed", "WatchStreamAsync has a blockOnPendingRequest flag (since v1.15). Pass false from a web handler or a queue worker: you get control back, save the run id, and resume later. Pass true from a long-running interactive host. Either way, choose it on purpose."],
+                    ["One telemetry source name", "Subscribe to Microsoft.Agents.AI.Workflows. AddOtlpExporter comes from the OpenTelemetry.Exporter.OpenTelemetryProtocol package, and Sdk is in the OpenTelemetry namespace, so you need that using."],
+                    ["Three ids, kept apart", "Run id, session id and checkpoint id are three different things. Log all three. If the agent routes between chat clients, log the active route per turn as well."],
+                    ["Suppress MAAI001 per project", "Experimental members are marked one by one, not per release. Write down which ones a release depends on, so the next upgrade has a known blast radius, and keep a plain fallback for anything business-critical."],
+                    ["Retries must be safe to repeat", "A retried workflow must not send the email or take the payment twice. And read the event stream as the source of truth: finished, cancelled, failed and waiting-for-a-human are four different outcomes, not one 'done'."]
+                ],
+                desc: "Getting a workflow into production is three jobs. Wire it up through dependency injection so executors come from the container. Watch it honestly, with OpenTelemetry and the event stream. And decide up front what your host does when the workflow stops to wait for a person. The runtime itself hasn't changed from v1.13 to v1.20; what the releases added is operational.",
+                file: "ProductionReadiness.cs",
+                code: `using Microsoft.Agents.AI.Workflows;
+using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry;          // Sdk lives here
+using OpenTelemetry.Trace;
+
+// 1. DI: executors are transient services; the singleton Workflow binds them through factories.
+var services = new ServiceCollection();
+services.AddTransient<TextAnalyzer>();
+services.AddTransient<Formatter>();
+services.AddSingleton<Workflow>(sp =>
+{
+    var analyzer  = ExecutorBindingExtensions.BindExecutor<TextAnalyzer>((id, sessionId) => new ValueTask<TextAnalyzer>(sp.GetRequiredService<TextAnalyzer>()));
+    var formatter = ExecutorBindingExtensions.BindExecutor<Formatter>((id, sessionId) => new ValueTask<Formatter>(sp.GetRequiredService<Formatter>()));
+    return new WorkflowBuilder(analyzer).AddEdge(analyzer, formatter).WithOutputFrom(formatter).Build();
+});
+
+// 2. Telemetry: one ActivitySource name to subscribe to. Sdk is OpenTelemetry.Sdk; AddOtlpExporter
+//    comes from the OpenTelemetry.Exporter.OpenTelemetryProtocol package.
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddSource("Microsoft.Agents.AI.Workflows")
+    .AddOtlpExporter()
+    .Build();
+
+// 3. Streaming: choose what the stream does at a pending human request -- it is a hosting decision.
+StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, "My message", sessionId, ct);
+await foreach (WorkflowEvent evt in run.WatchStreamAsync(blockOnPendingRequest: false, ct))
+{
+    if (evt is AgentResponseUpdateEvent update) { Console.Write(update.Update.Text); }
+}`,
+                svg: `
+<svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="animated-line" d="M 175 80 H 235" stroke="#38bdf8" stroke-width="2"/>
+    <path class="animated-line" d="M 415 80 H 475" stroke="#2dd4bf" stroke-width="2"/>
+    <path class="animated-line" d="M 550 113 V 168" stroke="#10b981" stroke-width="2"/>
+    <path class="animated-line" d="M 325 113 V 168" stroke="#f59e0b" stroke-width="2"/>
+
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Dependency injection', 'Register executors as transient services and the Workflow as a singleton. Inside the singleton, bind each executor with a factory that asks the service provider for it, so the graph is built once and executor instances come from the container on every run.')">
+        <rect x="25" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+        <text x="100" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">DI: bind via factories</text>
+        <text x="100" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">executors transient, Workflow singleton</text>
+    </g>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('The stream', 'RunStreamingAsync returns a StreamingRun, and WatchStreamAsync yields its events. Since v1.15 you say what the stream does at a pending human request with the blockOnPendingRequest flag; the cancellation token is optional.')">
+        <rect x="235" y="47" width="180" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="325" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">StreamingRun</text>
+        <text x="325" y="94" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">WatchStreamAsync(blockOnPendingRequest)</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('OpenTelemetry', 'Sdk.CreateTracerProviderBuilder, AddSource with the name Microsoft.Agents.AI.Workflows, AddOtlpExporter, Build. Sdk lives in the OpenTelemetry namespace, and AddOtlpExporter needs the OpenTelemetry.Exporter.OpenTelemetryProtocol package, which MAF does not bring in. The sample was compiled with exporter 1.15.3, the OpenTelemetry.Api version MAF 1.19 and 1.20 depend on.')">
+        <rect x="475" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">OpenTelemetry</text>
+        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">source: Microsoft.Agents.AI.Workflows</text>
+    </g>
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('When the workflow waits for a person', 'With blockOnPendingRequest false, your host sees the request (RequestInfoEvent, or HasPendingRequests on the round event), saves the request and run ids, returns, and later resumes with Run.ResumeAsync (or the checkpoint recovery service for a workflow hosted as an agent). With true, an interactive host simply keeps the stream open until the person answers.')">
+        <rect x="205" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="325" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">human needed: park or yield?</text>
+        <text x="325" y="215" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">false = return control and persist identities</text>
+    </g>
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('What to log', 'Package version, workflow id, run id, agent id, executor name, round number, duration and how it ended. For a routed agent, the active route per turn. Keep finished, cancelled, failed, waiting-for-a-human and incomplete-output as separate outcomes, or the waiting state disappears from your dashboards.')">
+        <rect x="475" y="168" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+        <text x="550" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Record</text>
+        <text x="550" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">run, session, checkpoint, route</text>
+    </g>
+
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Propagate cancellation from the host edge through the run, the executors, the wrapped agent calls and message injection</text>
+</svg>`
+            },
             bsp: {
-                title: "Pregel Superstep Engine (BSP Model)",
+                file: "SuperstepEngine.cs",
+                title: "How a Workflow Runs: rounds and barriers (supersteps)",
                 principlesTitle: "Good to Know",
                 principles: [
                     ["Everything moves in rounds", "All active nodes run together, then wait for each other before the next round starts. That barrier is the heartbeat of the engine."],
                     ["The slowest branch sets the pace", "Parallel paths re-sync every round - a long chain next to a short one makes the short one wait. Keep sequential work consolidated."],
                     ["State lands between rounds", "Updates queue up during a round and commit at the barrier, so concurrent nodes never race each other."]
                 ],
-                desc: "Visualizes bulk-synchronous-parallel execution. Real-World Case: Mortgage Document Verification Pipeline. Input is a multi-page PDF application. Superstep 0 splits and parses. Superstep 1 runs independent validations (Credit, Employment) in parallel, isolated within separate scopes. Superstep 2 aggregates the findings once all Superstep 1 nodes hit the execution barrier.",
+                desc: "A workflow runs in rounds (the framework calls them supersteps). Every node that has work runs, then all of them wait at a barrier before the next round starts. Example: a mortgage application. Round 0 splits the PDF. Round 1 checks credit and employment side by side, each in its own state. Round 2 combines the findings, and it cannot start until both checks are done. The executors in this example (PDF Reader, Credit Check, Employ Check, Aggregator) are names we chose; the framework parts are WorkflowBuilder, AddEdge and InProcessExecution.",
                 code: `// Define and run a parallel document verification workflow
 var builder = new WorkflowBuilder(pdfReaderBinding);
 
@@ -606,9 +1268,9 @@ Run run = await InProcessExecution.RunAsync(workflow, inputPdfBytes, sessionId, 
     <rect x="450" y="10" width="180" height="230" rx="10" fill="#11141a" stroke="#1d232c" stroke-width="2"/>
     
     <!-- Header Labels -->
-    <text x="100" y="35" text-anchor="middle" fill="#6366f1" font-family="Outfit" font-size="12" font-weight="bold">SUPERSTEP 0</text>
-    <text x="320" y="35" text-anchor="middle" fill="#a855f7" font-family="Outfit" font-size="12" font-weight="bold">SUPERSTEP 1</text>
-    <text x="540" y="35" text-anchor="middle" fill="#06b6d4" font-family="Outfit" font-size="12" font-weight="bold">SUPERSTEP 2</text>
+    <text x="100" y="35" text-anchor="middle" fill="#38bdf8" font-family="Outfit" font-size="12" font-weight="bold">SUPERSTEP 0</text>
+    <text x="320" y="35" text-anchor="middle" fill="#2dd4bf" font-family="Outfit" font-size="12" font-weight="bold">SUPERSTEP 1</text>
+    <text x="540" y="35" text-anchor="middle" fill="#fb923c" font-family="Outfit" font-size="12" font-weight="bold">SUPERSTEP 2</text>
     
     <!-- Step Barriers (Sync lines) -->
     <line x1="200" y1="10" x2="200" y2="240" stroke="#1d232c" stroke-dasharray="4 4" stroke-width="1.5"/>
@@ -621,48 +1283,49 @@ Run run = await InProcessExecution.RunAsync(workflow, inputPdfBytes, sessionId, 
     <path class="animated-line" d="M 360 160 L 480 120" stroke="url(#gradient-secondary)" stroke-width="2"/>
 
     <!-- Nodes -->
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('pdfReaderBinding (PDF Splitter)', 'Superstep 0: A single executor that parses the loan PDF application, splits the text sections, and queues targeted validation inputs for Superstep 1.')">
-        <circle cx="100" cy="120" r="30" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('pdfReaderBinding (PDF Splitter)', 'Superstep 0: A single executor that parses the loan PDF application, splits the text sections, and queues targeted validation inputs for Superstep 1.')">
+        <circle cx="100" cy="120" r="30" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="100" y="124" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">PDF Reader</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('creditCheckBinding (Credit Verification)', 'Superstep 1 (Parallel): Resolves applicant credit score, checks historical delinquencies, and stores findings in its isolated state scope.')">
-        <circle cx="320" cy="80" r="30" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('creditCheckBinding (Credit Verification)', 'Superstep 1 (Parallel): Resolves applicant credit score, checks historical delinquencies, and stores findings in its isolated state scope.')">
+        <circle cx="320" cy="80" r="30" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="320" y="84" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Credit Check</text>
     </g>
     
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('employmentVerificationBinding (Employer Check)', 'Superstep 1 (Parallel): Runs concurrently with Credit Check. Queries employer database and income tax API, completely isolated from Credit state.')">
-        <circle cx="320" cy="160" r="30" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('employmentVerificationBinding (Employer Check)', 'Superstep 1 (Parallel): Runs concurrently with Credit Check. Queries employer database and income tax API, completely isolated from Credit state.')">
+        <circle cx="320" cy="160" r="30" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="320" y="164" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Employ Check</text>
     </g>
 
-    <g class="node" style="--glow-color: #06b6d4;" onclick="showNodeDetails('riskAggregatorBinding (Risk Assessor)', 'Superstep 2: Gathering/sync node. Once both Credit and Employment tasks complete, it reads both scoped outputs to calculate a consolidated risk index.')">
-        <circle cx="540" cy="120" r="30" fill="#090b0e" stroke="#06b6d4" stroke-width="2"/>
+    <g class="node" style="--glow-color: #fb923c;" onclick="showNodeDetails('riskAggregatorBinding (Risk Assessor)', 'Superstep 2: Gathering/sync node. Once both Credit and Employment tasks complete, it reads both scoped outputs to calculate a consolidated risk index.')">
+        <circle cx="540" cy="120" r="30" fill="#090b0e" stroke="#fb923c" stroke-width="2"/>
         <text x="540" y="124" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Aggregator</text>
     </g>
     
     <!-- Gradients -->
     <defs>
         <linearGradient id="gradient-primary" x1="140" y1="120" x2="260" y2="120" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#6366f1"/>
-            <stop offset="100%" stop-color="#a855f7"/>
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#2dd4bf"/>
         </linearGradient>
         <linearGradient id="gradient-secondary" x1="360" y1="120" x2="480" y2="120" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#a855f7"/>
-            <stop offset="100%" stop-color="#06b6d4"/>
+            <stop offset="0%" stop-color="#2dd4bf"/>
+            <stop offset="100%" stop-color="#fb923c"/>
         </linearGradient>
     </defs>
 </svg>`
             },
             hitl: {
-                title: "RequestPort HITL Resumption Cycle",
+                file: "HitlResumption.cs",
+                title: "Waiting for a Human: pause, decide, resume (RequestPort)",
                 principlesTitle: "Why This Is Safe",
                 principles: [
                     ["Pause without polling", "The workflow stops itself at the port - no busy loops, no timers. It simply reports it is waiting for input."],
                     ["Humans can take their time", "The paused state can be checkpointed to storage, so an approval arriving days later - even after a restart - still resumes cleanly."],
                     ["Typed answers only", "The port declares its request and response types up front, so a malformed reply cannot slip into the workflow."]
                 ],
-                desc: "Shows the declarative Human-in-the-Loop pattern. Real-World Case: High-Value Underwriting Sign-off. The risk pipeline calculates risk automatically. If it exceeds a threshold, it halts at an 'underwriter-approval' port and writes a JSON checkpoint. The underwriter inspects the dashboard, enters override adjustment variables, and calls resume, completing the contract.",
+                desc: "Shows the declarative Human-in-the-Loop pattern. Real-World Case: High-Value Underwriting Sign-off. The risk pipeline calculates risk automatically. If it exceeds a threshold, it halts at an 'underwriter-approval' port and writes a JSON checkpoint. The underwriter inspects the dashboard, enters override adjustment variables, and calls resume, completing the contract. The names underwriter-approval and Underwriter Dashboard belong to this example; the framework parts are RequestPort, RunStatus.PendingRequests and Run.ResumeAsync.",
                 code: `// Declare underwriter port and bind to executor
 var underwriterPort = RequestPort.Create<RiskReport, DecisionResponse>("underwriter-approval");
 var underwriterBinding = ExecutorBindingExtensions.BindAsExecutor(underwriterPort, allowWrappedRequests: true);
@@ -683,30 +1346,30 @@ if (status == RunStatus.PendingRequests)
                 svg: `
 <svg width="650" height="250" viewBox="0 0 650 250" fill="none" xmlns="http://www.w3.org/2000/svg">
     <!-- Execution Path -->
-    <path class="animated-line" d="M 80 120 H 220" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 80 120 H 220" stroke="#38bdf8" stroke-width="2"/>
     <path class="animated-line" d="M 280 120 H 420" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
     <path class="animated-line" d="M 480 120 H 580" stroke="#10b981" stroke-width="2"/>
     
     <!-- Resumption Loops -->
-    <path d="M 250 90 C 250 30, 450 30, 450 90" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="3 3"/>
-    <path d="M 450 150 C 450 210, 250 210, 250 150" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <path d="M 250 90 C 250 30, 450 30, 450 90" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <path d="M 450 150 C 450 210, 250 210, 250 150" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="3 3"/>
 
     <!-- Nodes -->
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Risk Assessment Run', 'Phase 1: Processes the inputs, runs background checks, and determines that the risk level requires human authorization.')">
-        <rect x="30" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Risk Assessment Run', 'Phase 1: Processes the inputs, runs background checks, and determines that the risk level requires human authorization.')">
+        <rect x="30" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="80" y="124" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">1. Assess Risk</text>
     </g>
 
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('underwriterPort Boundary', 'Phase 2: Hits the declarative RequestPort, halts the BSP engine, sets status to PendingRequests, and writes the state bag to local disk.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('underwriterPort (a RequestPort; the name is this example)', 'Phase 2: Hits the declarative RequestPort, halts the run, sets status to PendingRequests, and writes the state bag to local disk.')">
         <rect x="220" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="270" y="120" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">2. RequestPort</text>
         <text x="270" y="136" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">Halted Checkpoint</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Underwriter Decision Dashboard', 'Phase 3: The human underwriter views the report on their console, adds custom terms (e.g. rate adjustments), and generates an ExternalRequest.')">
-        <rect x="400" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Underwriter Decision Dashboard', 'Phase 3: The human underwriter views the report on their console, adds custom terms (e.g. rate adjustments), and generates an ExternalRequest.')">
+        <rect x="400" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="450" y="120" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">3. Human Review</text>
-        <text x="450" y="136" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">Inject Response</text>
+        <text x="450" y="136" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Inject Response</text>
     </g>
 
     <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('run.ResumeAsync()', 'Phase 4: Restores execution context from disk, inserts the underwriter decision payload, and runs the final contract generation step.')">
@@ -716,17 +1379,18 @@ if (status == RunStatus.PendingRequests)
 </svg>`
             },
             multiagent: {
-                title: "Master Multi-Agent Staged Graph",
+                file: "MultiAgentWorkflow.cs",
+                title: "Agents and Code in One Graph: a full orchestration",
                 principlesTitle: "What to Notice",
                 principles: [
                     ["Agents are just nodes", "LLM-powered agents plug into the same graph as plain code executors - one topology, mixed workers."],
                     ["Parallel where it is safe", "Independent reviews run side by side and merge before any decision. The engine keeps them in step automatically."],
                     ["A human gate before the exit", "Anything irreversible sits behind an approval port, so the graph can be fast AND accountable."]
                 ],
-                desc: "An enterprise-grade orchestration topology combining multiple AI Agents, parallel execution lanes, and human approval. Real-World Case: Commercial Contract Redlining Room. The Dispatcher routes a draft contract. The Legal Agent edits the text and the Compliance Agent checks legal bounds concurrently. A merger combines edits before general counsel review.",
+                desc: "An enterprise-grade orchestration topology combining multiple AI Agents, parallel execution lanes, and human approval. Real-World Case: Commercial Contract Redlining Room. The Dispatcher routes a draft contract. The Legal Agent edits the text and the Compliance Agent checks legal bounds concurrently. A merger combines edits before general counsel review. Dispatcher, Redline Merger and General Counsel Port are names from this example; the framework parts are AIAgentBinding, Executor, RequestPort and WorkflowBuilder.",
                 code: `// Create standard conversational agents
-var legalAgent = new ChatClientAgent(chatClient, "You edit text for legal compliance.", "legal", ...);
-var complianceAgent = new ChatClientAgent(chatClient, "You audit legal liabilities.", "compliance", ...);
+var legalAgent = new ChatClientAgent(chatClient, instructions: "You edit text for legal compliance.", name: "legal", description: "Legal editor");
+var complianceAgent = new ChatClientAgent(chatClient, instructions: "You audit legal liabilities.", name: "compliance", description: "Compliance auditor");
 
 // Bind agents as executors inside the workflow graph
 var legalBinding = new AIAgentBinding(legalAgent, new AIAgentHostOptions { ForwardIncomingMessages = true });
@@ -746,41 +1410,42 @@ var workflow = new WorkflowBuilder(dispatcherBinding)
                 svg: `
 <svg width="650" height="250" viewBox="0 0 650 250" fill="none" xmlns="http://www.w3.org/2000/svg">
     <!-- Path lines -->
-    <path class="animated-line" d="M 120 120 L 220 80" stroke="#6366f1" stroke-width="1.5"/>
-    <path class="animated-line" d="M 120 120 L 220 160" stroke="#6366f1" stroke-width="1.5"/>
-    <path class="animated-line" d="M 300 80 L 400 120" stroke="#a855f7" stroke-width="1.5"/>
-    <path class="animated-line" d="M 300 160 L 400 120" stroke="#a855f7" stroke-width="1.5"/>
+    <path class="animated-line" d="M 120 120 L 220 80" stroke="#38bdf8" stroke-width="1.5"/>
+    <path class="animated-line" d="M 120 120 L 220 160" stroke="#38bdf8" stroke-width="1.5"/>
+    <path class="animated-line" d="M 300 80 L 400 120" stroke="#2dd4bf" stroke-width="1.5"/>
+    <path class="animated-line" d="M 300 160 L 400 120" stroke="#2dd4bf" stroke-width="1.5"/>
     <path class="animated-line" d="M 460 120 H 540" stroke="#f59e0b" stroke-width="1.5"/>
 
     <!-- Nodes -->
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Contract Dispatcher (AIAgentBinding)', 'Conversational router. Interprets contract directives, configures session bags, and dispatches sub-agreements to parallel drafting agents.')">
-        <rect x="20" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Contract Dispatcher (AIAgentBinding)', 'Conversational router. Interprets contract directives, configures session bags, and dispatches sub-agreements to parallel drafting agents.')">
+        <rect x="20" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="70" y="124" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Dispatcher Agent</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Legal Drafting Agent (AIAgentBinding)', 'Conversational LLM Agent. Edits the contract body text, adds standard clauses, and appends redlines inside its session bag history.')">
-        <rect x="200" y="50" width="100" height="60" rx="8" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Legal Drafting Agent (AIAgentBinding)', 'Conversational LLM Agent. Edits the contract body text, adds standard clauses, and appends redlines inside its session bag history.')">
+        <rect x="200" y="50" width="100" height="60" rx="8" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="250" y="84" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Legal Agent</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Compliance Auditing Agent (AIAgentBinding)', 'Conversational LLM Agent. Audits drafts for liability exposure and verifies indemnity clauses concurrently with Legal Agent.')">
-        <rect x="200" y="130" width="100" height="60" rx="8" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Compliance Auditing Agent (AIAgentBinding)', 'Conversational LLM Agent. Audits drafts for liability exposure and verifies indemnity clauses concurrently with Legal Agent.')">
+        <rect x="200" y="130" width="100" height="60" rx="8" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="250" y="164" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Compliance Agent</text>
     </g>
 
-    <g class="node" style="--glow-color: #06b6d4;" onclick="showNodeDetails('Redline Merger (Executor)', 'A custom non-agent C# executor. Combines the edits and compliance redlines into a unified markup, saving a checkpoint state.')">
-        <rect x="380" y="90" width="90" height="60" rx="8" fill="#090b0e" stroke="#06b6d4" stroke-width="2"/>
+    <g class="node" style="--glow-color: #fb923c;" onclick="showNodeDetails('Redline Merger (Executor)', 'A custom non-agent C# executor. Combines the edits and compliance redlines into a unified markup, saving a checkpoint state.')">
+        <rect x="380" y="90" width="90" height="60" rx="8" fill="#090b0e" stroke="#fb923c" stroke-width="2"/>
         <text x="425" y="124" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Redline Merger</text>
     </g>
 
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('General Counsel Port (RequestPort)', 'Human gate. Halts the execution graph, presenting the merged redlines on the General Counsel dashboard for final sign-off before signing.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('General Counsel Port (a RequestPort; the name is this example)', 'Human gate. Halts the execution graph, presenting the merged redlines on the General Counsel dashboard for final sign-off before signing.')">
         <polygon points="580,90 620,120 580,150 540,120" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="580" y="124" fill="#f3f4f6" font-family="Outfit" font-size="9" text-anchor="middle">Counsel Port</text>
     </g>
 </svg>`
             },
             loops: {
-                title: "Autonomous Loop Agents (LoopAgent + Evaluators)",
+                file: "LoopAgent.cs",
+                title: "Loop Agents: try, judge, retry (LoopAgent)",
                 principlesTitle: "The Idea in Short",
                 principles: [
                     ["Try, judge, retry", "The agent does the work; evaluators decide whether it is really done. If not, their feedback goes into the next attempt."],
@@ -812,18 +1477,18 @@ var loopAgent = new LoopAgent(
                 svg: `
 <svg width="650" height="250" viewBox="0 0 650 250" fill="none" xmlns="http://www.w3.org/2000/svg">
     <!-- Forward path -->
-    <path class="animated-line" d="M 130 120 H 240" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 130 120 H 240" stroke="#38bdf8" stroke-width="2"/>
     <path class="animated-line" d="M 360 120 H 460" stroke="#f59e0b" stroke-width="2"/>
     <!-- Feedback loop -->
-    <path d="M 500 90 C 500 25, 90 25, 90 90" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <text x="295" y="45" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">Continue(feedback) -> next iteration</text>
+    <path d="M 500 90 C 500 25, 90 25, 90 90" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text x="295" y="45" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Continue(feedback) -> next iteration</text>
     <!-- Stop path -->
     <path class="animated-line" d="M 540 150 C 540 190, 580 200, 610 200" stroke="#10b981" stroke-width="2"/>
 
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Worker AIAgent', 'Any AIAgent (e.g. a ChatClientAgent). LoopAgent derives from DelegatingAIAgent and wraps it; each iteration re-invokes the worker with accumulated evaluator feedback.')">
-        <rect x="30" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Worker AIAgent', 'Any AIAgent (e.g. a ChatClientAgent). LoopAgent derives from DelegatingAIAgent and wraps it; each iteration re-invokes the worker with accumulated evaluator feedback.')">
+        <rect x="30" y="90" width="100" height="60" rx="8" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="80" y="118" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Worker Agent</text>
-        <text x="80" y="134" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">iteration N</text>
+        <text x="80" y="134" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">iteration N</text>
     </g>
 
     <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('LoopContext', 'Carries Iteration, LastResponse, InitialMessages, Feedback and the AgentSession into each evaluator. Evaluators inspect it to decide whether the task is truly finished.')">
@@ -832,10 +1497,10 @@ var loopAgent = new LoopAgent(
         <text x="300" y="134" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">response + state</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('LoopEvaluator chain', 'AIJudge / CompletionMarker / TodoCompletion / Delegate / BackgroundTask (v1.12) evaluators return LoopEvaluation.Stop(), Continue(feedback) or ContinueWithMessages(...).')">
-        <rect x="460" y="90" width="120" height="60" rx="8" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('LoopEvaluator chain', 'AIJudge / CompletionMarker / TodoCompletion / Delegate / BackgroundTask (v1.12) evaluators return LoopEvaluation.Stop(), Continue(feedback) or ContinueWithMessages(...).')">
+        <rect x="460" y="90" width="120" height="60" rx="8" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="520" y="118" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Evaluators</text>
-        <text x="520" y="134" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">Stop / Continue</text>
+        <text x="520" y="134" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Stop / Continue</text>
     </g>
 
     <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('LoopEvaluation.Stop()', 'When an evaluator rules the task complete (or MaxIterations is hit), the loop ends and the final AgentResponse is returned to the caller.')">
@@ -845,15 +1510,16 @@ var loopAgent = new LoopAgent(
 </svg>`
             },
             v114: {
-                title: "MAF v1.14 Agent-Layer Migration Map",
+                file: "Maf114Migration.cs",
+                title: "MAF v1.14: what changed in the agent layer",
                 principlesTitle: "What Actually Changed",
                 principles: [
-                    ["Workflows stayed stable", "Microsoft.Agents.AI.Workflows and Microsoft.Agents.AI.Abstractions are byte-identical to v1.13. Existing executor, edge, HITL, state, checkpoint, and streaming patterns carry forward."],
-                    ["State access became async", "Agent modes and message injection now use async methods with cancellation tokens. Replace the removed synchronous calls instead of wrapping them in Task.Run."],
-                    ["Approval policy sees full context", "Auto-approval rules now receive ToolAutoApprovalRuleContext, including the call, agent, session, request messages, and run options."],
-                    ["Approval middleware was renamed", "Use approval-not-required bypass and approval-response binding. The builder extensions take an optional ILoggerFactory (default null); the ChatClientAgentOptions switches are opt-out flags."]
+                    ["Workflows did not change", "Microsoft.Agents.AI.Workflows and the Abstractions package are identical to v1.13. Executors, edges, human-in-the-loop, state, checkpoints and streaming all carry forward as they were."],
+                    ["Mode and message calls became async", "Agent modes and message injection now have async methods that take a cancellation token. Replace the old synchronous calls; don't wrap them in Task.Run."],
+                    ["Approval rules see the whole context", "An auto-approval rule now receives a ToolAutoApprovalRuleContext: the call plus the agent, session, request messages and run options, instead of just the function call."],
+                    ["The approval middleware was renamed", "The bypass is now UseApprovalNotRequiredFunctionBypassing and the binding is UseApprovalResponseBinding. Both take an optional logger factory, and ChatClientAgentOptions has matching Disable switches to opt out."]
                 ],
-                desc: "The v1.14 breaking surface is concentrated in Microsoft.Agents.AI. This map shows the compile-verified replacements for agent modes, message injection, contextual tool approval, and approval middleware; the Workflows graph model is unchanged.",
+                desc: "v1.14 is the one release that renamed and removed things, all of them in Microsoft.Agents.AI. The workflow graph did not change. This map shows the new shape of each changed area: agent modes, message injection, tool approval rules and approval middleware.",
                 code: `// Microsoft.Agents.AI 1.14.0
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
@@ -890,29 +1556,29 @@ ChatClientBuilder builder = chatClient.AsBuilder()
     .UseApprovalResponseBinding(loggerFactory);`,
                 svg: `
 <svg width="650" height="270" viewBox="0 0 650 270" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path class="animated-line" d="M 175 78 H 245" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 175 78 H 245" stroke="#38bdf8" stroke-width="2"/>
     <path class="animated-line" d="M 405 78 H 475" stroke="#10b981" stroke-width="2"/>
     <path class="animated-line" d="M 325 112 V 170" stroke="#f59e0b" stroke-width="2"/>
 
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Async agent modes', 'AgentModeProviderOptions.AgentMode now stores Instructions. AgentModeProvider implements IDisposable, and mode reads and writes use GetModeAsync and SetModeAsync with cancellation tokens.')">
-        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Agent modes', 'An AgentMode now carries Instructions, not a description. AgentModeProvider is disposable, and you read and set the mode with GetModeAsync and SetModeAsync, each taking a cancellation token.')">
+        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Agent Modes</text>
-        <text x="100" y="92" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">Get/SetModeAsync</text>
+        <text x="100" y="92" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">Get/SetModeAsync</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Contextual auto-approval', 'Rules now receive ToolAutoApprovalRuleContext rather than FunctionCallContent directly. Inspect FunctionCallContent plus trusted agent, session, request-message, and run-option context.')">
-        <rect x="245" y="45" width="160" height="66" rx="9" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Auto-approval rules', 'A rule receives a ToolAutoApprovalRuleContext rather than the bare function call. Look at FunctionCallContent for the call, and at the agent, session, request messages and run options for who is asking and why.')">
+        <rect x="245" y="45" width="160" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Tool Approval</text>
-        <text x="325" y="92" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">RuleContext</text>
+        <text x="325" y="92" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">RuleContext</text>
     </g>
 
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Async message injection', 'EnqueueMessagesAsync and GetPendingMessagesAsync replace the removed synchronous methods and both accept CancellationToken.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Message injection', 'EnqueueMessagesAsync and GetPendingMessagesAsync replace the old synchronous methods. Both take a cancellation token.')">
         <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="550" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Message Injection</text>
         <text x="550" y="92" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">Async + cancellation</text>
     </g>
 
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Approval middleware', 'UseApprovalNotRequiredFunctionBypassing and UseApprovalResponseBinding replace the old bypass surface. Both builder extensions take an optional ILoggerFactory (default null); ChatClientAgentOptions exposes matching Disable opt-out flags.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Approval middleware', 'UseApprovalNotRequiredFunctionBypassing and UseApprovalResponseBinding are the new names. The logger factory parameter is optional, and ChatClientAgentOptions exposes Disable flags if you want either one off.')">
         <rect x="205" y="170" width="240" height="70" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="325" y="199" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Approval Middleware</text>
         <text x="325" y="219" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">bypass + response binding</text>
@@ -922,16 +1588,17 @@ ChatClientBuilder builder = chatClient.AsBuilder()
 </svg>`
             },
             v116: {
-                title: "MAF v1.15 & v1.16 Workflows Additions",
+                file: "Maf116Additions.cs",
+                title: "MAF v1.15 and v1.16: what the workflow layer gained",
                 principlesTitle: "What Actually Changed",
                 principles: [
-                    ["Nothing broke", "Both releases are purely additive by mechanical surface diff. No type, member, or signature was removed or renamed, so v1.14 code compiles unchanged on v1.16."],
-                    ["v1.15: find the latest checkpoint", "CheckpointManager.GetLatestCheckpointAsync(sessionId, cancellationToken) resolves a session's most recent checkpoint. The token is optional and the return is NULLABLE -- a session with no checkpoints yields null. It resolves identity, not compatibility -- still validate before resuming."],
-                    ["v1.15: choose stream behavior at a human request", "WatchStreamAsync(blockOnPendingRequest, cancellationToken) makes parking-vs-yielding at a pending request an explicit hosting decision. The v1.13 single-token overload still works."],
-                    ["v1.16: Magentic prompts are customizable", "MagenticPromptOverrides supplies seven init-only prompt slots, MagenticDefaultPrompts exposes each shipped default, and the builder gains WithPromptOverrides and WithResponseLanguage."],
-                    ["v1.16 is experimental", "The whole prompt surface raises MAAI001 as a compile ERROR until suppressed. The pre-existing MagenticWorkflowBuilder methods are not gated. Treat it as subject to change."]
+                    ["Nothing broke", "Both releases only add. No type, member or signature was removed or renamed, so code written for v1.14 compiles unchanged on v1.16."],
+                    ["v1.15: find the latest checkpoint", "CheckpointManager.GetLatestCheckpointAsync gives you a session's most recent checkpoint, or null if it never took one, so declare it nullable and branch. It tells you where the session got to, not whether that checkpoint is still safe to resume."],
+                    ["v1.15: choose what the stream does at a human request", "WatchStreamAsync gained a blockOnPendingRequest flag. False hands control back to your host; true keeps the stream open. The older single-argument overload still works."],
+                    ["v1.16: Magentic prompts can be changed", "MagenticPromptOverrides has seven prompt slots you set when you create it, MagenticDefaultPrompts gives you each shipped default, and the builder gained WithPromptOverrides and WithResponseLanguage."],
+                    ["v1.16 is experimental", "The prompt surface raises MAAI001 until you suppress it in the project that uses it. The builder methods that existed before are not affected. Expect it to change."]
                 ],
-                desc: "v1.15 and v1.16 move the Workflows layer again after four stable releases -- both additive. v1.17 then changes nothing at all: its public surface is byte-identical to v1.16 by mechanical diff. v1.18, v1.19 and v1.20 add again -- agent-layer options, hosted-workflow checkpoint controls and one background-wait knob; see the v1.18-v1.20 view. This map shows the compile-verified new members: checkpoint lookup, pending-request stream control, and the experimental Magentic prompt surface.",
+                desc: "Two additive releases for the workflow layer: v1.15 added a way to find a session's latest checkpoint and a way to control the event stream at a human request; v1.16 made the Magentic manager's prompts customisable, behind the experimental flag. v1.17 changed nothing at all. Nothing was removed, so v1.14 code compiles as it is.",
                 code: `// Microsoft.Agents.AI.Workflows 1.16.0
 // Requires <NoWarn>$(NoWarn);MAAI001</NoWarn> for the Magentic prompt surface.
 using Microsoft.Agents.AI;
@@ -953,7 +1620,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
     .AddParticipants(participants)
     .WithPromptOverrides(new MagenticPromptOverrides
     {
-        ProgressLedgerPrompt = MagenticDefaultPrompts.ProgressLedgerPrompt + "\\nAlso list blockers.",
+        ProgressLedgerPrompt = MagenticDefaultPrompts.ProgressLedgerPrompt + " Also list blockers.",
         FinalAnswerPrompt    = "Answer as a short executive summary."
     })
     .WithResponseLanguage("French")
@@ -961,28 +1628,28 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
     .Build();`,
                 svg: `
 <svg width="650" height="270" viewBox="0 0 650 270" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path class="animated-line" d="M 175 78 H 245" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 175 78 H 245" stroke="#38bdf8" stroke-width="2"/>
     <path class="animated-line" d="M 325 112 V 168" stroke="#f59e0b" stroke-width="2"/>
 
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Latest checkpoint (v1.15)', 'CheckpointManager.GetLatestCheckpointAsync(sessionId, cancellationToken) returns the session most recent CheckpointInfo, or NULL when the session has never checkpointed. Declare it CheckpointInfo? and branch. The cancellation token is optional. It answers where did this session get to, not whether the checkpoint is still compatible.')">
-        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Latest checkpoint (v1.15)', 'CheckpointManager.GetLatestCheckpointAsync(sessionId, cancellationToken) returns the most recent CheckpointInfo for a session, or null if the session never checkpointed. Declare it nullable and branch. The token is optional. It answers where the session got to, not whether that checkpoint is still compatible with your code.')">
+        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Checkpoint Lookup</text>
-        <text x="100" y="92" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · GetLatest…</text>
+        <text x="100" y="92" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · GetLatest…</text>
     </g>
 
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Pending-request streaming (v1.15)', 'WatchStreamAsync(blockOnPendingRequest, cancellationToken) lets the host choose whether the event stream parks at a pending human request or yields control. Pass false in request handlers and queue workers.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Stream control at a human request (v1.15)', 'WatchStreamAsync(blockOnPendingRequest, cancellationToken): with false the stream hands control back to your host when the workflow waits for a person; with true it stays open. Use false in request handlers and queue workers.')">
         <rect x="245" y="45" width="160" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Stream Control</text>
         <text x="325" y="92" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · blockOnPendingRequest</text>
     </g>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('Magentic prompt overrides (v1.16)', 'MagenticPromptOverrides has seven init-only slots: TaskLedgerFactsPrompt, TaskLedgerPlanPrompt, TaskLedgerFullPrompt, TaskLedgerFactsUpdatePrompt, TaskLedgerPlanUpdatePrompt, ProgressLedgerPrompt and FinalAnswerPrompt. MagenticDefaultPrompts exposes each shipped default.')">
-        <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Magentic prompt overrides (v1.16)', 'MagenticPromptOverrides has seven slots, set when you create it: TaskLedgerFactsPrompt, TaskLedgerPlanPrompt, TaskLedgerFullPrompt, TaskLedgerFactsUpdatePrompt, TaskLedgerPlanUpdatePrompt, ProgressLedgerPrompt and FinalAnswerPrompt. MagenticDefaultPrompts holds each shipped default so you can build on it.')">
+        <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="550" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Magentic Prompts</text>
-        <text x="550" y="92" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">v1.16 · 7 init-only slots</text>
+        <text x="550" y="92" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">v1.16 · 7 init-only slots</text>
     </g>
 
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('MAAI001 gate', 'MagenticPromptOverrides, MagenticDefaultPrompts, WithPromptOverrides and WithResponseLanguage are marked experimental and raise MAAI001 as a compile ERROR. Add NoWarn MAAI001 to build. The pre-existing MagenticWorkflowBuilder methods are not gated.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('The experimental flag', 'MagenticPromptOverrides, MagenticDefaultPrompts, WithPromptOverrides and WithResponseLanguage are marked experimental, so the build fails with MAAI001 until you add it to NoWarn. The MagenticWorkflowBuilder methods that existed before are not affected.')">
         <rect x="205" y="168" width="240" height="70" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="325" y="197" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">⚗️ MAAI001 - experimental</text>
         <text x="325" y="217" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">compile error until suppressed</text>
@@ -992,19 +1659,20 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
 </svg>`
             },
             v119: {
-                title: "MAF v1.18-v1.20 Additions",
+                file: "Maf119Additions.cs",
+                title: "MAF v1.18 to v1.20: what the agent layer gained",
                 principlesTitle: "What Actually Changed",
                 principles: [
-                    ["Nothing broke, three times", "All three releases are purely additive by mechanical surface diff. v1.18 touches only the agent layer; v1.19 touches all three assemblies and moves the Microsoft.Extensions.AI dependency from 10.7.0 to 10.9.0; v1.20 adds exactly one property and nothing else."],
-                    ["v1.18: run tools in parallel, bound the approval loop", "ChatClientAgentOptions.AllowConcurrentInvocation (default false) runs several returned function calls concurrently. ToolApprovalAgentOptions.MaxAutoApprovalIterations caps auto-approved re-invocations; null means the const default of 40, which no reflection dump can show."],
-                    ["v1.18: keep backend calls from being orphaned", "EnableInvocableFunctionBypassing (or UseInvocableFunctionBypassing on a custom pipeline) stores backend function calls that arrive next to a frontend tool call and executes them on the next request. Experimental: MAAI001."],
-                    ["v1.19: route per session", "RoutePersistingRoutingChatClient picks a named inner client per agent session and persists the choice in the session state bag. It throws outside an agent run, and an unregistered route throws on SetActiveRoute. Experimental: MAAI001."],
-                    ["v1.19: own the workflow agent's checkpoints", "agent.GetService<WorkflowAgentMetadata>() identifies a workflow-hosting agent (even behind middleware). agent.WithCheckpointing(manager) returns a COPY writing to your manager -- and the SAME instance, unchanged, for a wrapped agent, a non-workflow agent, or an environment that already names a manager. Assert UsesOwnCheckpointStorage."],
-                    ["v1.19: TryPrepare does not check the id exists", "session.GetService<WorkflowSessionCheckpointRecovery>() (MAAI001) positions a workflow session on a checkpoint. CurrentCheckpoint is nullable, and TryPrepare accepts any well-formed id -- an unknown one makes the next run throw; only empty/whitespace is rejected. Resolve the id with GetLatestCheckpointAsync first."],
-                    ["v1.20: bound the background wait", "BackgroundAgentsProviderOptions.WaitTimeout caps how long the provider's wait tool blocks the parent run for a background task -- default five minutes. The options type validates nothing; the BackgroundAgentsProvider constructor throws ArgumentOutOfRangeException for zero, negative or Timeout.InfiniteTimeSpan values (the release timeout beside it ACCEPTS infinite -- executed on a session with no running task, where a negative value is accepted too). When it elapses the tasks keep running (package documentation); only ReleaseSessionAsync stops them."],
-                    ["Experimental is per member", "MAAI001 gates the bypass pair, BackgroundAgentsProvider and its options type, the routing client, the recovery service and FeatureUsage -- not AllowConcurrentInvocation, MaxAutoApprovalIterations, WithCheckpointing or WorkflowAgentMetadata. Scope the suppression to what needs it."]
+                    ["Nothing broke, three times", "All three releases only add. v1.18 touched the agent layer only; v1.19 touched all three packages and raised the Microsoft.Extensions.AI dependency to 10.9.0; v1.20 added exactly one property."],
+                    ["v1.18: parallel tools and a bounded approval loop", "AllowConcurrentInvocation (off by default) runs several returned tool calls at once. MaxAutoApprovalIterations caps how many times auto-approval may re-invoke the agent; null means 40."],
+                    ["v1.18: backend calls are not lost", "EnableInvocableFunctionBypassing keeps a backend tool call that arrives next to a frontend one and runs it on the next request, instead of dropping it. Experimental."],
+                    ["v1.19: route per session", "RoutePersistingRoutingChatClient picks a named inner chat client per session and remembers the choice in the session. It only works inside an agent run, and an unregistered route fails when you select it. Experimental."],
+                    ["v1.19: a hosted workflow can own its checkpoints", "GetService<WorkflowAgentMetadata> tells you an agent wraps a workflow. WithCheckpointing returns a copy that writes checkpoints to your manager, or the same instance unchanged if it cannot, so check UsesOwnCheckpointStorage afterwards."],
+                    ["v1.19: TryPrepare trusts the id you give it", "WorkflowSessionCheckpointRecovery positions a session on a checkpoint, but TryPrepare accepts any well-formed id. An unknown one fails on the next run, so look the id up first. Experimental."],
+                    ["v1.20: bound the background wait", "BackgroundAgentsProviderOptions.WaitTimeout caps how long the wait tool blocks a run for a background task; the default is five minutes. It is checked when you create the provider, not when you set it, and infinite is rejected there while ReleaseSessionAsync accepts infinite. When it expires, the tasks keep running."],
+                    ["Experimental is decided per member", "The bypass, the routing client, the recovery service, FeatureUsage and the background provider (with its options) are marked experimental. AllowConcurrentInvocation, MaxAutoApprovalIterations, WithCheckpointing and WorkflowAgentMetadata are not."]
                 ],
-                desc: "v1.18 adds five agent-layer members; v1.19 adds a per-session routing chat client, three hosted-workflow checkpoint controls and a feature-usage tracker; v1.20 adds the background wait-tool timeout. This map shows the compile- and execution-verified shapes, and which of them are behind the MAAI001 experimental diagnostic.",
+                desc: "Three small additive releases. v1.18 lets an agent run tools in parallel, caps the auto-approval loop and stops backend calls being lost. v1.19 adds a chat client that routes per session and gives a hosted workflow control over its checkpoints. v1.20 adds one setting: how long the background-agents wait tool may block. Nothing was removed, and the code below was compiled against 1.20.0.",
                 code: `// Microsoft.Agents.AI 1.20.0 / Microsoft.Agents.AI.Workflows 1.20.0
 // Requires <NoWarn>$(NoWarn);MAAI001</NoWarn> for the members marked experimental below.
 using Microsoft.Agents.AI;
@@ -1053,41 +1721,41 @@ var background = new BackgroundAgentsProvider(agents, new BackgroundAgentsProvid
 await background.ReleaseSessionAsync(bgSession);  // a session the provider served -- the OTHER timeout: null = 30 s (package docs), InfiniteTimeSpan accepted (executed)`,
                 svg: `
 <svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path class="animated-line" d="M 325 111 V 165" stroke="#6366f1" stroke-width="2"/>
+    <path class="animated-line" d="M 325 111 V 165" stroke="#38bdf8" stroke-width="2"/>
     <path class="animated-line" d="M 175 200 H 205" stroke="#10b981" stroke-width="2"/>
     <path class="animated-line" d="M 445 200 H 475" stroke="#f59e0b" stroke-width="2"/>
 
-    <g class="node" style="--glow-color: #a855f7;" onclick="showNodeDetails('v1.18 agent options', 'AllowConcurrentInvocation and MaxAutoApprovalIterations compile clean. EnableInvocableFunctionBypassing, UseInvocableFunctionBypassing and BackgroundAgentsProvider.ReleaseSessionAsync are behind MAAI001.')">
-        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#a855f7" stroke-width="2"/>
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('v1.18 agent options', 'AllowConcurrentInvocation and MaxAutoApprovalIterations compile without any suppression. EnableInvocableFunctionBypassing, UseInvocableFunctionBypassing and BackgroundAgentsProvider.ReleaseSessionAsync are experimental and need MAAI001 suppressed.')">
+        <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">v1.18 Agent Options</text>
-        <text x="100" y="92" fill="#a855f7" font-family="Outfit" font-size="9" text-anchor="middle">concurrency + approval cap</text>
+        <text x="100" y="92" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">concurrency + approval cap</text>
     </g>
 
-    <g class="node" style="--glow-color: #6366f1;" onclick="showNodeDetails('Session-persisted routing', 'RoutePersistingRoutingChatClient (MAAI001) selects a named inner IChatClient per AgentSession and stores the route in the session state bag. GetActiveRoute / SetActiveRoute; throws outside an agent run, and an unregistered DefaultRoute surfaces as InvalidOperationException on the first run.')">
-        <rect x="250" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#6366f1" stroke-width="2"/>
+    <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Routing per session (v1.19)', 'RoutePersistingRoutingChatClient chooses a named inner chat client per agent session and stores the choice in the session state. GetActiveRoute and SetActiveRoute read and change it. It only works inside an agent run, and a default route that was never registered fails on the first run. Experimental.')">
+        <rect x="250" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Routing Chat Client</text>
-        <text x="325" y="92" fill="#6366f1" font-family="Outfit" font-size="9" text-anchor="middle">route stored per session</text>
+        <text x="325" y="92" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">route stored per session</text>
     </g>
 
-    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('FeatureUsage', 'Process-wide feature bitmask in Microsoft.Agents.AI.Abstractions (MAAI001). MarkUsed(index) and ApplyToUserAgent(userAgent, include). Infrastructure for framework integrations, not for applications.')">
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('FeatureUsage (v1.19)', 'A process-wide set of feature bits in Microsoft.Agents.AI.Abstractions: MarkUsed sets one, ApplyToUserAgent adds them to a User-Agent string. Meant for framework integrations, not for applications. Experimental.')">
         <rect x="475" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2"/>
         <text x="550" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">FeatureUsage</text>
         <text x="550" y="92" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">Abstractions, infrastructure</text>
     </g>
 
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('WorkflowAgentMetadata', 'agent.GetService<WorkflowAgentMetadata>() returns non-null for a workflow-hosting agent, through middleware too. UsesOwnCheckpointStorage tells whether checkpoints go to a named CheckpointManager or travel inside the serialized session. Not experimental.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('WorkflowAgentMetadata (v1.19)', 'agent.GetService<WorkflowAgentMetadata>() is non-null for an agent that wraps a workflow, even through middleware. UsesOwnCheckpointStorage says whether checkpoints go to a named CheckpointManager or travel inside the serialized session. Not experimental.')">
         <rect x="25" y="167" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="100" y="195" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">WorkflowAgentMetadata</text>
         <text x="100" y="214" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">identify via GetService</text>
     </g>
 
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('WithCheckpointing', 'WorkflowHostingExtensions.WithCheckpointing(agent, manager) returns a copy that writes checkpoints to your manager. Same instance, unchanged, for a wrapped agent, a non-workflow agent, or an environment that already names a manager. An auto-generated id is regenerated; an explicit id is kept. Not experimental.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('WithCheckpointing (v1.19)', 'agent.WithCheckpointing(manager) returns a copy of the agent that writes its checkpoints to your manager. If the agent is wrapped, is not a workflow, or already has a manager, you get the same instance back unchanged, with no error, so check UsesOwnCheckpointStorage. An auto-generated id is regenerated on the copy; an explicit id is kept. Not experimental.')">
         <rect x="205" y="167" width="240" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="325" y="195" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Hosted Workflow Agent</text>
         <text x="325" y="214" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">AsAIAgent + WithCheckpointing (copy, or unchanged)</text>
     </g>
 
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('WorkflowSessionCheckpointRecovery', 'session.GetService<WorkflowSessionCheckpointRecovery>() (MAAI001). CurrentCheckpoint is CheckpointInfo? (null before the first run). TryPrepare(id) selects without checking the id exists: an unknown id is accepted and the next run throws KeyNotFoundException; an empty or whitespace id throws ArgumentException. Recovery of an interrupted run, not rollback.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Checkpoint recovery (v1.19)', 'session.GetService<WorkflowSessionCheckpointRecovery>() positions a workflow session on a checkpoint. CurrentCheckpoint is null before the first run. TryPrepare accepts any well-formed id without checking it exists; an unknown id fails on the next run. Look the id up with GetLatestCheckpointAsync first. Experimental.')">
         <rect x="475" y="167" width="150" height="66" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="550" y="195" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Checkpoint Recovery</text>
         <text x="550" y="214" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">TryPrepare: id not checked</text>
@@ -1097,11 +1765,11 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
 </svg>`
             },
             generator: {
-                title: "MSAF Architecture Blueprint Generator",
+                title: "Blueprint Generator: describe a workflow, get a program",
                 principlesTitle: "About This Tool",
                 principles: [
                     ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back - not a fragment."],
-                    ["Only real building blocks", "Every identifier is verified against the actual MAF v1.20.0 DLLs; every generated program was compile-tested against pinned 1.17.0 packages, and the Workflows members it uses are unchanged through 1.20.0 by mechanical diff - no invented APIs, no ... placeholders."],
+                    ["Only real building blocks", "Every name in the output exists in the real MAF 1.20.0 assemblies. The generated programs were compile-tested at 1.17.0, and the workflow members they use have not changed since, so they build on 1.20.0 as well. No invented APIs, no placeholders to fill in."],
                     ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
                 desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program - every variable declared, verified against the MAF v1.20.0 binaries.",
@@ -1112,7 +1780,7 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
                         <label for="flow-type">Execution Topology</label>
                         <select id="flow-type" onchange="generateBlueprint()">
                             <option value="seq">Sequential Chain (Linear)</option>
-                            <option value="parallel">Parallel Fan-out (Pregel BSP)</option>
+                            <option value="parallel">Parallel Fan-out (supersteps)</option>
                             <option value="orchestrate">Agent Orchestration (AgentWorkflowBuilder)</option>
                             <option value="agent">Multi-Agent Graph (hand-wired)</option>
                         </select>
@@ -1149,7 +1817,7 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
             }
         };
 
-        let activeView = 'bsp';
+        let activeView = 'basics';
 
         function switchView(viewKey, btnEl = null) {
             // Update active state on buttons
@@ -1182,23 +1850,46 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
             const overlay = document.getElementById('node-info-overlay');
             overlay.classList.remove('visible');
 
+            const notes = document.getElementById('view-notes');
+            notes.innerHTML = viewData.notes || '';
+            notes.hidden = !viewData.notes;
+
             if (viewKey === 'generator') {
                 target.innerHTML = viewData.htmlContent;
                 // Run generator logic immediately
                 setTimeout(generateBlueprint, 50);
             } else {
                 target.innerHTML = viewData.svg;
-                document.getElementById('code-panel-title').textContent = viewKey === 'bsp' ? 'PregelSuperstep.cs' : viewKey === 'hitl' ? 'HitlResumption.cs' : viewKey === 'loops' ? 'LoopAgent.cs' : viewKey === 'v114' ? 'Maf114Migration.cs' : viewKey === 'v116' ? 'Maf116Additions.cs' : viewKey === 'v119' ? 'Maf119Additions.cs' : 'MultiAgentWorkflow.cs';
+                document.getElementById('code-panel-title').textContent = viewData.file;
                 document.getElementById('code-content').textContent = viewData.code;
             }
         }
 
         function showNodeDetails(name, description) {
             const overlay = document.getElementById('node-info-overlay');
-            document.getElementById('node-overlay-title').textContent = name;
+            const title = document.getElementById('node-overlay-title');
+            // Clicking the node that is already open closes it again.
+            if (overlay.classList.contains('visible') && title.textContent === name) { hideNodeDetails(); return; }
+            title.textContent = name;
             document.getElementById('node-overlay-desc').textContent = description;
             overlay.classList.add('visible');
         }
+
+        function hideNodeDetails() {
+            document.getElementById('node-info-overlay').classList.remove('visible');
+        }
+
+        // The popup closes on a click anywhere outside it and outside a diagram node (a node click is
+        // the open/toggle path, handled above), and on Escape. Clicking inside the popup keeps it open
+        // so its text can be selected. Registered once, at load.
+        document.addEventListener('click', (e) => {
+            const overlay = document.getElementById('node-info-overlay');
+            if (!overlay.classList.contains('visible')) return;
+            const inNode = e.target.closest && e.target.closest('.node');
+            const inOverlay = e.target.closest && e.target.closest('#node-info-overlay');
+            if (!inNode && !inOverlay) hideNodeDetails();
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideNodeDetails(); });
 
         function copyCode() {
             const text = document.getElementById('code-content').textContent;
@@ -1518,7 +2209,7 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
         }
 
         // Initialize default view
-        switchView('bsp');
+        switchView('basics');
     </script>
 </body>
 </html>

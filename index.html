@@ -11,8 +11,8 @@
             --bg-card: #0e131f;
             --bg-card-hover: #151c2e;
             --bg-border: #1e293b;
-            --color-primary: #8b5cf6; /* Violet */
-            --color-primary-glow: rgba(139, 92, 246, 0.15);
+            --color-primary: #38bdf8; /* Sky */
+            --color-primary-glow: rgba(56, 189, 248, 0.15);
             --color-secondary: #3b82f6; /* Blue */
             --color-secondary-glow: rgba(59, 130, 246, 0.15);
             --color-accent: #14b8a6; /* Teal */
@@ -47,7 +47,7 @@
             height: 100vh;
             z-index: -2;
             background: 
-                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.1) 0%, transparent 45%),
                 radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.1) 0%, transparent 45%),
                 radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.05) 0%, transparent 50%);
             filter: blur(80px);
@@ -108,8 +108,8 @@
 
         .portal-card:hover {
             transform: translateY(-6px);
-            border-color: rgba(139, 92, 246, 0.4);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.1);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.1);
             background: var(--bg-card-hover);
         }
 
@@ -178,7 +178,7 @@
             align-items: center;
             gap: 8px;
             width: fit-content;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
             position: relative;
             z-index: 2;
         }
@@ -190,7 +190,7 @@
 
         .btn-portal:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
         }
 
         .portal-card.teal .btn-portal:hover {
@@ -241,7 +241,7 @@
         }
 
         .skill-card:hover {
-            border-color: rgba(139, 92, 246, 0.3);
+            border-color: rgba(56, 189, 248, 0.3);
             transform: translateY(-2px);
             background: var(--bg-card-hover);
         }
@@ -273,9 +273,9 @@
         }
 
         .badge-meta.primary {
-            background: rgba(139, 92, 246, 0.1);
-            color: #c084fc;
-            border-color: rgba(139, 92, 246, 0.2);
+            background: rgba(56, 189, 248, 0.1);
+            color: #7dd3fc;
+            border-color: rgba(56, 189, 248, 0.2);
         }
 
         .skill-top p {
@@ -345,7 +345,7 @@
             <div class="portal-card" id="card-visualizer">
                 <div class="card-body">
                     <h2><span class="card-icon">⚡</span>Interactive Visualizer</h2>
-                    <p>Explore the C# Microsoft Agent Framework (MSAF) execution graphs, dynamic agent states, checkpointing, and human-in-the-loop triggers visually inside a sleek, interactive visualizer dashboard.</p>
+                    <p>Explore the Microsoft Agent Framework by topic: the superstep engine, human-in-the-loop, compaction, declarative executors, the event taxonomy, skills and tool approval, production readiness, what each release added, and finally how the skill itself routes a question. Every C# sample on the page is compile-checked against the pinned packages.</p>
                 </div>
                 <a href="./msaf-visualizer.html" class="btn-portal">
                     Launch Visualizer <span>→</span>
