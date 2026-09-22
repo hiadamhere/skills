@@ -23,6 +23,8 @@ Entries group changes by release preparation date. The catalog is not versioned 
 - The MSAF visualizer now has dedicated views for guarded file edits, session stores, the chat-client adapter, host-controlled modes and the 1.21/1.22 release comparison. Routing, telemetry and blueprint pins target 1.22. All 24 generator combinations compile; eight executor-only combinations run offline, including human-gate resume.
 
 ### Fixed
+- Increase shared portfolio/catalog navigation links and appearance controls to at least 44-pixel targets.
+- Make every interactive visualizer diagram node keyboard-focusable and activatable with Enter or Space, including older views.
 - Separate `DisableWriteTools` (omit modifying tools) from approval-bypass flags in the MSAF visualizer and all five affected reference versions. Narrow the visualizer's experimental warning to file-access types on its 1.22 pin, clarify type/member gates in the version map, and correct the 1.21/1.22 compile-check instructions to use each page's own version.
 - Correct completed-workflow status examples to use Idle, including their affected older-version copies. Narrow the file-access experimental warning on the verified 1.20-1.22 pins.
 
