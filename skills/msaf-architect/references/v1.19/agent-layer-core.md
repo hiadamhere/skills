@@ -111,7 +111,7 @@ var builder = new WorkflowBuilder(inputNodeBinding)
 
 ## 🛠️ Complete integration example
 
-Define an agent, bind it, run it, and persist its session:
+Define an agent, bind it, run it, and read its response:
 
 ```csharp
 using Microsoft.Agents.AI;
@@ -137,22 +137,17 @@ Workflow workflow = new WorkflowBuilder(reviewerBinding)
     .WithOutputFrom(reviewerBinding)
     .Build();
 
-AgentSession session = await reviewerAgent.CreateSessionAsync(conversationId, CancellationToken.None);
 
-Run run = await InProcessExecution.RunAsync(
+await using Run run = await InProcessExecution.RunAsync(
     workflow, new ChatMessage(ChatRole.User, userInput), conversationId, CancellationToken.None);
 
-if (await run.GetStatusAsync() == RunStatus.Ended)
+if (await run.GetStatusAsync() == RunStatus.Idle)
 {
     // There is no GetOutputsAsync() -- filter NewEvents instead.
-    foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>())
+    foreach (var evt in run.NewEvents.OfType<AgentResponseEvent>())
     {
-        Console.WriteLine($"Workflow Output: {evt.As<ChatMessage>()?.Text}");
+        Console.WriteLine($"Workflow Output: {evt.As<AgentResponse>()?.Text}");
     }
-
-    JsonElement stateJson =
-        await reviewerAgent.SerializeSessionAsync(session, new JsonSerializerOptions(), CancellationToken.None);
-    // Persist stateJson ...
 }
 ```
 
@@ -177,3 +172,7 @@ if (await run.GetStatusAsync() == RunStatus.Ended)
 
 ---
 *Verified against MAF v1.19.0 DLL surface and compile tests (2026-08-27). The core `AIAgent`, `ChatClientAgent`, `AgentSession` and `AIAgentBinding` surfaces are byte-identical from v1.17 through v1.19 by mechanical diff. **Provenance:** the construction, session, binding and integration samples were compile-tested on pinned **1.12.0** (surface-verified 1.13.0); the asynchronous mode and message-injection contract on **1.14.0**, where the optional `ILoggerFactory` was re-verified by compile test on 2026-08-27 — optionality is asserted from that compile, since a dump renders no parameter defaults and byte-identity therefore cannot carry it. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14 and v1.18 guides, and split from [Agent Middleware and Routing](agent-middleware.md) to keep each page inside the per-page budget; no claim was re-dated.*
+
+*Verified against MAF v1.19.0 DLL surface and completion-status execution probe (2026-09-19). Accuracy correction only: a normally completed run reports `RunStatus.Idle` and still exposes output events; the sample no longer gates successful output on the wrong status. The earlier verification above remains the provenance for other claims.*
+
+*Completion/output recheck (2026-09-20): the retained `probe-agent-correctness` executes an `AIAgentBinding` with a fake `IChatClient` against this page's package pin. It asserts `RunStatus.Idle` and the exact `AgentResponseEvent` payload text. The integration example reads `AgentResponse`, not `ChatMessage`. An independently created agent session was removed from this example because it was never supplied to the workflow; serializing it would not persist this run.*

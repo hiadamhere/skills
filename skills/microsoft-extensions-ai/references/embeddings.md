@@ -1,6 +1,6 @@
 # 🔢 Embeddings
 
-`IEmbeddingGenerator<TInput, TEmbedding>` is the embedding counterpart to `IChatClient` — one contract every provider implements. For text the concrete shape is almost always `IEmbeddingGenerator<string, Embedding<float>>`.
+`IEmbeddingGenerator<TInput, TEmbedding>` is the embedding counterpart to `IChatClient` — a shared contract for provider adapters. For text the concrete shape is almost always `IEmbeddingGenerator<string, Embedding<float>>`.
 
 ---
 
@@ -29,9 +29,9 @@ ReadOnlyMemory<float> v = await generator.GenerateVectorAsync("shortcut");
 ```
 
 > [!IMPORTANT]
-> `GenerateAsync(IEnumerable<TInput>)` returns `GeneratedEmbeddings<TEmbedding>`; `GenerateAsync(TInput)` returns a single `TEmbedding`. Same method name, different return type, chosen by argument shape. When you want the numbers and nothing else, `GenerateVectorAsync` skips the wrapper entirely.
+> `GenerateAsync(IEnumerable<TInput>)` returns `GeneratedEmbeddings<TEmbedding>`; `GenerateAsync(TInput)` returns a single `TEmbedding`. Same method name, different return type, chosen by argument shape. When you want the numbers and nothing else, `GenerateVectorAsync` returns the vector directly to the caller; this is a convenience, not an allocation or performance guarantee.
 
-`Embedding<T>` exposes `Vector` (`ReadOnlyMemory<T>`) and `Dimensions`. `GeneratedEmbeddings<TEmbedding>` is enumerable and preserves input order.
+`Embedding<T>` exposes `Vector` (`ReadOnlyMemory<T>`) and `Dimensions`. `GeneratedEmbeddings<TEmbedding>` is an enumerable result collection. Input/result pairing relies on the generator returning embeddings in corresponding order; the collection cannot validate semantic alignment.
 
 ## Options
 
@@ -73,11 +73,11 @@ The cache is **per input and per options**, not per call — a different `Dimens
 
 ## Engineering guidance
 
-- **Batch aggressively.** One call with 100 inputs is dramatically cheaper and faster than 100 calls. Use the `IEnumerable` overload wherever you control the loop.
+- **Batch within provider limits.** The `IEnumerable` overload can reduce request overhead. Measure latency and check request limits and pricing; batching does not establish a cost reduction.
 - **Pin the model, and store which model produced each vector.** Embeddings from different models are not comparable, and a silent model change invalidates a whole index without any error.
 - **Treat `Dimensions` as part of your storage schema.** Changing it means re-embedding the corpus, not just changing a parameter.
-- Cache embeddings for stable inputs. The same document embedded twice is pure waste — this is where `UseDistributedCache` pays for itself far more predictably than on chat.
-- Normalize inputs (trim, collapse whitespace, consistent casing policy) before embedding, or near-identical documents produce needlessly different vectors.
+- Cache embeddings for stable inputs. For deterministic use cases, `UseDistributedCache` can avoid repeated requests; measure cache overhead and choose retention appropriate to the model and data.
+- Choose a consistent, domain-appropriate preprocessing policy. Do not remove casing or whitespace when it carries meaning, such as source code.
 
 ## ✅ Review checklist
 
@@ -87,4 +87,4 @@ The cache is **per input and per options**, not per call — a different `Dimens
 - The generator is consumed from DI so caching and telemetry layers apply.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. Execution facts: `UseDistributedCache` on an embedding generator caches per input and options, so a batch mixing cached and new inputs sends only the new ones inward; `GenerateAndZipAsync` returns input/embedding pairs; a `DelegatingEmbeddingGenerator` subclass forwards to its inner generator. The differing return types of the batch and single-input `GenerateAsync` overloads were re-confirmed by compile test.*
+*Verified against Microsoft.Extensions.AI 10.10.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-09-20). Every code fence on this page compiles against 10.10.0. Execution facts: `UseDistributedCache` on an embedding generator caches per input and options, so a batch mixing cached and new inputs sends only the new ones inward; `GenerateAndZipAsync` returns input/embedding pairs; a `DelegatingEmbeddingGenerator` subclass forwards to its inner generator. The differing return types of the batch and single-input `GenerateAsync` overloads were re-confirmed by compile test.*

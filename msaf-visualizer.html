@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSAF Architect Visualizer (v1.20.0)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>MSAF Architect Visualizer (v1.22.0)</title>
+
     <style>
         :root {
             --bg-dark: #090b0e;
@@ -452,7 +452,7 @@
         .view-notes th { color: var(--text-main); font-weight: 600; }
         .view-notes td:first-child { color: var(--text-main); font-family: var(--font-code); font-size: 0.8rem; white-space: nowrap; }
         .view-notes .group td { color: var(--color-primary); font-weight: 600; padding-top: 12px; font-family: var(--font-main); }
-        .node-overlay-hint { margin-top: 10px; font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; }
+        .node-overlay-hint { margin-top: 10px; font-size: 0.7rem; color: var(--text-muted); }
 
         .node-overlay h4 {
             font-size: 0.95rem;
@@ -466,22 +466,31 @@
             color: var(--text-muted);
         }
     </style>
+    <link rel="stylesheet" href="./site-theme.css">
+    <script src="./site-theme.js"></script>
 </head>
-<body>
+<body class="visualizer-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <nav class="site-nav" aria-label="Site navigation">
+        <div class="site-links"><a href="./index.html">&larr; Skills catalog</a><a class="portfolio-link" href="https://hiadamhere.github.io/"><span class="portfolio-mark" aria-hidden="true">✳</span>Open-source developer tools <span aria-hidden="true">↗</span></a></div>
+        <div class="theme-picker" role="group" aria-label="Color theme" hidden>
+            <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+            <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+        </div>
+    </nav>
     <div class="ambient-glow-1"></div>
     <div class="ambient-glow-2"></div>
 
-    <a href="./index.html" class="back-link">← Back to the Skills Catalog</a>
-
     <header>
         <div class="logo-group">
-            <h1>⚡ MSAF Architect Visualizer</h1>
+            <h1>MSAF Architect Visualizer</h1>
             <p>Interactive architecture patterns & blueprints for Microsoft Agent Framework</p>
         </div>
-        <div class="version-badge">MAF v1.10-v1.20 VERIFIED</div>
+        <div class="version-badge">MAF 1.22 SAMPLES VERIFIED</div>
     </header>
 
-    <main>
+    <main id="main-content">
         <!-- Sidebar Navigation -->
         <div class="sidebar">
             <div class="nav-card">
@@ -552,6 +561,13 @@
                         </button>
                     </li>
                 </ul>
+                <p class="nav-group">New agent APIs</p>
+                <ul class="nav-list">
+                    <li><button class="nav-btn" onclick="switchView('fileedits', this)"><span class="nav-btn-icon">1.21</span>Safe File Edits</button></li>
+                    <li><button class="nav-btn" onclick="switchView('sessionstores', this)"><span class="nav-btn-icon">1.22</span>Agent Session Storage</button></li>
+                    <li><button class="nav-btn" onclick="switchView('chatadapter', this)"><span class="nav-btn-icon">1.22</span>Agent as Chat Client</button></li>
+                    <li><button class="nav-btn" onclick="switchView('agentmodes', this)"><span class="nav-btn-icon">1.22</span>Host-Controlled Modes</button></li>
+                </ul>
                 <p class="nav-group">Generator</p>
                 <ul class="nav-list">
                     <li>
@@ -582,6 +598,7 @@
                         </button>
                     </li>
                 </ul>
+                <ul class="nav-list"><li><button class="nav-btn" onclick="switchView('v122', this)"><span class="nav-btn-icon">1.22</span>v1.21 &amp; v1.22 Additions</button></li></ul>
                 <p class="nav-group">About this skill</p>
                 <ul class="nav-list">
                     <li>
@@ -600,7 +617,7 @@
                     <p><strong>The slowest branch sets the pace</strong><br>Parallel paths re-sync every round - a long chain next to a short one makes the short one wait. Keep sequential work consolidated.</p>
                     <p><strong>State lands between rounds</strong><br>Updates queue up during a round and commit at the barrier, so concurrent nodes never race each other.</p>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.8;">✓ Every name on this page exists in the real MAF v1.10-v1.20 assemblies, and every C# sample was compiled against them.</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px;">✓ Current C# samples compile against MAF 1.22.0. Release labels state when an API arrived; experimental gates are called out per type or member.</p>
             </div>
         </div>
 
@@ -616,7 +633,7 @@
                 </div>
 
                 <!-- Interactive SVG Canvas -->
-                <div class="diagram-container">
+                <div class="diagram-container" tabindex="0" aria-label="Workflow diagram and notes">
                     <div id="diagram-target" style="width: 100%; display: flex; justify-content: center;">
                         <!-- SVG content will be injected dynamically -->
                     </div>
@@ -639,7 +656,7 @@
                             <div class="code-title" id="code-panel-title">InProcessExecution.cs</div>
                             <button class="copy-btn" onclick="copyCode()">Copy Code</button>
                         </div>
-                        <pre><code id="code-content">Loading...</code></pre>
+                        <pre tabindex="0" aria-label="Code sample"><code id="code-content">Loading...</code></pre>
                     </div>
                 </div>
             </div>
@@ -661,7 +678,7 @@
                     ["Types are checked when you build", "Every executor declares what it accepts and what it produces. If an edge connects a producer of strings to a consumer of ints, Build() throws. And an executor can only send or yield the types it declared: the first version of the sample below yielded a string from an Executor<int> and failed at run time."],
                     ["The context is how an executor reaches the outside", "Inside HandleAsync you get an IWorkflowContext: SendMessageAsync passes a message on, YieldOutputAsync produces a result of the whole workflow, AddEventAsync reports progress, and the state methods read and write shared state."]
                 ],
-                desc: "Start here if executors are new to you. A workflow is a graph: executors are the nodes, edges are the paths, and messages (plain .NET objects) travel along them. The sample below is the smallest complete workflow: one executor counts the words in a string and hands the number to a second executor, which turns it into the result. It was run against 1.20.0: the quick brown fox gives '4 words'.",
+                desc: "Start here if executors are new to you. A workflow is a graph: executors are the nodes, edges are the paths, and messages (plain .NET objects) travel along them. The sample below is the smallest complete workflow: one executor counts the words in a string and hands the number to a second executor, which turns it into the result. It was run against 1.22.0: the quick brown fox gives '4 words'.",
                 code: `using Microsoft.Agents.AI.Workflows;
 
 // An executor receives ONE kind of message, does its work, and passes something on.
@@ -708,7 +725,7 @@ foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>()) Console.WriteLi
         <text x="235" y="90" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">WordCounter</text>
         <text x="235" y="109" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Executor&lt;string, int&gt;</text>
     </g>
-    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Reporter: Executor of int, producing string', 'Accepts the int the counter sent and turns it into the text "4 words". It is marked as the workflow output source, so what it produces becomes the result of the run. In the first version of this sample it derived from Executor of int alone and tried to yield a string: the framework refused at run time, because an executor may only produce the types it declared.')">
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Reporter: Executor of int, producing string', 'Accepts the int the counter sent and turns it into the text &quot;4 words&quot;. It is marked as the workflow output source, so what it produces becomes the result of the run. In the first version of this sample it derived from Executor of int alone and tried to yield a string: the framework refused at run time, because an executor may only produce the types it declared.')">
         <rect x="335" y="62" width="140" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="405" y="90" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Reporter</text>
         <text x="405" y="109" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Executor&lt;int, string&gt;</text>
@@ -732,8 +749,8 @@ foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>()) Console.WriteLi
                 principlesTitle: "Three Reads, Not a Folder",
                 principles: [
                     ["Find the version first", "Everything in the skill is checked per MAF version against the real assemblies, so nothing is answered until the project's Microsoft.Agents.AI version is known."],
-                    ["Then one page", "Each topic page for the current version stands on its own. Loading the whole folder means reading twelve answers to get one."],
-                    ["Older versions stay as they were", "Pages for v1.11 to v1.19 are correct for those versions and are only fixed when something in them is wrong. New topics go into the current version's folder."],
+                    ["Then one page", "Each topic page for the current version stands on its own. The current folder has 15 topics. Read the one your task needs, not all the other answers."],
+                    ["Older versions stay as they were", "Pages for v1.11 to v1.21 are correct for those versions and are only fixed when something in them is wrong. New topics go into the current version's folder."],
                     ["It also says what does not exist", "The matrix names the API that never shipped: WorkflowSuspendedException does not exist in any MAF version. Waiting for a human is RequestPort, PendingRequests and ResumeAsync, in every version."]
                 ],
                 desc: "This page is about the framework; this last view is about the skill behind it. When an agent uses the skill to answer a question, it reads three things: the project file to learn which MAF version is installed, one compatibility matrix, and one topic page written for that version. Never a whole folder.",
@@ -741,7 +758,7 @@ foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>()) Console.WriteLi
                 code: `# How this skill answers a question -- three reads, never a folder
 
 1. RESOLVE the version.
-   Read the .csproj: Microsoft.Agents.AI.Workflows / Microsoft.Agents.AI  ->  e.g. 1.20.0
+   Read the .csproj: Microsoft.Agents.AI.Workflows / Microsoft.Agents.AI  ->  e.g. 1.22.0
    (Microsoft.Agents.Builder / Microsoft.Agents.Hosting.AspNetCore is the M365 Agents SDK: not this skill.)
 
 2. CHECK the matrix.
@@ -755,6 +772,8 @@ foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>()) Console.WriteLi
    Build an agent: ChatClientAgent, sessions, binding, modes          agent-layer-core.md
    Wrap an agent: approval middleware, concurrency, routing           agent-middleware.md   (v1.19+)
    Background agents: releasing a session, the wait-tool timeout      background-agents.md  (v1.20+)
+   Store agent conversations across requests                       agent-session-store.md (v1.22+)
+   Expose an agent as IChatClient                                    agent-chat-client.md   (v1.22+)
    Autonomous iteration: LoopAgent and evaluators                     agent-loops.md
    Agent skills, tool approval, file stores                           agent-skills.md
    Keep a long conversation inside the window                         context-compaction.md
@@ -766,8 +785,8 @@ foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>()) Console.WriteLi
    Host a workflow as an agent: AsAIAgent, checkpoint redirection     workflow-hosting.md   (v1.19+)
    Observe a run: the event taxonomy and typed output                 workflow-events.md
 
-A v1.19 or v1.20 page is self-contained: it needs no second page to be understood.
-Loading a whole folder buys you every other topic in it (13 pages, ~135 KB) for nothing.`,
+A page from v1.19 onward is self-contained: it needs no second page to be understood.
+Loading a whole folder buys you every other topic in it (15 topic pages) for nothing.`,
                 svg: `
 <svg width="650" height="290" viewBox="0 0 650 290" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path class="animated-line" d="M 175 80 H 235" stroke="#38bdf8" stroke-width="2"/>
@@ -777,27 +796,27 @@ Loading a whole folder buys you every other topic in it (13 pages, ~135 KB) for 
     <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('1. Find the version', 'Read the .csproj for Microsoft.Agents.AI.Workflows or Microsoft.Agents.AI. A project using Microsoft.Agents.Builder or Microsoft.Agents.Hosting.AspNetCore is on the separate Microsoft 365 Agents SDK, which this skill does not cover.')">
         <rect x="25" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="100" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">1. Resolve version</text>
-        <text x="100" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">.csproj: 1.20.0</text>
+        <text x="100" y="94" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">.csproj: 1.22.0</text>
     </g>
     <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('2. Check the matrix', 'references/version-map.md: one table of features by version, with experimental cells marked, what was removed or renamed, and the fallback rules.')">
         <rect x="235" y="47" width="180" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="325" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">2. Check the matrix</text>
         <text x="325" y="94" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">version-map.md</text>
     </g>
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('3. Read one topic page', 'references/v1.20/ has one page per topic, picked from the task table in the skill body. Each page stands on its own; a link to another version is background, never required. The skill measures this: 13 topics, one file each.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('3. Read one topic page', 'references/v1.22/ has one page per topic, picked from the task table in the skill body. Each page stands on its own; a link to another version is background, never required. The skill measures this: 15 topics, one file each.')">
         <rect x="475" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="550" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">3. Read ONE page</text>
-        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">references/v1.20/topic.md</text>
+        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">references/v1.22/topic.md</text>
     </g>
 
-    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('Not this: the whole folder', 'The current folder is 13 pages, about 135 KB. Loading all of it to answer one question means reading twelve answers you did not ask for. The skill body links pages, never folders, for exactly this reason.')">
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('Not this: the whole folder', 'The current folder is 15 topic pages. Loading all of it to answer one question means reading unrelated answers you did not ask for. The skill body links pages, never folders, for exactly this reason.')">
         <rect x="205" y="175" width="240" height="56" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 4"/>
         <text x="325" y="199" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">the whole folder</text>
-        <text x="325" y="217" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">13 pages, ~135 KB: never the route</text>
+        <text x="325" y="217" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">15 topic pages: never the route</text>
         <line x1="215" y1="185" x2="435" y2="221" stroke="#ef4444" stroke-width="1.5" opacity="0.6"/>
     </g>
 
-    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Older folders (v1.11 to v1.19) are frozen historical record - correct for their pin, fixed in place, never restructured</text>
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Older folders (v1.11 to v1.21) are frozen historical record - correct for their pin, fixed in place, never restructured</text>
 </svg>`
             },
             compaction: {
@@ -808,7 +827,7 @@ Loading a whole folder buys you every other topic in it (13 pages, ~135 KB) for 
                     ["Nothing is deleted, only hidden", "A strategy doesn't remove messages. It marks groups of them as excluded, and the model simply stops seeing them. That's why tool calls and their results never get separated by accident."],
                     ["Set the formatter when you create the strategy", "ToolResultCompactionStrategy lets you decide how a shrunk tool result looks, but only in the object initializer. Setting it later won't compile."],
                     ["Write your own by overriding CompactCoreAsync", "Not CompactAsync, which can't be overridden. Your class gets the index, marks what it wants hidden, and returns true if it changed anything."],
-                    ["Same in every version", "These 15 types haven't changed from v1.10 to v1.20, so what you learn here works on any version you're pinned to."]
+                    ["Same in every version", "These 15 types haven't changed from v1.10 to v1.22, so what you learn here works on any version you're pinned to."]
                 ],
                 desc: "A long conversation eventually stops fitting the model's context window. Instead of writing your own code to trim history, you plug in three small pieces: a trigger that says when to compact, a strategy that says what to drop or summarise, and a provider that runs them inside the agent. Click a node to see how each piece behaves.",
                 file: "ContextCompaction.cs",
@@ -887,10 +906,10 @@ sealed class DropFailedToolCalls : CompactionStrategy
         <text x="565" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Trigger</text>
         <text x="565" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">TokensExceed(100k)</text>
     </g>
-    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Strategy: what to do', 'Every strategy takes its trigger first; everything else is optional. SlidingWindow keeps the last N turns. Truncation drops the oldest groups. ToolResult shrinks tool output but keeps the call visible. ContextWindow works out a budget from the model window and output size. Summarization asks a model to condense old history. Pipeline runs several in order. ChatReducer wraps an existing IChatReducer.')">
+    <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Strategy: what to do', 'Every strategy takes its trigger first; everything else is optional. SlidingWindowCompactionStrategy keeps the last N turns. Truncation drops the oldest groups. ToolResultCompactionStrategy shrinks tool output but keeps the call visible. ContextWindowCompactionStrategy works out a budget from the model window and output size. Summarization asks a model to condense old history. Pipeline runs several in order. ChatReducer wraps an existing IChatReducer.')">
         <rect x="205" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
         <text x="325" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">CompactionStrategy</text>
-        <text x="325" y="215" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">SlidingWindow, ToolResult, Summarization, Pipeline...</text>
+        <text x="325" y="215" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">Sliding window, tool results, summarization, pipeline...</text>
     </g>
     <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Provider: plugs it into the agent', 'Give it a strategy and add it to the agent through ChatClientAgentOptions.AIContextProviders or ChatClientBuilder.UseAIContextProviders. From then on the history is compacted automatically. For a one-off, the static CompactAsync compacts a list of messages without any provider.')">
         <rect x="475" y="168" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
@@ -898,7 +917,7 @@ sealed class DropFailedToolCalls : CompactionStrategy
         <text x="550" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">an AIContextProvider</text>
     </g>
 
-    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">15 types, byte-identical v1.10 to v1.20 - the override target and the init-only accessor are compile facts, not dump facts</text>
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">15 types, same public signatures v1.10 to v1.22 - the override target and the init-only accessor are compile facts, not dump facts</text>
 </svg>`
             },
             declarative: {
@@ -911,7 +930,7 @@ sealed class DropFailedToolCalls : CompactionStrategy
                     ["3. Connect them in ConfigureProtocol", "Override ConfigureProtocol. Read the attributes in (AddClassAttributeTypes, AddMethodAttributeTypes), then connect each message type to its method (ConfigureRoutes, AddHandler). This is the step that makes it work, and it's required: the build fails without it."],
                     ["Don't reach for ReflectingExecutor", "It's the old way, marked obsolete since v1.11. It still compiles, so nothing stops you, but it will be removed."]
                 ],
-                desc: "If executors are new to you, read The Building Blocks first. Most executors handle one message type: you derive from Executor<TIn> and override HandleAsync. This page is about the other case, one executor that accepts several types. You write a method per type, label each with [MessageHandler], and connect them in one required method, ConfigureProtocol. The Router below was run against 1.20.0: given the text hello, it outputs 5, the length.",
+                desc: "If executors are new to you, read The Building Blocks first. Most executors handle one message type: you derive from Executor<TIn> and override HandleAsync. This page is about the other case, one executor that accepts several types. You write a method per type, label each with [MessageHandler], and connect them in one required method, ConfigureProtocol. The Router below was run against 1.22.0: given the text hello, it outputs 5, the length.",
                 file: "DeclarativeExecutor.cs",
                 code: `using Microsoft.Agents.AI.Workflows;
 
@@ -951,7 +970,7 @@ internal sealed class Router : Executor
         <text x="550" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">RouteBuilder</text>
         <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">AddHandler / AddCatchAll</text>
     </g>
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('What the sample does when run', 'Running the Router against 1.20.0: it reports that it takes System.String and outputs System.Int32, and the text hello comes out as 5, its length.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('What the sample does when run', 'Running the Router against 1.22.0: it reports that it takes System.String and outputs System.Int32, and the text hello comes out as 5, its length.')">
         <rect x="475" y="168" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="550" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">string in, int out</text>
         <text x="550" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">hello yields 5 (executed)</text>
@@ -975,7 +994,7 @@ internal sealed class Router : Executor
                     ["The method is RunStreamingAsync", "There is no StreamAsync. RunAsync runs to completion; RunStreamingAsync gives you the event stream. RunToCompletionAsync drains the stream for you and lets a callback answer requests."],
                     ["You can add your own events", "WorkflowEvent isn't sealed. Derive from it and call AddEventAsync inside an executor, and your progress rides the same stream as everything else."]
                 ],
-                desc: "When you run a workflow as a stream, it hands you a sequence of events: an executor started, a round finished, the run needs a human, here is the output. There are 21 event types, all small, all deriving from one base. Progress bars, logging and the human-in-the-loop pause all read from this one stream. Same 21 types from v1.11 to v1.20.",
+                desc: "When you run a workflow as a stream, it hands you a sequence of events: an executor started, a round finished, the run needs a human, here is the output. There are 21 event types, all small, all deriving from one base. Progress bars, logging and the human-in-the-loop pause all read from this one stream. Same 21 types from v1.11 to v1.22.",
                 file: "WorkflowEvents.cs",
                 notes: '<table><tr><th>All 21 event types</th><th>What it tells you</th></tr><tr class="group"><td colspan="2">Lifecycle</td></tr><tr><td>WorkflowEvent</td><td>the base of all 21: one Data object, a readable ToString; derive from it for your own events</td></tr><tr><td>WorkflowStartedEvent</td><td>the run started; Data is the input</td></tr><tr class="group"><td colspan="2">Rounds (supersteps)</td></tr><tr><td>SuperStepEvent</td><td>base of the two round events; StepNumber</td></tr><tr><td>SuperStepStartedEvent</td><td>a round began; StartInfo says which executors are sending and whether external messages arrived</td></tr><tr><td>SuperStepCompletedEvent</td><td>a round ended; CompletionInfo says which executors ran, whether state changed, whether messages or a human request are pending, and the checkpoint if one was taken</td></tr><tr class="group"><td colspan="2">Executors</td></tr><tr><td>ExecutorEvent</td><td>base of the three executor events; ExecutorId</td></tr><tr><td>ExecutorInvokedEvent</td><td>an executor started</td></tr><tr><td>ExecutorCompletedEvent</td><td>an executor finished</td></tr><tr><td>ExecutorFailedEvent</td><td>an executor threw; the exception is in Data</td></tr><tr class="group"><td colspan="2">Output</td></tr><tr><td>WorkflowOutputEvent</td><td>a result: Is&lt;T&gt;, As&lt;T&gt;, HasTag, IsIntermediate; list this case last in a switch</td></tr><tr><td>AgentResponseEvent</td><td>a finished agent reply (a kind of WorkflowOutputEvent)</td></tr><tr><td>AgentResponseUpdateEvent</td><td>one streamed piece of an agent reply; AsResponse folds them (a kind of WorkflowOutputEvent)</td></tr><tr class="group"><td colspan="2">Errors and warnings</td></tr><tr><td>WorkflowErrorEvent</td><td>the workflow failed; the exception is in Exception</td></tr><tr><td>SubworkflowErrorEvent</td><td>a nested workflow failed</td></tr><tr><td>WorkflowWarningEvent</td><td>something worth knowing that did not stop the run</td></tr><tr><td>SubworkflowWarningEvent</td><td>a warning from a nested workflow</td></tr><tr class="group"><td colspan="2">Waiting for a human</td></tr><tr><td>RequestInfoEvent</td><td>the run is waiting on a person; carries the ExternalRequest to answer</td></tr><tr class="group"><td colspan="2">Magentic (namespace Specialized.Magentic)</td></tr><tr><td>MagenticOrchestratorEvent</td><td>base of the three manager events; carries the ledger</td></tr><tr><td>MagenticPlanCreatedEvent</td><td>the manager made a plan</td></tr><tr><td>MagenticReplannedEvent</td><td>the manager changed the plan</td></tr><tr><td>MagenticProgressLedgerUpdatedEvent</td><td>the manager updated its progress ledger</td></tr></table>',
                 code: `using Microsoft.Agents.AI.Workflows;
@@ -1023,7 +1042,7 @@ sealed class ProgressEvent : WorkflowEvent
     <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Lifecycle and rounds', 'WorkflowStartedEvent carries the input. SuperStepStartedEvent and SuperStepCompletedEvent bracket each round: the completed one tells you which executors ran, whether state changed, whether messages or requests are pending, and the checkpoint if one was taken. Its HasPendingRequests flag is how you know a human is needed.')">
         <rect x="15" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="70" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Lifecycle</text>
-        <text x="70" y="158" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">Started, SuperStep x2</text>
+        <text x="70" y="158" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">Started, two round events</text>
     </g>
     <g class="node" style="--glow-color: #fb923c;" onclick="showNodeDetails('Executors', 'ExecutorInvokedEvent, ExecutorCompletedEvent and ExecutorFailedEvent, each with the executor id. On the failed one, the exception is in Data, not in a property called Exception.')">
         <rect x="135" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#fb923c" stroke-width="2"/>
@@ -1033,7 +1052,7 @@ sealed class ProgressEvent : WorkflowEvent
     <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('Errors, warnings and the human request', 'WorkflowErrorEvent and WorkflowWarningEvent, with Subworkflow variants for nested workflows; the error exposes Exception. RequestInfoEvent carries the request the workflow is waiting on a human to answer. See the RequestPort view for what to do with it.')">
         <rect x="270" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2"/>
         <text x="325" y="141" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Trouble + HITL</text>
-        <text x="325" y="158" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">Error, Warning, RequestInfo</text>
+        <text x="325" y="158" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">Errors, warnings, human requests</text>
     </g>
     <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('Output: the one branch you inspect', 'WorkflowOutputEvent knows which executor produced it and carries tags. Is<T> tests the type, As<T> casts, HasTag checks a tag, and IsIntermediate (an extension method) tells you it is not the final answer. The two agent events derive from it, which is why it goes last in a switch.')">
         <rect x="405" y="118" width="110" height="58" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2.5"/>
@@ -1051,20 +1070,20 @@ sealed class ProgressEvent : WorkflowEvent
         <text x="460" y="238" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">derive from Output: case order matters</text>
     </g>
 
-    <text x="325" y="278" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">21 types, identical v1.11 to v1.20 - a workflow hosted as an agent is observed through the agent surface instead</text>
+    <text x="325" y="278" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">21 types, identical v1.11 to v1.22 - a workflow hosted as an agent is observed through the agent surface instead</text>
 </svg>`
             },
             skills: {
                 title: "Agent Skills, File Stores and Tool Approval",
                 principlesTitle: "The Idea in Short",
                 principles: [
-                    ["This whole area is marked experimental", "Compiling against it gives you the MAAI001 diagnostic until you suppress it. Do that in the one project that uses it, not for the whole solution."],
+                    ["File-access types are experimental on the 1.22 pin", "The file-access types raise MAAI001 until suppressed. Skill-source/provider and tool-approval types are not type-level gated on this pin. Scope suppression to the project that uses file access."],
                     ["The Disable switches remove a human check quietly", "Each Disable...Approval flag turns off a prompt for a whole class of operations. Nothing in the transcript says a prompt was skipped. Combined with a broad auto-approval rule, everything goes through and nothing is recorded."],
                     ["Auto-approval can't loop forever", "Each round of auto-approved calls is a fresh call to the inner agent, so a per-call limit wouldn't help. MaxAutoApprovalIterations is the cap; leave it null and you get 40, a constant you won't find in an API listing."],
                     ["Dispose the chain", "Sources, the skills provider and the file provider all implement IDisposable. Pass ownsSource: true and disposing the provider disposes everything it wraps."],
                     ["Rules see the whole situation", "An approval rule doesn't just get the function name. It gets the call plus the agent, the session, the request messages and the run options, so policy can depend on who is asking."]
                 ],
-                desc: "Three things an agent host has to decide: where the agent's reusable skills come from, how the agent reads and writes files, and who approves a tool call before it runs. The first two are providers you plug in. The third is a small set of rules and switches that are easy to combine badly. Same shapes from v1.18 to v1.20.",
+                desc: "Three things an agent host has to decide: where the agent's reusable skills come from, how the agent reads and writes files, and who approves a tool call before it runs. The first two are providers you plug in. The third is a small set of rules and switches that are easy to combine badly. Skill-source and approval guidance remains; open Safe File Edits for the new 1.21 search and edit contract.",
                 file: "SkillsAndApproval.cs",
                 code: `using Microsoft.Agents.AI;
 using Microsoft.Extensions.Logging;
@@ -1141,7 +1160,7 @@ var gated = new ToolApprovalAgent(innerAgent, new ToolApprovalAgentOptions
         <text x="550" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">ToolApprovalAgent</text>
         <text x="550" y="215" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">cap: null = const 40 (v1.18+)</text>
     </g>
-    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('The Disable flags', 'AgentSkillsProviderOptions has DisableLoadSkillApproval, DisableReadSkillResourceApproval and DisableRunSkillScriptApproval. FileAccessProviderOptions has DisableWriteTools, DisableReadOnlyToolApproval and DisableWriteToolApproval. Each removes a human check with no prompt and no record. Never combine one with a broad auto-approval rule.')">
+    <g class="node" style="--glow-color: #ef4444;" onclick="showNodeDetails('Approval flags and write-tool availability', 'AgentSkillsProviderOptions has DisableLoadSkillApproval, DisableReadSkillResourceApproval and DisableRunSkillScriptApproval. FileAccessProviderOptions has DisableReadOnlyToolApproval and DisableWriteToolApproval. These approval flags remove human checks; never combine them with a broad auto-approval rule. Separately, FileAccessProviderOptions.DisableWriteTools omits modifying tools and exposes only read-only tools.')">
         <rect x="205" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 4"/>
         <text x="325" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Disable*Approval flags</text>
         <text x="325" y="215" fill="#ef4444" font-family="Outfit" font-size="9" text-anchor="middle">no prompt, no record - fail open</text>
@@ -1149,10 +1168,241 @@ var gated = new ToolApprovalAgent(innerAgent, new ToolApprovalAgentOptions
     <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('AgentFileStore: how agents touch files', 'The interface behind FileSystemAgentFileStore and InMemoryAgentFileStore, used by FileAccessProvider. WriteAsync, ReadAsync, FileExistsAsync, DeleteAsync, SearchAsync, and ListChildrenAsync, which returns entries with a Name and a Type for files and folders alike. The method names changed in v1.13; the old ones are gone.')">
         <rect x="15" y="168" width="160" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="95" y="196" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">AgentFileStore</text>
-        <text x="95" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">Write/Read/ListChildren/Search</text>
+        <text x="95" y="215" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">Write / read / list children / search</text>
     </g>
 
     <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Log the rule that approved a call, and log when the cap ends a run - that is the signal a model is looping on a tool</text>
+</svg>`
+            },
+            fileedits: {
+                title: "Safe File Edits (v1.21+)",
+                principlesTitle: "Shared line numbers, guarded writes",
+                principles: [["One coordinate system", "SplitLines keeps CRLF, LF and lone CR endings. ScanContent matches without the terminator but returns verbatim lines and 1-based numbers; no match returns null. Use these helpers when overriding SearchAsync."], ["A default search now exists", "SearchAsync is virtual rather than abstract from 1.21. Existing overrides still work. A store can inherit the base implementation instead of rebuilding its search loop."], ["Reject stale edits", "ExpectedLine is optional and nullable. When provided, replace_lines rejects a mismatch with ArgumentException. Supply the original text, not the number-and-tab prefix from a numbered read; the comparison ignores its trailing terminator."], ["Keep the replacement newline", "NewLine contains the complete replacement, including its desired terminator. Omitting the newline joins the replacement to the following line."], ["Not a storage lock", "ExpectedLine catches a stale line, but it does not make read/edit/write transactional. Protect concurrent writes in the actual storage implementation. File-access types remain MAAI001-gated."]],
+                desc: "Search and edit must agree about which line is being changed. In 1.21, AgentFileStore publishes the line-splitting and scanning helpers used by file access, gives SearchAsync a default implementation, and adds ExpectedLine to reject a stale edit. The sample only prepares an edit; it does not write it.",
+                file: "SafeFileEdits.cs",
+                code: `// MAF 1.21+: file-access types require MAAI001 suppression.
+var files = new InMemoryAgentFileStore();
+await files.WriteAsync("notes.txt", "first\\r\\nsecond\\r\\nthird");
+string content = await files.ReadAsync("notes.txt");
+IReadOnlyList<string> lines = AgentFileStore.SplitLines(content);
+FileSearchResult match = AgentFileStore.ScanContent("notes.txt", content, new Regex("second$"));
+if (match is not null)
+{
+    FileSearchMatch found = match.MatchingLines[0];
+    var edit = new FileLineEdit
+    {
+        LineNumber = found.LineNumber, // 1-based: 2 here
+        ExpectedLine = found.Line,     // the text seen during the search
+        NewLine = "updated\\r\\n"      // keep the desired line ending
+    };
+    // Pass this edit to the file-access replace_lines tool.
+    // Constructing FileLineEdit alone does not write the file.
+    Console.WriteLine($"Guard line {edit.LineNumber}; total lines: {lines.Count}");
+}`,
+                svg: `<svg width="650" height="320" viewBox="0 0 650 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Search coordinates and guarded replacement">
+<path class="animated-line" d="M195 75 H235" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M415 75 H455" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M545 110 V145 H210 V175" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M545 145 H440 V175" stroke="#4b7b86" stroke-width="2"/>
+<g class="node" role="button" tabindex="0" aria-label="Search content" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Search content&quot;,&quot;Use the same content returned by ReadAsync. ScanContent reports 1-based coordinates and preserves the original terminator.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="40" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="105.0" y="68" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Search content</text>
+<text x="105.0" y="89" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">SplitLines / ScanContent</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Match: line 2" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Match: line 2&quot;,&quot;The regex second$ matches the line without its CRLF. The returned FileSearchMatch.Line includes the CRLF.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="40" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="325.0" y="68" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Match: line 2</text>
+<text x="325.0" y="89" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">second + CRLF</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Prepare edit" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Prepare edit&quot;,&quot;Carry the observed line into ExpectedLine and include the desired newline in NewLine. Constructing the edit does not apply it.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="455" y="40" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="545.0" y="68" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Prepare edit</text>
+<text x="545.0" y="89" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">ExpectedLine + NewLine</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Still matches" style="--glow-color: #10b981;" onclick="showNodeDetails(&quot;Still matches&quot;,&quot;The file-access line editor accepts a matching guard. Comparison ignores the expected trailing terminator.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="120" y="175" width="180" height="70" rx="10" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+<text x="210.0" y="203" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Still matches</text>
+<text x="210.0" y="224" fill="#10b981" font-family="Outfit" font-size="10" text-anchor="middle">apply replacement</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Changed since read" style="--glow-color: #f59e0b;" onclick="showNodeDetails(&quot;Changed since read&quot;,&quot;A mismatching ExpectedLine raises ArgumentException instead of silently editing a different line.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="350" y="175" width="180" height="70" rx="10" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+<text x="440.0" y="203" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Changed since read</text>
+<text x="440.0" y="224" fill="#f59e0b" font-family="Outfit" font-size="10" text-anchor="middle">reject and reread</text></g>
+<text x="325" y="298" fill="#9ca3af" font-family="Outfit" font-size="11" text-anchor="middle">Search -&gt; observed text -&gt; guarded edit; never guess the line number.</text>
+</svg>`
+            },
+            sessionstores: {
+                title: "Agent Session Storage (v1.22)",
+                principlesTitle: "Load, run, save explicitly",
+                principles: [["Lookup is not creation", "GetSessionAsync returns null on a miss. GetOrCreateSessionAsync calls that lookup and creates through the owning agent only when necessary. Neither operation automatically saves a new session."], ["Every partition is identity", "AgentSessionStoreKey combines SessionId with all named partitions. Names are case-sensitive; ordering does not change equality or the hash. No partitions means Partitions is null. WithPartition returns a new key, or the same instance when its value already matches."], ["Store independent sessions", "The package contract requires a successful lookup to return an independent session instance. Serialize and restore through the owning agent instead of handing several callers the same mutable object."], ["Save is a host decision", "SaveSessionAsync persists the intended turn. Independent copies do not resolve conflicting saves: choose an optimistic-concurrency or other backend policy. Derive tenant partitions from trusted identity, not model arguments."], ["Decorate the store", "DelegatingAgentSessionStore forwards lookup, save and service discovery to an inner store. GetService exposes an assignable base store without a service key; keyed requests need an implementation that supports them."], ["What was exercised", "Offline probes cover key identity, miss/create without save, explicit save forwarding and service discovery. Durable storage, independent-instance restoration and concurrent-save behavior remain backend responsibilities."]],
+                desc: "AgentSessionStore is a contract for persisting agent conversations across requests. It is separate from workflow checkpoints and supplies no database. The host chooses the backend, trusted identity partitions and save policy. All three new store types are experimental.",
+                file: "SessionStoreUsage.cs",
+                code: `// MAF 1.22; MAAI001. innerAgent and sessionStore are host-provided.
+// Resolve tenant identity from trusted host context, not model arguments.
+var key = new AgentSessionStoreKey("conversation-42")
+    .WithPartition("tenant", "tenant-a");
+AgentSession conversation = await sessionStore.GetOrCreateSessionAsync(innerAgent, key, ct);
+AgentResponse answer = await innerAgent.RunAsync("Continue the conversation", conversation, cancellationToken: ct);
+// GetOrCreateSessionAsync does not save. Save after the intended turn.
+await sessionStore.SaveSessionAsync(innerAgent, key, conversation, ct);
+Console.WriteLine(answer.Text);`,
+                svg: `<svg width="650" height="320" viewBox="0 0 650 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Explicit agent session persistence">
+<path class="animated-line" d="M195 70 H235" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M415 70 H455" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M545 105 V210 H415" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M235 210 H195" stroke="#4b7b86" stroke-width="2"/>
+<g class="node" role="button" tabindex="0" aria-label="Trusted identity" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Trusted identity&quot;,&quot;Every key partition must be honored along with the owning agent. A partition identifies a tenant; it does not authorize access.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="35" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="105.0" y="63" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Trusted identity</text>
+<text x="105.0" y="84" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">agent + tenant + session</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Lookup or create" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Lookup or create&quot;,&quot;GetSessionAsync may return null. The default GetOrCreateSessionAsync creates through the agent on a miss but does not persist it.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="35" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="325.0" y="63" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Lookup or create</text>
+<text x="325.0" y="84" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">GetOrCreateSessionAsync</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Run intended turn" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Run intended turn&quot;,&quot;The backend must restore an independent instance per successful lookup. Do not share a mutable session across concurrent callers.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="455" y="35" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="545.0" y="63" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Run intended turn</text>
+<text x="545.0" y="84" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">independent session</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Save explicitly" style="--glow-color: #10b981;" onclick="showNodeDetails(&quot;Save explicitly&quot;,&quot;The host persists after its intended operation and enforces its storage concurrency policy. This is agent state, not a workflow checkpoint.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="175" width="180" height="70" rx="10" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+<text x="325.0" y="203" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Save explicitly</text>
+<text x="325.0" y="224" fill="#10b981" font-family="Outfit" font-size="10" text-anchor="middle">SaveSessionAsync</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Backend policy" style="--glow-color: #f59e0b;" onclick="showNodeDetails(&quot;Backend policy&quot;,&quot;Implement serialization, trusted partition scoping and conflicting-save handling in your storage backend.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="175" width="180" height="70" rx="10" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+<text x="105.0" y="203" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Backend policy</text>
+<text x="105.0" y="224" fill="#f59e0b" font-family="Outfit" font-size="10" text-anchor="middle">copies + isolation</text></g>
+<text x="325" y="298" fill="#9ca3af" font-family="Outfit" font-size="11" text-anchor="middle">GetOrCreateSessionAsync does not save. A live in-memory session is not durable storage.</text>
+</svg>`
+            },
+            chatadapter: {
+                title: "Agent to Chat Client (v1.22)",
+                principlesTitle: "Choose one conversation contract",
+                principles: [["Stateless means full history", "Without a session, callers supply the full history on every call and responses carry no conversation ID. Agent-wide memory or a separately configured service conversation can still persist."], ["Bound means new messages only", "With a session, responses use a fixed explicit ID or a generated client ID. Send only new messages. Echoing that ID is accepted and stripped before reaching the agent; a different nonblank ID raises InvalidOperationException."], ["One session, one request at a time", "Serialize calls through a bound adapter. Do not register it as a shared singleton across users: histories would mix, and concurrent use is unsupported. An ID supplied without a session raises ArgumentException."], ["Custom agents are an opt-in", "The default requires ChatClientAgent or an agent exposing one through unkeyed GetService. Other agents raise InvalidOperationException unless allowNonChatClientAgents is true. They may ignore options; only ResponseFormat is also copied to general agent run options."], ["Filter caller options", "On agents that honor ChatOptions, caller tools are added and instructions appended. Map trusted settings explicitly. Rewriting ConversationId does not strip other potentially sensitive response metadata."], ["Know the adapter limits", "Package contract: background/continuation tokens do not round-trip; an empty bound stream still emits an ID-only update. Offline probes verify ID handling and custom-agent rejection, not a live model or these streaming edge cases."]],
+                desc: "AsIChatClient exposes the full agent pipeline through IChatClient. It does not unwrap the model client. Decide whether the adapter is stateless or bound to one session before wiring it into a host. This extension requires MAAI001 suppression.",
+                file: "AgentChatClient.cs",
+                code: `// MAF 1.22; MAAI001. chatClient is your configured model client.
+var agent = new ChatClientAgent(chatClient, instructions: "Answer concisely.");
+using IChatClient stateless = agent.AsIChatClient();
+// Stateless calls send full history; returned ConversationId is null.
+
+AgentSession conversation = await agent.CreateSessionAsync();
+using IChatClient stateful = agent.AsIChatClient(conversation, conversationId: "conversation-42");
+ChatResponse first = await stateful.GetResponseAsync("Remember the number 7.");
+ChatResponse next = await stateful.GetResponseAsync("What number?",
+    new ChatOptions { ConversationId = first.ConversationId });
+// Send only new messages to a bound session, and serialize its calls.
+// Custom agents require allowNonChatClientAgents: true and may ignore options.
+Console.WriteLine(next.Text);`,
+                svg: `<svg width="650" height="320" viewBox="0 0 650 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Stateless and session-bound chat adapters">
+<path class="animated-line" d="M195 70 H235" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M415 70 H455" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M195 215 H235" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M415 215 H455" stroke="#4b7b86" stroke-width="2"/>
+<g class="node" role="button" tabindex="0" aria-label="Full history" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Full history&quot;,&quot;A sessionless adapter expects the caller to supply the conversation history for each call.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="35" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="105.0" y="63" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Full history</text>
+<text x="105.0" y="84" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">every request</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Stateless adapter" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Stateless adapter&quot;,&quot;The adapter holds no session and clears response conversation identifiers. Other agent-wide state may still exist.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="35" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="325.0" y="63" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Stateless adapter</text>
+<text x="325.0" y="84" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">no AgentSession</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Response" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Response&quot;,&quot;Do not try to resume this adapter by a service conversation ID.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="455" y="35" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="545.0" y="63" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Response</text>
+<text x="545.0" y="84" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">ConversationId = null</text></g>
+<g class="node" role="button" tabindex="0" aria-label="New message only" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;New message only&quot;,&quot;Do not resend the whole history: the bound session already stores it. Serialize calls.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="180" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="105.0" y="208" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">New message only</text>
+<text x="105.0" y="229" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">one request at a time</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Bound adapter" style="--glow-color: #10b981;" onclick="showNodeDetails(&quot;Bound adapter&quot;,&quot;The client uses the same session and a fixed client conversation ID for its lifetime.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="180" width="180" height="70" rx="10" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+<text x="325.0" y="208" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Bound adapter</text>
+<text x="325.0" y="229" fill="#10b981" font-family="Outfit" font-size="10" text-anchor="middle">one AgentSession</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Fixed client ID" style="--glow-color: #10b981;" onclick="showNodeDetails(&quot;Fixed client ID&quot;,&quot;The accepted ID is stripped before the agent sees options. A different nonblank ID is rejected.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="455" y="180" width="180" height="70" rx="10" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+<text x="545.0" y="208" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Fixed client ID</text>
+<text x="545.0" y="229" fill="#10b981" font-family="Outfit" font-size="10" text-anchor="middle">echo it or omit it</text></g>
+<text x="325" y="298" fill="#9ca3af" font-family="Outfit" font-size="11" text-anchor="middle">The full agent pipeline remains in place; its tool and instruction policies still matter.</text>
+</svg>`
+            },
+            agentmodes: {
+                title: "Host-Controlled Modes (v1.22)",
+                principlesTitle: "Hide model tools, retain host control",
+                principles: [["Defaults keep both tools", "DisableModeSetTool and DisableModeGetTool both default to false. Set each independently to omit the corresponding model tool."], ["Host calls still work", "Turning off the tools does not disable GetModeAsync or SetModeAsync. The offline probe disables both, confirms no mode tools are contributed, then changes and reads the session mode."], ["A quiet change still changes", "SetModeAsync with disableNotification: true changes the mode. The package contract says it omits the mode-change notification; the normal overload retains its existing behavior."], ["Attach the same provider", "Use AgentModeProvider in the agent context and change the same session the host will run. Mode definitions are AgentModeProviderOptions.AgentMode, a nested type."], ["Instructions are not permissions", "A read or write mode is guidance to the agent, not enforcement. Keep access checks and tool approval independent of the selected mode."]],
+                desc: "The host can omit the built-in mode getter, setter, or both while retaining programmatic access. A new SetModeAsync overload can suppress the mode-change notification. These additions are not experimental-gated.",
+                file: "HostModes.cs",
+                code: `// MAF 1.22: these mode controls are not MAAI001-gated.
+using var modes = new AgentModeProvider(new AgentModeProviderOptions
+{
+    Modes = new[]
+    {
+        new AgentModeProviderOptions.AgentMode("read", "Inspect and explain."),
+        new AgentModeProviderOptions.AgentMode("write", "Apply the approved changes.")
+    },
+    DefaultMode = "read",
+    DisableModeSetTool = true,
+    DisableModeGetTool = true
+});
+// session belongs to the host; attach this provider to its agent context.
+// Turning off model tools does not disable the host API.
+await modes.SetModeAsync(session, "write", disableNotification: true, cancellationToken: ct);
+Console.WriteLine(await modes.GetModeAsync(session, ct)); // write
+// A mode is instructions, not an authorization boundary. Enforce tool policy separately.`,
+                svg: `<svg width="650" height="320" viewBox="0 0 650 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Host-only mode control">
+<path class="animated-line" d="M415 80 H455" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M325 115 V180" stroke="#4b7b86" stroke-width="2"/>
+<g class="node" role="button" tabindex="0" aria-label="Model tools" style="--glow-color: #f59e0b;" onclick="showNodeDetails(&quot;Model tools&quot;,&quot;Both disable flags default to false. In this example they are true, so neither built-in tool is contributed.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="45" width="180" height="70" rx="10" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+<text x="105.0" y="73" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Model tools</text>
+<text x="105.0" y="94" fill="#f59e0b" font-family="Outfit" font-size="10" text-anchor="middle">getter / setter omitted</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Host decision" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;Host decision&quot;,&quot;The host retains programmatic access even when the model has no mode tools. These controls are not MAAI001-gated.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="45" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="325.0" y="73" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Host decision</text>
+<text x="325.0" y="94" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">SetModeAsync</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Session mode" style="--glow-color: #10b981;" onclick="showNodeDetails(&quot;Session mode&quot;,&quot;GetModeAsync returns the changed mode. Use the same provider and session that the agent uses.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="455" y="45" width="180" height="70" rx="10" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+<text x="545.0" y="73" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Session mode</text>
+<text x="545.0" y="94" fill="#10b981" font-family="Outfit" font-size="10" text-anchor="middle">read -&gt; write</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Notification" style="--glow-color: #f59e0b;" onclick="showNodeDetails(&quot;Notification&quot;,&quot;Package contract: disableNotification true omits the mode-change message, not the mode change.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="180" width="180" height="70" rx="10" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+<text x="325.0" y="208" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Notification</text>
+<text x="325.0" y="229" fill="#f59e0b" font-family="Outfit" font-size="10" text-anchor="middle">optional suppression</text></g>
+<text x="325" y="298" fill="#9ca3af" font-family="Outfit" font-size="11" text-anchor="middle">Mode instructions guide behavior. Tool authorization still belongs to the host.</text>
+</svg>`
+            },
+            v122: {
+                title: "MAF 1.21 and 1.22: What Changed",
+                principlesTitle: "Two releases, separate adoption checks",
+                principles: [["1.21: search and edit agree", "AgentFileStore adds SplitLines and ScanContent, SearchAsync gains a default implementation, and FileLineEdit adds ExpectedLine. Open Safe File Edits for the stale-line and newline traps."], ["1.22: host the conversation", "AgentSessionStore, AgentSessionStoreKey and DelegatingAgentSessionStore define persistence contracts. AsIChatClient exposes an agent through a sessionless or session-bound adapter. Each has its own topic view."], ["1.22: modes and telemetry", "AgentModeProvider gains tool switches and a notification-suppressing overload. OpenTelemetryAgent.DefaultSourceName lets a tracing pipeline subscribe to the default agent source without hardcoding its string."], ["Experimental is per type or member", "File-access and session-store types are gated. AsIChatClient and DefaultSourceName are gated members. The new mode controls are ungated. Do not classify a whole release as experimental."], ["Scope of the comparison", "These claims cover Microsoft.Agents.AI.Abstractions, Microsoft.Agents.AI and Microsoft.Agents.AI.Workflows. They do not say that every provider or hosting package is unchanged."]],
+                desc: "The three inspected assemblies add file-search support in 1.21, then agent-session storage, a chat-client adapter, mode controls and a telemetry property in 1.22. Their workflow public signatures do not change. Both releases require Microsoft.Extensions.AI 10.10.0 or later.",
+                file: "Release121122.cs",
+                code: `// Pin Microsoft.Agents.AI, .Abstractions and .Workflows to 1.22.0.
+// Both 1.21 and 1.22 require Microsoft.Extensions.AI 10.10.0 or later.
+// Suppress MAAI001 deliberately for the experimental APIs below.
+IReadOnlyList<string> lines = AgentFileStore.SplitLines("one\\r\\ntwo"); // 1.21+
+var key = new AgentSessionStoreKey("conversation-42").WithPartition("tenant", "tenant-a"); // 1.22
+var modeOptions = new AgentModeProviderOptions { DisableModeSetTool = true }; // 1.22, ungated
+string sourceName = OpenTelemetryAgent.DefaultSourceName; // 1.22, MAAI001
+Console.WriteLine($"{lines.Count} lines; session {key.SessionId}; telemetry {sourceName}");
+// AgentSessionStore, DelegatingAgentSessionStore and AsIChatClient: see their topic views.
+// Workflow public signatures are unchanged in 1.21 and 1.22.`,
+                svg: `<svg width="650" height="320" viewBox="0 0 650 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="MAF release additions from 1.20 through 1.22">
+<path class="animated-line" d="M195 90 H235" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M415 90 H455" stroke="#4b7b86" stroke-width="2"/>
+<path class="animated-line" d="M325 125 V190" stroke="#4b7b86" stroke-width="2"/>
+<g class="node" role="button" tabindex="0" aria-label="1.20 baseline" style="--glow-color: #38bdf8;" onclick="showNodeDetails(&quot;1.20 baseline&quot;,&quot;Keep the earlier release view for the history of concurrent invocation, routing and background-agent release.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="15" y="55" width="180" height="70" rx="10" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
+<text x="105.0" y="83" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">1.20 baseline</text>
+<text x="105.0" y="104" fill="#38bdf8" font-family="Outfit" font-size="10" text-anchor="middle">background wait timeout</text></g>
+<g class="node" role="button" tabindex="0" aria-label="1.21" style="--glow-color: #2dd4bf;" onclick="showNodeDetails(&quot;1.21&quot;,&quot;New line helpers, a default search implementation and ExpectedLine. Microsoft.Extensions.AI minimum becomes 10.10.0.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="235" y="55" width="180" height="70" rx="10" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
+<text x="325.0" y="83" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">1.21</text>
+<text x="325.0" y="104" fill="#2dd4bf" font-family="Outfit" font-size="10" text-anchor="middle">search + guarded edits</text></g>
+<g class="node" role="button" tabindex="0" aria-label="1.22" style="--glow-color: #10b981;" onclick="showNodeDetails(&quot;1.22&quot;,&quot;Session stores, AsIChatClient, mode tool switches and the default agent telemetry source.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="455" y="55" width="180" height="70" rx="10" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
+<text x="545.0" y="83" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">1.22</text>
+<text x="545.0" y="104" fill="#10b981" font-family="Outfit" font-size="10" text-anchor="middle">session + host controls</text></g>
+<g class="node" role="button" tabindex="0" aria-label="Workflow public signatures unchanged" style="--glow-color: #f59e0b;" onclick="showNodeDetails(&quot;Workflow public signatures unchanged&quot;,&quot;The existing workflow samples compile against 1.22. The API comparison says nothing about runtime internals or packages outside the three inspected assemblies.&quot;)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.dispatchEvent(new MouseEvent('click',{bubbles:true}));}">
+<rect x="155" y="190" width="340" height="70" rx="10" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
+<text x="325.0" y="218" fill="#f3f4f6" font-family="Outfit" font-size="12" text-anchor="middle">Workflow public signatures unchanged</text>
+<text x="325.0" y="239" fill="#f59e0b" font-family="Outfit" font-size="10" text-anchor="middle">in the inspected 1.21 and 1.22 assemblies</text></g>
+<text x="325" y="298" fill="#9ca3af" font-family="Outfit" font-size="11" text-anchor="middle">Resolve your package version first; use the topic page written for that pin.</text>
 </svg>`
             },
             production: {
@@ -1160,16 +1410,17 @@ var gated = new ToolApprovalAgent(innerAgent, new ToolApprovalAgentOptions
                 principlesTitle: "The Idea in Short",
                 principles: [
                     ["Decide what happens when a human is needed", "WatchStreamAsync has a blockOnPendingRequest flag (since v1.15). Pass false from a web handler or a queue worker: you get control back, save the run id, and resume later. Pass true from a long-running interactive host. Either way, choose it on purpose."],
-                    ["One telemetry source name", "Subscribe to Microsoft.Agents.AI.Workflows. AddOtlpExporter comes from the OpenTelemetry.Exporter.OpenTelemetryProtocol package, and Sdk is in the OpenTelemetry namespace, so you need that using."],
+                    ["Two telemetry sources", "Subscribe to Microsoft.Agents.AI.Workflows for workflow spans and OpenTelemetryAgent.DefaultSourceName for agents using the default source. A custom agent source needs its configured name instead. The new property is MAAI001-gated and read at runtime; its 1.22 value is Experimental.Microsoft.Agents.AI."],
                     ["Three ids, kept apart", "Run id, session id and checkpoint id are three different things. Log all three. If the agent routes between chat clients, log the active route per turn as well."],
-                    ["Suppress MAAI001 per project", "Experimental members are marked one by one, not per release. Write down which ones a release depends on, so the next upgrade has a known blast radius, and keep a plain fallback for anything business-critical."],
+                    ["Suppress MAAI001 per project", "Experimental gates can cover a whole type or an individual member. Write down which ones a release depends on, so the next upgrade has a known blast radius, and keep a plain fallback for anything business-critical."],
                     ["Retries must be safe to repeat", "A retried workflow must not send the email or take the payment twice. And read the event stream as the source of truth: finished, cancelled, failed and waiting-for-a-human are four different outcomes, not one 'done'."]
                 ],
-                desc: "Getting a workflow into production is three jobs. Wire it up through dependency injection so executors come from the container. Watch it honestly, with OpenTelemetry and the event stream. And decide up front what your host does when the workflow stops to wait for a person. The runtime itself hasn't changed from v1.13 to v1.20; what the releases added is operational.",
+                desc: "Getting a workflow into production is three jobs. Wire it up through dependency injection so executors come from the container. Watch it honestly, with OpenTelemetry and the event stream. And decide up front what your host does when the workflow stops to wait for a person. In 1.22, subscribe to the default agent telemetry source through its new property as well as the workflow source. Unchanged public workflow signatures do not imply unchanged runtime internals.",
                 file: "ProductionReadiness.cs",
-                code: `using Microsoft.Agents.AI.Workflows;
+                code: `using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.DependencyInjection;
-using OpenTelemetry;          // Sdk lives here
+using OpenTelemetry;
 using OpenTelemetry.Trace;
 
 // 1. DI: executors are transient services; the singleton Workflow binds them through factories.
@@ -1183,10 +1434,12 @@ services.AddSingleton<Workflow>(sp =>
     return new WorkflowBuilder(analyzer).AddEdge(analyzer, formatter).WithOutputFrom(formatter).Build();
 });
 
-// 2. Telemetry: one ActivitySource name to subscribe to. Sdk is OpenTelemetry.Sdk; AddOtlpExporter
-//    comes from the OpenTelemetry.Exporter.OpenTelemetryProtocol package.
+// 2. Telemetry: subscribe separately to workflow and agent sources.
+//    DefaultSourceName is new in MAF 1.22 and requires MAAI001 suppression.
+//    AddOtlpExporter comes from OpenTelemetry.Exporter.OpenTelemetryProtocol.
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource("Microsoft.Agents.AI.Workflows")
+    .AddSource(OpenTelemetryAgent.DefaultSourceName)
     .AddOtlpExporter()
     .Build();
 
@@ -1213,10 +1466,10 @@ await foreach (WorkflowEvent evt in run.WatchStreamAsync(blockOnPendingRequest: 
         <text x="325" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">StreamingRun</text>
         <text x="325" y="94" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">WatchStreamAsync(blockOnPendingRequest)</text>
     </g>
-    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('OpenTelemetry', 'Sdk.CreateTracerProviderBuilder, AddSource with the name Microsoft.Agents.AI.Workflows, AddOtlpExporter, Build. Sdk lives in the OpenTelemetry namespace, and AddOtlpExporter needs the OpenTelemetry.Exporter.OpenTelemetryProtocol package, which MAF does not bring in. The sample was compiled with exporter 1.15.3, the OpenTelemetry.Api version MAF 1.19 and 1.20 depend on.')">
+    <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('OpenTelemetry', 'Subscribe to Microsoft.Agents.AI.Workflows for workflows and OpenTelemetryAgent.DefaultSourceName for default agent spans. The new property is experimental and runtime-resolved. Custom agent sources need their custom name. This sample compiled on MAF 1.22 with OpenTelemetry.Exporter.OpenTelemetryProtocol 1.15.3.')">
         <rect x="475" y="47" width="150" height="66" rx="9" fill="#090b0e" stroke="#10b981" stroke-width="2"/>
         <text x="550" y="75" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">OpenTelemetry</text>
-        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">source: Microsoft.Agents.AI.Workflows</text>
+        <text x="550" y="94" fill="#10b981" font-family="Outfit" font-size="9" text-anchor="middle">workflow + default agent source</text>
     </g>
     <g class="node" style="--glow-color: #f59e0b;" onclick="showNodeDetails('When the workflow waits for a person', 'With blockOnPendingRequest false, your host sees the request (RequestInfoEvent, or HasPendingRequests on the round event), saves the request and run ids, returns, and later resumes with Run.ResumeAsync (or the checkpoint recovery service for a workflow hosted as an agent). With true, an interactive host simply keeps the stream open until the person answers.')">
         <rect x="205" y="168" width="240" height="66" rx="9" fill="#090b0e" stroke="#f59e0b" stroke-width="2"/>
@@ -1338,10 +1591,11 @@ if (status == RunStatus.PendingRequests)
 {
     // Underwriter accesses dashboard UI and submits approval data
     var decision = new DecisionResponse { Approved = true, AdjustedRate = 4.25f };
-    var response = ExternalRequest.Create(underwriterPort, decision, "request-id").CreateResponse(decision);
+    var responses = run.NewEvents.OfType<RequestInfoEvent>()
+        .Select(e => e.Request.CreateResponse(decision)).ToArray();
 
     // Resume workflow passing the response payload
-    await run.ResumeAsync(new[] { response }, ct);
+    await run.ResumeAsync(responses, ct);
 }`,
                 svg: `
 <svg width="650" height="250" viewBox="0 0 650 250" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1497,7 +1751,7 @@ var loopAgent = new LoopAgent(
         <text x="300" y="134" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">response + state</text>
     </g>
 
-    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('LoopEvaluator chain', 'AIJudge / CompletionMarker / TodoCompletion / Delegate / BackgroundTask (v1.12) evaluators return LoopEvaluation.Stop(), Continue(feedback) or ContinueWithMessages(...).')">
+    <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('LoopEvaluator chain', 'AIJudgeLoopEvaluator / CompletionMarkerLoopEvaluator / TodoCompletionLoopEvaluator / DelegateLoopEvaluator / BackgroundTaskCompletionLoopEvaluator (v1.12) evaluators return LoopEvaluation.Stop(), Continue(feedback) or ContinueWithMessages(...).')">
         <rect x="460" y="90" width="120" height="60" rx="8" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="520" y="118" fill="#f3f4f6" font-family="Outfit" font-size="10" text-anchor="middle">Evaluators</text>
         <text x="520" y="134" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Stop / Continue</text>
@@ -1569,7 +1823,7 @@ ChatClientBuilder builder = chatClient.AsBuilder()
     <g class="node" style="--glow-color: #2dd4bf;" onclick="showNodeDetails('Auto-approval rules', 'A rule receives a ToolAutoApprovalRuleContext rather than the bare function call. Look at FunctionCallContent for the call, and at the agent, session, request messages and run options for who is asking and why.')">
         <rect x="245" y="45" width="160" height="66" rx="9" fill="#090b0e" stroke="#2dd4bf" stroke-width="2"/>
         <text x="325" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Tool Approval</text>
-        <text x="325" y="92" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">RuleContext</text>
+        <text x="325" y="92" fill="#2dd4bf" font-family="Outfit" font-size="9" text-anchor="middle">Approval context</text>
     </g>
 
     <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Message injection', 'EnqueueMessagesAsync and GetPendingMessagesAsync replace the old synchronous methods. Both take a cancellation token.')">
@@ -1634,7 +1888,7 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
     <g class="node" style="--glow-color: #38bdf8;" onclick="showNodeDetails('Latest checkpoint (v1.15)', 'CheckpointManager.GetLatestCheckpointAsync(sessionId, cancellationToken) returns the most recent CheckpointInfo for a session, or null if the session never checkpointed. Declare it nullable and branch. The token is optional. It answers where the session got to, not whether that checkpoint is still compatible with your code.')">
         <rect x="25" y="45" width="150" height="66" rx="9" fill="#090b0e" stroke="#38bdf8" stroke-width="2"/>
         <text x="100" y="73" fill="#f3f4f6" font-family="Outfit" font-size="11" text-anchor="middle">Checkpoint Lookup</text>
-        <text x="100" y="92" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · GetLatest…</text>
+        <text x="100" y="92" fill="#38bdf8" font-family="Outfit" font-size="9" text-anchor="middle">v1.15 · Latest checkpoint</text>
     </g>
 
     <g class="node" style="--glow-color: #10b981;" onclick="showNodeDetails('Stream control at a human request (v1.15)', 'WatchStreamAsync(blockOnPendingRequest, cancellationToken): with false the stream hands control back to your host when the workflow waits for a person; with true it stays open. Use false in request handlers and queue workers.')">
@@ -1670,10 +1924,10 @@ Workflow workflow = new MagenticWorkflowBuilder(managerAgent)
                     ["v1.19: a hosted workflow can own its checkpoints", "GetService<WorkflowAgentMetadata> tells you an agent wraps a workflow. WithCheckpointing returns a copy that writes checkpoints to your manager, or the same instance unchanged if it cannot, so check UsesOwnCheckpointStorage afterwards."],
                     ["v1.19: TryPrepare trusts the id you give it", "WorkflowSessionCheckpointRecovery positions a session on a checkpoint, but TryPrepare accepts any well-formed id. An unknown one fails on the next run, so look the id up first. Experimental."],
                     ["v1.20: bound the background wait", "BackgroundAgentsProviderOptions.WaitTimeout caps how long the wait tool blocks a run for a background task; the default is five minutes. It is checked when you create the provider, not when you set it, and infinite is rejected there while ReleaseSessionAsync accepts infinite. When it expires, the tasks keep running."],
-                    ["Experimental is decided per member", "The bypass, the routing client, the recovery service, FeatureUsage and the background provider (with its options) are marked experimental. AllowConcurrentInvocation, MaxAutoApprovalIterations, WithCheckpointing and WorkflowAgentMetadata are not."]
+                    ["Experimental can apply to types or members", "The bypass, the routing client, the recovery service, FeatureUsage and the background provider (with its options) are marked experimental. AllowConcurrentInvocation, MaxAutoApprovalIterations, WithCheckpointing and WorkflowAgentMetadata are not."]
                 ],
-                desc: "Three small additive releases. v1.18 lets an agent run tools in parallel, caps the auto-approval loop and stops backend calls being lost. v1.19 adds a chat client that routes per session and gives a hosted workflow control over its checkpoints. v1.20 adds one setting: how long the background-agents wait tool may block. Nothing was removed, and the code below was compiled against 1.20.0.",
-                code: `// Microsoft.Agents.AI 1.20.0 / Microsoft.Agents.AI.Workflows 1.20.0
+                desc: "Three small additive releases. v1.18 lets an agent run tools in parallel, caps the auto-approval loop and stops backend calls being lost. v1.19 adds a chat client that routes per session and gives a hosted workflow control over its checkpoints. v1.20 adds one setting: how long the background-agents wait tool may block. Nothing was removed, and the code below was compiled against 1.22.0.",
+                code: `// Microsoft.Agents.AI 1.22.0 / Microsoft.Agents.AI.Workflows 1.22.0
 // Requires <NoWarn>$(NoWarn);MAAI001</NoWarn> for the members marked experimental below.
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
@@ -1761,7 +2015,7 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
         <text x="550" y="214" fill="#f59e0b" font-family="Outfit" font-size="9" text-anchor="middle">TryPrepare: id not checked</text>
     </g>
 
-    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Both releases purely additive - v1.17 code compiles unchanged; MAAI001 is gated per member, not per release</text>
+    <text x="325" y="268" fill="#6b7280" font-family="Outfit" font-size="9" text-anchor="middle">Both releases purely additive - v1.17 code compiles unchanged; MAAI001 can gate a type or a member, not per release</text>
 </svg>`
             },
             generator: {
@@ -1769,10 +2023,10 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
                 principlesTitle: "About This Tool",
                 principles: [
                     ["Describe, get a program", "Pick your topology, persistence, and human-in-the-loop options and get a complete single-file C# program back - not a fragment."],
-                    ["Only real building blocks", "Every name in the output exists in the real MAF 1.20.0 assemblies. The generated programs were compile-tested at 1.17.0, and the workflow members they use have not changed since, so they build on 1.20.0 as well. No invented APIs, no placeholders to fill in."],
+                    ["Only real building blocks", "All 24 combinations are compiled against MAF 1.22.0. The eight executor-only combinations using memory or JSON checkpoints also run offline. Agent and custom-store selections include explicitly marked configuration hooks."],
                     ["Compiles as-is", "Output is one ordered program: top-level statements first, then the executor / message / store types it needs. Paste it into a project referencing the MAF package and it builds."]
                 ],
-                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program - every variable declared, verified against the MAF v1.20.0 binaries.",
+                desc: "Choose your topology, persistence, and human-in-the-loop options to generate a complete, copy-paste-ready single-file C# program - every variable declared, verified against the MAF v1.22.0 binaries.",
                 code: `// Set choices on the questionnaire above to generate code...`,
                 htmlContent: `
                 <div class="blueprint-form">
@@ -1805,7 +2059,7 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
                 <div class="blueprint-output">
                     <div class="blueprint-output-header">
                         <h4 id="blueprint-title">Recommended Blueprint: Sequential Pipeline</h4>
-                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.20.0 Blueprint</span>
+                        <span class="version-badge" style="font-size: 0.75rem;">MAF v1.22.0 Blueprint</span>
                     </div>
                     <ul class="blueprint-bullets" id="blueprint-rules">
                         <li>Linear executors connected via simple <code>builder.AddEdge()</code> routes.</li>
@@ -1912,10 +2166,11 @@ await background.ReleaseSessionAsync(bgSession);  // a session the provider serv
 
             // Compose ONE coherent, compilable program per selection. Ordering is
             // enforced (top-level statements first, type declarations last) and every
-            // building block is verified against the MAF v1.20.0 DLL surface.
+            // building block is verified against the MAF v1.22.0 DLL surface.
             const usings = new Set([
                 "using System;",
                 "using System.Threading;",
+                "using System.Linq;",
                 "using System.Threading.Tasks;",
                 "using Microsoft.Agents.AI.Workflows;"
             ]);
@@ -2093,7 +2348,16 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
                 }
                 body.push('var gatePort = RequestPort.Create<' + lastType + ', GateDecision>("human-gate");');
                 body.push("var gate     = ExecutorBindingExtensions.BindAsExecutor(gatePort, allowWrappedRequests: true);");
-                types.push("public sealed record GateDecision(bool Approved);");
+                body.push("var decisionOutput = ExecutorBindingExtensions.BindExecutor(new DecisionExecutor());");
+                types.push(`public sealed record GateDecision(bool Approved);
+
+// RequestPort forwards its response; this terminal executor yields the workflow output.
+public sealed class DecisionExecutor : Executor<GateDecision, GateDecision>
+{
+    public DecisionExecutor() : base("decision-output") { }
+    public override ValueTask<GateDecision> HandleAsync(GateDecision message, IWorkflowContext context, CancellationToken ct)
+        => new(message);
+}`);
             }
 
             // ---- 3. Build the workflow graph ----
@@ -2115,7 +2379,8 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
             edges.forEach(function (e) { body.push(e); });
             if (hitl === 'yes' && !prebuilt) {
                 body.push("    .AddEdge(" + lastNode + ", gate)");
-                body.push("    .WithOutputFrom(gate)");
+                body.push("    .AddEdge(gate, decisionOutput)");
+                body.push("    .WithOutputFrom(decisionOutput)");
             } else {
                 body.push("    .WithOutputFrom(" + lastNode + ")");
             }
@@ -2126,7 +2391,7 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
             body.push("");
             if (state === 'none') {
                 ruleItems.push("Transient run: state lives in memory and is discarded when the run ends.");
-                body.push("Run run = await InProcessExecution.RunAsync(workflow, input, sessionId, ct);");
+                body.push("await using Run run = await InProcessExecution.RunAsync(workflow, input, sessionId, ct);");
             } else if (state === 'scoped') {
                 usings.add("using System.IO;");
                 usings.add("using System.Text.Json;");
@@ -2135,7 +2400,7 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
                 body.push("// -- Checkpointing: JSON files on disk --");
                 body.push('var store   = new FileSystemJsonCheckpointStore(new DirectoryInfo("./checkpoints"));');
                 body.push("var manager = CheckpointManager.CreateJson(store, new JsonSerializerOptions());");
-                body.push("Run run = await InProcessExecution.RunAsync(workflow, input, manager, sessionId, ct);");
+                body.push("await using Run run = await InProcessExecution.RunAsync(workflow, input, manager, sessionId, ct);");
             } else {
                 usings.add("using System.Collections.Generic;");
                 usings.add("using System.Text.Json;");
@@ -2143,16 +2408,15 @@ public sealed class AggregateExecutor : Executor<PartialResult, Report>
                 ruleItems.push("Custom persistence: implement all three <code>ICheckpointStore&lt;JsonElement&gt;</code> members.");
                 body.push("// -- Checkpointing: your custom store (SQL, Redis, etc.) --");
                 body.push("var manager = CheckpointManager.CreateJson(new SqlCheckpointStore(), new JsonSerializerOptions());");
-                body.push("Run run = await InProcessExecution.RunAsync(workflow, input, manager, sessionId, ct);");
+                body.push("await using Run run = await InProcessExecution.RunAsync(workflow, input, manager, sessionId, ct);");
                 types.push(
 `// ICheckpointStore<JsonElement> declares exactly three members -- implement them all.
 public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
 {
     public ValueTask<CheckpointInfo> CreateCheckpointAsync(string sessionId, JsonElement value, CheckpointInfo parent)
     {
-        var checkpointId = Guid.NewGuid().ToString();
         // TODO: persist 'value' under (sessionId, checkpointId), linked to 'parent'.
-        return new ValueTask<CheckpointInfo>(new CheckpointInfo(sessionId, checkpointId));
+        throw new NotImplementedException("Persist the checkpoint before returning its key.");
     }
 
     // TODO: load the JSON payload for 'key' from your store.
@@ -2168,14 +2432,13 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
             // ---- 5. Resume the suspended run (HITL only) ----
             if (hitl === 'yes' && !prebuilt) {
                 body.push("");
-                body.push("// Post the human decision, then resume the suspended run.");
+                body.push("// Demo decision only: replace with your authenticated human approval UI.");
                 body.push("if (await run.GetStatusAsync(ct) == RunStatus.PendingRequests)");
                 body.push("{");
                 body.push("    var decision = new GateDecision(true);");
-                body.push("    ExternalResponse response = ExternalRequest");
-                body.push('        .Create(gatePort, decision, "req-1")');
-                body.push("        .CreateResponse(decision);");
-                body.push("    await run.ResumeAsync(new[] { response }, ct);");
+                body.push("    var responses = run.NewEvents.OfType<RequestInfoEvent>()");
+                body.push("        .Select(e => e.Request.CreateResponse(decision)).ToArray();");
+                body.push("    await run.ResumeAsync(responses, ct);");
                 body.push("}");
             }
 
@@ -2190,8 +2453,8 @@ public sealed class SqlCheckpointStore : ICheckpointStore<JsonElement>
 
             const hasTodo = flow === 'agent' || flow === 'orchestrate' || state === 'db';
             const header =
-                "// MAF v1.20 blueprint -- a complete single-file program (top-level statements).\n" +
-                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.20.0, then: dotnet run\n" +
+                "// MAF v1.22 blueprint -- a complete single-file program (top-level statements).\n" +
+                "// Paste into a project referencing Microsoft.Agents.AI.Workflows 1.22.0, then: dotnet run\n" +
                 (hasTodo
                     ? "// Compiles as-is; fill in the // TODO spots before it runs.\n"
                     : "// Compiles and runs as-is; swap the sample executor bodies for your logic.\n");

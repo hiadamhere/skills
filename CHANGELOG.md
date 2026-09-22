@@ -2,9 +2,29 @@
 
 All notable changes to the **AI Agent Skills Catalog** are recorded here, newest first.
 
-Entries are dated by the day the change landed on `main`. The catalog is not versioned with semver - skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.20), which is what you actually pin against.
+Entries group changes by release preparation date. The catalog is not versioned with semver - skills carry their own upstream version coverage (for example `msaf-architect` covers MAF v1.10 through v1.22), which is what you actually pin against.
 
 ---
+
+## 2026-09-22
+
+### Changed
+- All four pages label the portfolio link "Open-source developer tools". Repaired a broken MSAF diagram popup and clarified abbreviated diagram labels. Visualizer validation now checks prose identifiers against historical API surfaces; this checks existence, not semantic or version correctness.
+- MCP C# and Python pins updated to 2.2.0. Refreshed C# surfaces, migration guidance and absence checks; corrected stdio logging and Python constructor wording. Retained offline checks compile examples and execute stdio tool-call round trips. TypeScript remains at 1.30.0.
+- MSAF completion examples now read the actual AgentResponse payload. Retained agent-bound completion and checkpoint identity probes; clarified type-level versus member-level experimental gates in the skill and visualizer.
+- MAUI catalog and planning guidance distinguish supported MAUI 10 from legacy MAUI 8/9, with dated servicing and support information.
+- Expanded Microsoft.Extensions.AI with dedicated image, speech, realtime and hosted-file workflows, plus an evidence/coverage guide. Corrected speech input types, DI-helper assumptions, middleware ordering, stream aggregation and provider-wide claims. All 47 examples compile; 31 new offline assertions pass. Type mentions rise from 125/239 to 167/239; live integrations remain untested.
+- Microsoft.Extensions.AI skill verified against 10.10.0: refreshed both assembly surfaces, all nine reference stamps, 39 compiled examples and offline behavior probes. Public API signatures and experimental annotations are unchanged from 10.9.0. The catalog and HTML reader show the current pin and verification note.
+- The catalog, MSAF visualizer, Spectre.Console reference and skill reader now share the portfolio's warm typography, paper and charcoal surfaces, and muted accents. A top navigation link returns to Adam's portfolio; light, dark and system appearance choices persist across pages. Fonts and their licenses are bundled for later publication.
+
+### Added
+- msaf-architect references for MAF 1.21 and 1.22: aligned file-search line numbers, guarded edits, session-store contracts, the agent-to-chat-client adapter, mode tool switches and the default agent telemetry source. Separate pages cover session storage and the chat-client adapter. Pinned offline probes distinguish executed behavior from package contracts.
+
+- The MSAF visualizer now has dedicated views for guarded file edits, session stores, the chat-client adapter, host-controlled modes and the 1.21/1.22 release comparison. Routing, telemetry and blueprint pins target 1.22. All 24 generator combinations compile; eight executor-only combinations run offline, including human-gate resume.
+
+### Fixed
+- Separate `DisableWriteTools` (omit modifying tools) from approval-bypass flags in the MSAF visualizer and all five affected reference versions. Narrow the visualizer's experimental warning to file-access types on its 1.22 pin, clarify type/member gates in the version map, and correct the 1.21/1.22 compile-check instructions to use each page's own version.
+- Correct completed-workflow status examples to use Idle, including their affected older-version copies. Narrow the file-access experimental warning on the verified 1.20-1.22 pins.
 
 ## 2026-09-04
 

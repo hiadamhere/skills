@@ -142,7 +142,11 @@ The built-in rules have the same contextual delegate shape and can be assigned d
 **2. Granular approval flags** suppress the approval prompt for whole operation classes:
 
 * `AgentSkillsProviderOptions`: `DisableLoadSkillApproval`, `DisableReadSkillResourceApproval`, `DisableRunSkillScriptApproval`.
-* `FileAccessProviderOptions`: `DisableWriteTools`, `DisableReadOnlyToolApproval`, `DisableWriteToolApproval`.
+* `FileAccessProviderOptions`: `DisableReadOnlyToolApproval`, `DisableWriteToolApproval`.
+
+`FileAccessProviderOptions.DisableWriteTools` instead hides the tools that modify the file store; only read-only tools are exposed when it is true. This controls tool availability, not approval bypass.
+
+*Correction verified against the `FileAccessProviderOptions.DisableWriteTools` package XML documentation for MAF 1.19.0 (2026-09-22); no new runtime-execution claim.*
 
 > [!WARNING]
 > **Every `Disable*Approval` flag removes a human gate, and it fails open.** There is no prompt, and nothing in the transcript records that one was skipped. Set them only where the operation class is provably safe for the identity running it, and never together with a broad auto-approval rule — the two mechanisms compose, so the combination approves everything with no record.

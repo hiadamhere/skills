@@ -20,7 +20,7 @@ IChatClient client = raw.AsBuilder()
 `AsBuilder()` is an extension on `IChatClient`; `new ChatClientBuilder(innerClient)` is equivalent.
 
 > [!IMPORTANT]
-> **Order is behavior, not style.** Each `Use…` wraps everything registered before it, so the first registration sits *outermost* and sees the request first. Put the cache outside function invocation and a cache hit skips the whole tool loop; put it inside and you cache individual provider round-trips instead. Decide which one you actually want.
+> **Order is behavior, not style.** The first registration sits *outermost* and wraps layers registered after it. The retained order probe checks both ordinary and streaming calls. Put the cache outside function invocation and a cache hit skips the whole tool loop; put it inside and you cache individual provider round-trips instead. Decide which one you actually want.
 
 ### Available layers
 
@@ -61,7 +61,7 @@ services.AddEmbeddingGenerator(embeddingGenerator)
 Each `Add…` has an `IServiceProvider`-factory overload for when the inner client needs resolved dependencies, plus a `ServiceLifetime` parameter.
 
 - Consume `IChatClient` from DI; do not resolve the provider client directly, or you bypass every layer above.
-- Register once at composition root. Building a pipeline per request throws away caching and adds allocation on a hot path.
+- Register once at composition root. Avoid rebuilding wrappers per request without a lifetime reason; a distributed cache can still retain entries across pipeline instances, so rebuilding does not necessarily discard cached results.
 
 ## Custom middleware
 
@@ -103,7 +103,7 @@ IChatClient client = raw.AsBuilder()
     .Build();
 ```
 
-`ConfigureOptions` runs your callback on a **clone** of the caller's `ChatOptions` (or on a fresh instance when none was passed), so the caller's object is never mutated and a value the caller did set survives a `??=` (executed).
+`ConfigureOptions` runs your callback on a **clone** of the caller's `ChatOptions` (or on a fresh instance when none was passed), so assigning the top-level model/temperature defaults shown here does not mutate the caller's options. A caller-set value survives `??=` (executed). This is not a deep-copy guarantee for nested mutable values.
 
 ## Engineering guidance
 
@@ -121,4 +121,4 @@ IChatClient client = raw.AsBuilder()
 - Custom layers derive from `DelegatingChatClient` and override *both* `GetResponseAsync` and `GetStreamingResponseAsync`.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. Execution facts: a `DelegatingChatClient` subclass forwards `GetService` and `Dispose` to its inner client and can sit in a `.Use(...)` layer; `InnerClient` is protected (CS0122 from outside); `ConfigureOptions` runs on a clone, so the caller's `ChatOptions` is never mutated and `??=` preserves caller-set values. The `MEAI001` gate on the chat reducers was established by reflection sweep and compile error.*
+*Verified against Microsoft.Extensions.AI 10.10.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-09-20). Every code fence on this page compiles against 10.10.0. Execution facts: a `DelegatingChatClient` subclass forwards `GetService` and `Dispose` to its inner client and can sit in a `.Use(...)` layer; `InnerClient` is protected (CS0122 from outside); `ConfigureOptions` runs on a clone, so the tested top-level assignments do not mutate the caller's `ChatOptions`, and `??=` preserves caller-set values. The `MEAI001` gate on the chat reducers was established by reflection sweep and compile error.*

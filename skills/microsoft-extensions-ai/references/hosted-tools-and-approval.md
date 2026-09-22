@@ -30,7 +30,7 @@ var options = new ChatOptions
         {
             AllowedTools = ["search", "read_page"],
             ApprovalMode = HostedMcpServerToolApprovalMode.NeverRequire,
-            Headers = new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpToken}" },   // from your secret store; the provider retains it
+            Headers = new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpToken}" },   // from your secret store; sent to the provider; check its data-handling policy
         },
     ],
 };
@@ -39,9 +39,9 @@ ChatResponse response = await client.GetResponseAsync("What changed in the docs 
 ```
 
 > [!IMPORTANT]
-> **Hosted tools are executed by the provider, not by `UseFunctionInvocation`.** The function-invoking client forwards them to the provider untouched and only ever invokes `AIFunction`s (executed: a `Tools` list mixing both reached the inner client intact). What a hosted tool did comes back as *content* — `WebSearchToolCallContent`, `CodeInterpreterToolResultContent`, `McpServerToolCallContent` and friends, all in [content-model.md](content-model.md). Nothing in the abstraction checks whether the provider you are talking to supports a given hosted tool; an unsupported one is the provider's error, at call time.
+> **Hosted tools are executed by the provider, not by `UseFunctionInvocation`.** The function-invoking client forwards them to the provider untouched and only ever invokes `AIFunction`s (executed: a `Tools` list mixing both reached the inner client intact). What a hosted tool did comes back as *content* — `WebSearchToolCallContent`, `CodeInterpreterToolResultContent`, `McpServerToolCallContent` and friends, all in [content-model.md](content-model.md). Nothing in the abstraction checks whether the provider you are talking to supports a given hosted tool; unsupported tools may be rejected or handled differently by the adapter/provider. Verify support with that integration.
 
-**`HostedMcpServerTool`** takes a server name and an address (`string` or `Uri`). Its defaults are all `null` — `ApprovalMode` (the provider's own default applies), `AllowedTools` (every tool the server offers), `Headers`, `ServerDescription`. The approval modes are `HostedMcpServerToolApprovalMode.AlwaysRequire`, `.NeverRequire`, and `.RequireSpecific(alwaysRequireApprovalToolNames, neverRequireApprovalToolNames)`. Restrict `AllowedTools` and keep approval on for anything that writes; the server is reachable by the provider, not by you.
+**`HostedMcpServerTool`** takes a server name and an address (`string` or `Uri`). Its defaults are all `null` — `ApprovalMode` (the provider's own default applies), `AllowedTools` (no explicit allow-list supplied), `Headers`, `ServerDescription`. The approval modes are `HostedMcpServerToolApprovalMode.AlwaysRequire`, `.NeverRequire`, and `.RequireSpecific(alwaysRequireApprovalToolNames, neverRequireApprovalToolNames)`. Restrict `AllowedTools` and keep approval on for anything that writes; the server is reachable by the provider, not by you.
 
 ## Approval for your own functions
 
@@ -82,10 +82,10 @@ The flow, as executed against the pinned package:
 
 ## Engineering guidance
 
-- **Approval belongs on irreversible tools** — writes, deletes, payments, deployments — not on lookups. Every approval is a round trip through the model and a human.
+- **Approval belongs on irreversible tools** — writes, deletes, payments, deployments — not on lookups. An interactive approval adds a user decision before execution; design the UI and timeout policy explicitly.
 - **The approval lives in the conversation.** Keep the request's messages and your response message in the same history you send back; the client matches them by `CallId`.
-- **Hosted MCP servers are a trust decision.** Allow-list the tools, keep an approval mode on anything that writes, and remember the provider holds whatever you put in `Headers`.
-- **Hosted tools cost differently.** A web search or code run is billed and rate-limited by the provider; treat their results like any other untrusted tool output.
+- **Hosted MCP servers are a trust decision.** Allow-list the tools, keep an approval mode on anything that writes, and treat whatever you put in `Headers` as disclosed to the provider.
+- **Hosted tools cost differently.** Check provider-specific billing and rate limits for web searches and code runs; treat their results like any other untrusted tool output.
 
 ## ✅ Review checklist
 
@@ -95,4 +95,4 @@ The flow, as executed against the pinned package:
 - The approval response goes back with the response's own messages preserved in the history.
 
 ---
-*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). The tool names, the `HostedMcpServerTool` defaults, the pass-through of hosted tools by the function-invoking client, and the full approve/reject round trip (what the caller receives, what the provider sees, the rejection text) are execution facts; the `MEAI001` gate on `HostedToolSearchTool` and on `RequiresConfirmation` was confirmed by compile error.*
+*Verified against Microsoft.Extensions.AI 10.10.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-09-20). The tool names, the `HostedMcpServerTool` defaults, the pass-through of hosted tools by the function-invoking client, and the full approve/reject round trip (what the caller receives, what the provider sees, the rejection text) are execution facts; the `MEAI001` gate on `HostedToolSearchTool` and on `RequiresConfirmation` was confirmed by compile error.*

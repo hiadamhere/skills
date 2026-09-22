@@ -34,9 +34,9 @@ foreach (AIContent content in message.Contents)
 ```
 
 > [!WARNING]
-> **`TextReasoningContent` does *not* derive from `TextContent`.** They are siblings under `AIContent` — assigning one to the other fails with **CS0029**. A `case TextContent` will therefore **not** catch reasoning content, and a loop that handles only `TextContent` drops the model's chain of thought without a word. Handle both, or decide deliberately to skip reasoning.
+> **`TextReasoningContent` does *not* derive from `TextContent`.** They are siblings under `AIContent` — assigning one to the other fails with **CS0029**. A `case TextContent` will therefore **not** catch reasoning content, and a loop that handles only `TextContent` omits the reasoning content or summary the provider chose to expose. Handle both, or decide deliberately to skip reasoning.
 >
-> This is invisible in the surface dump, which does not record base types at all — the hierarchy on this page came from compile tests, not from reading the dump.
+> The public-members dump does not record base types. The hierarchy on this page is checked through reflection; the sibling assignment above is also checked by the retained CS0029 compile test.
 
 `TextReasoningContent` also carries `ProtectedData`, the opaque blob some providers require you to echo back to preserve a reasoning chain across turns. Round-trip it verbatim; do not parse it.
 
@@ -81,7 +81,7 @@ ToolResultContent ─┴── FunctionResultContent, McpServerToolResultContent
                        ImageGenerationToolResultContent
 ```
 
-Every edge in that tree is compile-verified by direct assignment, not read off the dump — which records no base types at all. Matching on the **base** `ToolCallContent` catches every hosted-tool flavour at once, which is what you want for logging; matching on `FunctionCallContent` catches only the calls you are expected to execute yourself. See [tool-calling.md](tool-calling.md) for the execution loop.
+The reflection shape comparison checks the base types in that tree; the public-members dump alone cannot establish them. Matching on the **base** `ToolCallContent` catches every hosted-tool flavour at once, which is what you want for logging; matching on `FunctionCallContent` catches only the calls you are expected to execute yourself. See [tool-calling.md](tool-calling.md) for the execution loop.
 
 Human approval rides the same channel: `ToolApprovalRequestContent` and `ToolApprovalResponseContent`. So do `InputRequestContent` / `InputResponseContent` for mid-run input, and `HostedFileContent` / `HostedVectorStoreContent` for provider-side artifacts.
 
@@ -100,7 +100,7 @@ case ErrorContent error:
 > [!IMPORTANT]
 > **An error can arrive as *content* rather than as an exception.** `ErrorContent` is an ordinary item in the list, so a response that "succeeded" may still carry a failure inside it. A pipeline that only catches exceptions will report success for a response whose content says otherwise — check for `ErrorContent` explicitly when partial failure matters.
 
-`UsageContent` wraps a `UsageDetails`, and appears in streaming responses too — usually as the final update, which is why accumulating usage means scanning content rather than reading a property on the response.
+`UsageContent` wraps a `UsageDetails`, and appears in streaming responses too — with placement determined by the adapter. Scan updates for usage; the aggregated `ChatResponse` also exposes `Usage`.
 
 ## 📎 Annotations
 
@@ -137,4 +137,4 @@ foreach (AIContent content in response.Messages.SelectMany(m => m.Contents))
 | something the abstraction dropped | `content.RawRepresentation` |
 
 ---
-*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. The surface dump records no base types, so the hierarchy here was established by compile test: `TextReasoningContent` is **not** assignable to `TextContent` (CS0029), while every `*ToolCallContent` (function, MCP server, web search, code interpreter, image generation) is assignable to `ToolCallContent`, every `*ToolResultContent` to `ToolResultContent`, and the approval/input/hosted content types to `AIContent` — each edge asserted by a direct assignment that compiles. `UriContent`'s optional `mediaType`, and the `LoadFromAsync`/`SaveToAsync` static-versus-instance split, are likewise compile-test facts. `Annotations` is `null` on a fresh content item; the citation and region types were compiled, not observed from a provider.*
+*Verified against Microsoft.Extensions.AI 10.10.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-09-20). Every code fence on this page compiles against 10.10.0. The surface dump records no base types, so the hierarchy here was checked with the reflection shape comparison of both assemblies. A retained negative assignment separately confirms that `TextReasoningContent` is **not** assignable to `TextContent` (CS0029). The tool-call, tool-result and approval/input/hosted base types match the previous pin in that comparison. `UriContent`'s optional `mediaType`, and the `LoadFromAsync`/`SaveToAsync` static-versus-instance split, are likewise compile-test facts. `Annotations` is `null` on a fresh content item; the citation and region types were compiled, not observed from a provider.*

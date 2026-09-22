@@ -3,7 +3,7 @@
 The agent-skills system feeds reusable skill definitions (`AgentSkill`) into an agent's context through `AgentSkillsProvider`, an `AIContextProvider`. Sources and filters are **context-aware** — they receive an `AgentSkillsSourceContext` identifying the requesting agent and session. The surface is byte-identical from v1.18 through v1.20 by mechanical diff.
 
 > [!WARNING]
-> This entire API family is marked **experimental** — compiling against it raises diagnostic **`MAAI001`**. Suppress it deliberately: `<NoWarn>$(NoWarn);MAAI001</NoWarn>` or `#pragma warning disable MAAI001`. The auto-approval iteration cap below is **not** gated.
+> The file-access types (`AgentFileStore`, `FileAccessProvider`, their options and edit types) raise **`MAAI001`**. Suppress it deliberately: `<NoWarn>$(NoWarn);MAAI001</NoWarn>` or `#pragma warning disable MAAI001`. The skill-source/provider and tool-approval types are not type-level gated on this pin; the auto-approval iteration cap below is **not** gated either.
 
 ---
 
@@ -142,7 +142,11 @@ The built-in rules have the same contextual delegate shape and can be assigned d
 **2. Granular approval flags** suppress the approval prompt for whole operation classes:
 
 * `AgentSkillsProviderOptions`: `DisableLoadSkillApproval`, `DisableReadSkillResourceApproval`, `DisableRunSkillScriptApproval`.
-* `FileAccessProviderOptions`: `DisableWriteTools`, `DisableReadOnlyToolApproval`, `DisableWriteToolApproval`.
+* `FileAccessProviderOptions`: `DisableReadOnlyToolApproval`, `DisableWriteToolApproval`.
+
+`FileAccessProviderOptions.DisableWriteTools` instead hides the tools that modify the file store; only read-only tools are exposed when it is true. This controls tool availability, not approval bypass.
+
+*Correction verified against the `FileAccessProviderOptions.DisableWriteTools` package XML documentation for MAF 1.20.0 (2026-09-22); no new runtime-execution claim.*
 
 > [!WARNING]
 > **Every `Disable*Approval` flag removes a human gate, and it fails open.** There is no prompt, and nothing in the transcript records that one was skipped. Set them only where the operation class is provably safe for the identity running it, and never together with a broad auto-approval rule — the two mechanisms compose, so the combination approves everything with no record.
@@ -178,3 +182,5 @@ var gated = new ToolApprovalAgent(innerAgent, new ToolApprovalAgentOptions
 
 ---
 *Verified against MAF v1.20.0 DLL surface (2026-09-03). The agent-skills, file-access, and tool-approval surfaces are byte-identical from v1.18 through v1.20 by mechanical diff. **Provenance:** the decorator sources, granular approval flags, the `ownsSource` constructor, `IDisposable` disposal and the `AgentFileStore` calls were compile-tested against pinned **1.13.0**; the contextual `ToolAutoApprovalRuleContext` rules against **1.14.0**; and `MaxAutoApprovalIterations` with its `const` default was compiled and read against **1.18.0 and 1.19.0** (value 40, CS0131 on assignment proving the `const`; see `scripts/compile-verified.txt`), failing against 1.17.0 with CS1061/CS0117. A `const` is not emitted by the dumper at all, so that one rests on the 1.19.0 execution rather than on byte-identity; the remaining v1.13/v1.14 claims rest on their own compiles. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14 and v1.18 guides; the pre-1.13 rename tables were deliberately left in their own folders and the version map, because they name shapes absent from this version's surface. No claim was re-dated. Copied forward from the v1.19 page on 2026-09-03: the 1.19.0 → 1.20.0 surface diff is a single added member, `BackgroundAgentsProviderOptions.WaitTimeout` (documented and executed on the [Background Agents](background-agents.md) page), so the re-stamp rests on that mechanical diff and every compile and execution fact above keeps the pin it names; no claim was re-dated. Fixed in place on 2026-09-03: the composing-sources table had called all five entries decorators; `AggregatingAgentSkillsSource` and `AgentInMemorySkillsSource` derive from `AgentSkillsSource`, not `DelegatingAgentSkillsSource` (surface dump). Sharpened on 2026-09-04: each row now carries its base type, and the prose no longer implies those two are the only direct subclasses — `AgentFileSkillsSource` is another. Both readings were checked against the v1.20.0 dump, which holds exactly three `DelegatingAgentSkillsSource` subclasses; no claim was re-dated.*
+
+*Verified against MAF v1.20.0 DLL surface and runtime attribute metadata (2026-09-19). Accuracy correction: the warning now identifies file-access types rather than marking the whole skill/approval family experimental. Earlier compile and execution provenance remains unchanged.*

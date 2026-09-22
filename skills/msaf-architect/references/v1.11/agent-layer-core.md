@@ -85,7 +85,7 @@ var builder = new WorkflowBuilder(inputNodeBinding)
 
 ## 🛠️ Complete Integration Example
 
-Below is a complete implementation showing how to define a `ChatClientAgent`, bind it to a workflow, save its state, and run it using the `InProcessExecution` runtime.
+Below is a complete implementation showing how to define a `ChatClientAgent`, bind it to a workflow, read its response, and run it using the `InProcessExecution` runtime.
 
 ```csharp
 using Microsoft.Agents.AI;
@@ -131,11 +131,9 @@ public class AgentWorkflowService
             .WithOutputFrom(reviewerBinding)
             .Build();
 
-        // 4. Create agent session
-        AgentSession session = await reviewerAgent.CreateSessionAsync(conversationId, CancellationToken.None);
 
-        // 5. Run workflow using InProcessExecution
-        Run run = await InProcessExecution.RunAsync(
+        // 4. Run workflow using InProcessExecution
+        await using Run run = await InProcessExecution.RunAsync(
             workflow, 
             new ChatMessage(ChatRole.User, userInput), 
             conversationId, 
@@ -143,18 +141,14 @@ public class AgentWorkflowService
         );
 
         var status = await run.GetStatusAsync();
-        if (status == RunStatus.Ended)
+        if (status == RunStatus.Idle)
         {
             // Extract agent output — there is no GetOutputsAsync(); filter NewEvents instead
-            foreach (var evt in run.NewEvents.OfType<WorkflowOutputEvent>())
+            foreach (var evt in run.NewEvents.OfType<AgentResponseEvent>())
             {
-                var output = evt.As<ChatMessage>();
+                var output = evt.As<AgentResponse>();
                 Console.WriteLine($"Workflow Output: {output?.Text}");
             }
-
-            // Optional: Serialize session state to persist history
-            JsonElement stateJson = await reviewerAgent.SerializeSessionAsync(session, new JsonSerializerOptions(), CancellationToken.None);
-            // Save stateJson to your database...
         }
     }
 }
@@ -162,3 +156,7 @@ public class AgentWorkflowService
 
 ---
 *Verified against MAF v1.11.0 DLL surface (2026-07-03).*
+
+*Verified against MAF v1.11.0 DLL surface and completion-status execution probe (2026-09-19). Accuracy correction only: a normally completed run reports `RunStatus.Idle` and still exposes output events; the sample no longer gates successful output on the wrong status. The earlier verification above remains the provenance for other claims.*
+
+*Completion/output recheck (2026-09-20): the retained `probe-agent-correctness` executes an `AIAgentBinding` with a fake `IChatClient` against this page's package pin. It asserts `RunStatus.Idle` and the exact `AgentResponseEvent` payload text. The integration example reads `AgentResponse`, not `ChatMessage`. An independently created agent session was removed from this example because it was never supplied to the workflow; serializing it would not persist this run.*

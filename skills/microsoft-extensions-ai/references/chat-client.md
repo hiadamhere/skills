@@ -1,6 +1,6 @@
 # 💬 Chat with `IChatClient`
 
-`IChatClient` (in `Microsoft.Extensions.AI.Abstractions`) is the single abstraction every provider implements. You get one from a provider package (OpenAI, Azure AI, Ollama, …) or wrap another client; the *usage* below is identical regardless of provider.
+`IChatClient` (in `Microsoft.Extensions.AI.Abstractions`) is the shared chat abstraction implemented by provider adapters. You get one from a provider package (OpenAI, Azure AI, Ollama, …) or wrap another client; the call shape is shared; supported options and behavior depend on the adapter and provider.
 
 > [!IMPORTANT]
 > **The method is `GetResponseAsync`.** The pre-GA preview method `CompleteAsync` does not exist in the GA surface — code from tutorials/model memory that calls it will not compile. Likewise `ChatCompletion` does not exist; the response type is `ChatResponse`, and a streaming chunk is `ChatResponseUpdate`.
@@ -29,7 +29,7 @@ Console.WriteLine(response2.Text);
 ```
 
 * `ChatMessage(ChatRole role, string content)` — roles are `ChatRole.System`, `ChatRole.User`, `ChatRole.Assistant`, `ChatRole.Tool`.
-* `ChatResponse.Text` is the concatenated assistant text. Other properties: `Messages`, `Usage` (`UsageDetails`), `FinishReason` (`ChatFinishReason?`), `ModelId`, `ResponseId`, `ConversationId`, `ContinuationToken` — see *Reading the response* below.
+* `ChatResponse.Text` combines text from its messages; do not use it as a role filter. Other properties: `Messages`, `Usage` (`UsageDetails`), `FinishReason` (`ChatFinishReason?`), `ModelId`, `ResponseId`, `ConversationId`, `ContinuationToken` — see *Reading the response* below.
 
 ## Stream a response
 
@@ -51,7 +51,7 @@ ChatResponse full = await client.GetStreamingResponseAsync(history).ToChatRespon
 await history.AddMessagesAsync(client.GetStreamingResponseAsync(history));                   // or append the answer straight to the history
 ```
 
-`ToChatResponseAsync` merges *consecutive* same-role updates into one message until a *different, non-null* `MessageId` arrives — a shared id is not merged across a gap, and id-less updates never start a new message — carries `ResponseId`, `ConversationId` and `FinishReason` across, and turns `UsageContent` updates into `Usage` (executed). `ToChatResponse()` does the same for updates you already collected, and `AddMessages(history, response)` appends a non-streamed response.
+`ToChatResponseAsync` merges *consecutive* same-role updates into one message until a *different, non-null* `MessageId` arrives — a shared id is not merged across a gap, and an id-less update with the same role joins the last message; a role change starts a new message — carries `ResponseId`, `ConversationId` and `FinishReason` across, and turns `UsageContent` updates into `Usage` (executed). `ToChatResponse()` does the same for updates you already collected, and `AddMessages(history, response)` appends a non-streamed response.
 
 ## Tuning the call with `ChatOptions`
 
@@ -72,7 +72,7 @@ ChatResponse response = await client.GetResponseAsync("Summarize MVU.", options)
 
 `ChatOptions` numeric properties are nullable value types (`float?`, `int?`, `long?`) — pass `0.7f`, not `0.7`, or you get **CS0266** (`cannot implicitly convert double to float?`). Full set includes `Temperature`, `TopP`, `TopK`, `MaxOutputTokens`, `FrequencyPenalty`, `PresencePenalty`, `Seed`, `StopSequences`, `Instructions`, `ModelId`, `ResponseFormat` (see [structured output](structured-output.md)), `Reasoning`, `ToolMode`, `Tools` and `AllowMultipleToolCalls` (see [tool calling](tool-calling.md)), plus the state controls below: `ConversationId`, `AllowBackgroundResponses`, `ContinuationToken`.
 
-For reasoning models, `Reasoning = new ReasoningOptions { Effort = ReasoningEffort.High, Output = ReasoningOutput.Summary }` asks for more thinking and a summary of it; the summary arrives as `TextReasoningContent` (see [content-model.md](content-model.md)) and the spend as `Usage.ReasoningTokenCount`. `Reasoning` is `null` by default, and every option here reaches the provider unchanged through the pipeline (executed).
+For reasoning models, `Reasoning = new ReasoningOptions { Effort = ReasoningEffort.High, Output = ReasoningOutput.Summary }` asks for more thinking and a summary of it; the summary arrives as `TextReasoningContent` (see [content-model.md](content-model.md)) and the spend as `Usage.ReasoningTokenCount`. `Reasoning` is `null` by default, and the retained function-invocation probe forwards `Reasoning`, `StopSequences`, `Seed` and `TopK` unchanged. Other middleware can change options; forwarding does not prove provider support.
 
 > [!IMPORTANT]
 > The token limit is **`MaxOutputTokens`**. `ChatOptions.MaxTokens` — the name most tutorials and model memory reach for — does not exist and fails with **CS0117**.
@@ -95,11 +95,11 @@ ChatClientMetadata? provider = client.GetService<ChatClientMetadata>();
 
 - **`FinishReason`** is `ChatFinishReason.Stop`, `Length`, `ToolCalls` or `ContentFilter` (string-backed; the values are `stop`, `length`, `tool_calls`, `content_filter`). `Length` is the one to check before trusting an answer.
 - **`Usage`** is a `UsageDetails`: `InputTokenCount`, `OutputTokenCount`, `TotalTokenCount`, `CachedInputTokenCount`, `ReasoningTokenCount`, and provider extras in `AdditionalCounts`. `UsageDetails.Add` sums every counter, `AdditionalCounts` included (executed) — keep one instance per session and add each response to it.
-- **`ChatClientMetadata`** (`ProviderName`, `ProviderUri`, `DefaultModelId`) answers `client.GetService<ChatClientMetadata>()` through every layer of a pipeline (executed through function invocation and a custom layer); `GetRequiredService<T>()` throws instead of returning `null`.
+- **`ChatClientMetadata`** (`ProviderName`, `ProviderUri`, `DefaultModelId`) answers `client.GetService<ChatClientMetadata>()` through the tested function-invocation and forwarding custom layers. A custom layer or root router can answer differently; `GetRequiredService<T>()` throws instead of returning `null`.
 
 ## Conversation state
 
-Some providers keep the conversation on their side. When they do, the response carries a **`ConversationId`**, and from then on you send **only the new messages** with that id on the options — resending the whole history duplicates every turn on the provider's copy:
+For adapters that use **`ConversationId`** to represent server-held history, send **only new messages** with that id. The example below assumes that contract; verify it before mixing local and server-held history:
 
 ```csharp
 using Microsoft.Extensions.AI;
@@ -123,7 +123,7 @@ ChatResponse next = await client.GetResponseAsync(options.ConversationId is null
 
 ## Background responses
 
-For long-running work a provider may return before the answer exists. Opt in with `AllowBackgroundResponses = true`; a response that is still running comes back with **no messages and a `ContinuationToken`**, which you send back — with an empty message list — until the answer arrives:
+For long-running work a provider may return before the answer exists. Opt in with `AllowBackgroundResponses = true`; the offline scenario tested here returns **no messages and a `ContinuationToken`**, which the example sends back — with an empty message list — until the token disappears. Verify background support and continuation semantics with your adapter:
 
 ```csharp
 using Microsoft.Extensions.AI;
@@ -150,4 +150,4 @@ for (int attempt = 0; pending.ContinuationToken is ResponseContinuationToken tok
 - Add caching, telemetry, or DI registration → [middleware and DI](middleware-and-di.md)
 
 ---
-*Verified against Microsoft.Extensions.AI 10.9.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-08-28). Every code fence on this page compiles against 10.9.0. Execution facts: `ToChatResponseAsync` merges consecutive same-role updates until a different non-null `MessageId` and carries `ResponseId`, `ConversationId`, `FinishReason` and usage across; once a provider returns a `ConversationId`, the function-invoking client's next iteration sends only the new message with that id; background responses (no messages, a `ContinuationToken`) pass through the pipeline untouched and the token round-trips through `ToBytes`/`FromBytes`; `Reasoning`, `StopSequences`, `Seed` and `TopK` reach the provider unchanged; `UsageDetails.Add` sums every counter including `AdditionalCounts`; `ChatClientMetadata` resolves through function invocation and a custom layer.*
+*Verified against Microsoft.Extensions.AI 10.10.0 DLL surface (`Microsoft.Extensions.AI` + `.Abstractions`), compiled and executed against the pinned package (2026-09-20). Every code fence on this page compiles against 10.10.0. Execution facts: `ToChatResponseAsync` merges consecutive same-role updates until a different non-null `MessageId` and carries `ResponseId`, `ConversationId`, `FinishReason` and usage across; once a provider returns a `ConversationId`, the function-invoking client's next iteration sends only the new message with that id; background responses (no messages, a `ContinuationToken`) pass through the pipeline untouched and the token round-trips through `ToBytes`/`FromBytes`; `Reasoning`, `StopSequences`, `Seed` and `TopK` reach the provider unchanged; `UsageDetails.Add` sums every counter including `AdditionalCounts`; `ChatClientMetadata` resolves through function invocation and a custom layer.*

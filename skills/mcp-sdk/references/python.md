@@ -3,7 +3,7 @@
 The official Python SDK builds an MCP **server** from decorated functions: create an `MCPServer`, decorate handlers with `@mcp.tool()`, and run a transport.
 
 > [!WARNING]
-> **`from mcp.server.fastmcp import FastMCP` does not exist in `mcp` 2.0.0.** That import is in essentially every MCP tutorial and is what model memory reaches for; in 2.0.0 it fails outright (`ModuleNotFoundError`, and pyright `reportMissingImports`). The class is now **`MCPServer`** in `mcp.server.mcpserver`. This is the single highest-value fact in this document — measured baseline behavior imported the real package in 5 of 5 trials and then hallucinated the API inside it.
+> **`from mcp.server.fastmcp import FastMCP` does not exist in `mcp` 2.2.0.** That import is in essentially every MCP tutorial and is what model memory reaches for; in 2.2.0 it fails outright (`ModuleNotFoundError`; pyright rejects the imported symbol with `reportAttributeAccessIssue`). The class is now **`MCPServer`** in `mcp.server.mcpserver`. This is the single highest-value fact in this document — measured baseline behavior imported the real package in 5 of 5 trials and then hallucinated the API inside it.
 
 ---
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     mcp.run(transport="stdio")
 ```
 
-* `MCPServer(...)` takes `name`, `title`, `description`, `instructions`, `version`, `icons`, `website_url` — all keyword, all optional.
+* `MCPServer(...)` takes `name`, `title`, `description`, `instructions`, `version`, `icons`, `website_url` — all optional and usable as keywords; they are not keyword-only. Additional configuration parameters follow these.
 * `@mcp.tool()` takes `name`, `title`, `description`, `annotations`, `icons`, `meta`, `structured_output` — all optional. Omit `name` and the function's own name is used.
 * **Type annotations are the schema.** `message: str` becomes the tool's input schema; the SDK derives it from the signature, so annotate every parameter.
 * The docstring supplies the tool description when `description=` is omitted.
@@ -48,7 +48,7 @@ Confirmed by pyright against the pinned package — each fails as a *hard* error
 
 | Reached-for name | Reality |
 |---|---|
-| `mcp.server.fastmcp` / `FastMCP` | Does not exist in 2.0.0 — use `mcp.server.mcpserver.MCPServer` |
+| `mcp.server.fastmcp` / `FastMCP` | Does not exist in 2.2.0 — use `mcp.server.mcpserver.MCPServer` |
 | `mcp.types.ToolResult` | Does not exist — not an exported symbol (it also raises at runtime, not just in the type checker) |
 
 Return an ordinary Python value from a tool. The SDK converts it into the protocol's content blocks; you do not construct a result wrapper yourself.
@@ -72,4 +72,4 @@ Return an ordinary Python value from a tool. The SDK converts it into the protoc
 - `pyright` passes against the project's own virtualenv.
 
 ---
-*Verified against `mcp` 2.0.0 shipped type information and type-checked with `pyright --pythonpath <venv>` (2026-08-06). The absence of `mcp.server.fastmcp` and `mcp.types.ToolResult` was confirmed by pyright and by runtime import against the pinned package.*
+*Verified against `mcp` 2.2.0 shipped type information and type-checked with `pyright --pythonpath <venv>` (2026-09-20). The absence of `mcp.server.fastmcp` and `mcp.types.ToolResult` was confirmed by pyright and by runtime import against the pinned package.*

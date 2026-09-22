@@ -18,8 +18,9 @@ Reach for this skill when planning a new MAUI app or making a structural decisio
 
 1. **Resolve the ground before advising.** Read repository instructions, the project files, `global.json`, `Directory.Build.*`, and any central package files. `scripts/inspect-maui.ps1 -Path <repo>` (PowerShell 7) snapshots SDK, workloads, target frameworks, OS floors and MAUI package versions as JSON; `dotnet --info` and `dotnet workload list` give the same facts by hand. Full policy: [version and sources](references/version-and-sources.md).
 2. **Identify the target platforms.** The platform set drives most architectural decisions (navigation shell, lifecycle handling, native capability boundaries, packaging).
-3. **Preserve the project's current SDK/package strategy** unless the user explicitly asks for an upgrade. Never solve an application design question by bumping every workload.
-4. **Make the architecture decisions** using the reference that matches the question:
+3. **Distinguish supported and legacy targets.** As of 2026-09-20, MAUI 10 is supported; MAUI 8 and 9 are legacy/migration targets. Confirm the current servicing level and end dates in [version and sources](references/version-and-sources.md).
+4. **Preserve the project's current SDK/package strategy** unless the user explicitly asks for an upgrade. Never solve an application design question by bumping every workload.
+5. **Make the architecture decisions** using the reference that matches the question:
 
 | Decision | Reference |
 |---|---|
