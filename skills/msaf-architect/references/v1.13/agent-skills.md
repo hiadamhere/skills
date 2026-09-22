@@ -44,7 +44,11 @@ Two complementary mechanisms gate tool calls:
 
 **2. Granular approval flags** *(new in v1.13)* — suppress the approval prompt for whole operation classes:
 * `AgentSkillsProviderOptions`: `DisableLoadSkillApproval`, `DisableReadSkillResourceApproval`, `DisableRunSkillScriptApproval`.
-* `FileAccessProviderOptions`: `DisableWriteTools`, `DisableReadOnlyToolApproval`, `DisableWriteToolApproval`.
+* `FileAccessProviderOptions`: `DisableReadOnlyToolApproval`, `DisableWriteToolApproval`.
+
+`FileAccessProviderOptions.DisableWriteTools` instead hides the tools that modify the file store; only read-only tools are exposed when it is true. This controls tool availability, not approval bypass.
+
+*Correction verified against the `FileAccessProviderOptions.DisableWriteTools` package XML documentation for MAF 1.13.0 (2026-09-22); no new runtime-execution claim.*
 
 ## ♻️ Lifecycle, Disposal & Composition *(new in v1.13)*
 

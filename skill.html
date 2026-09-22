@@ -17,9 +17,9 @@
   Dependency-free: the markdown renderer below is deliberately small rather than
   a CDN import, because the published site must stay self-contained.
 -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
 <style>
 :root{
   --bg-dark:#07090e; --bg-card:#0e131f; --bg-border:#1e293b;
@@ -67,11 +67,21 @@ h1.skill-name{font-size:2rem;font-weight:700;margin:14px 0 8px}
 .state{padding:40px 0;color:var(--text-muted)}
 .state a{color:var(--color-primary)}
 </style>
+    <link rel="stylesheet" href="./site-theme.css">
+    <script src="./site-theme.js"></script>
 </head>
-<body>
+<body class="reference-reader">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <nav class="site-nav" aria-label="Site navigation">
+        <div class="site-links"><a href="./index.html">&larr; Skills catalog</a><a class="portfolio-link" href="https://hiadamhere.github.io/"><span class="portfolio-mark" aria-hidden="true">✳</span>Open-source developer tools <span aria-hidden="true">↗</span></a></div>
+        <div class="theme-picker" role="group" aria-label="Color theme" hidden>
+            <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+            <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+        </div>
+    </nav>
 <div class="wrap">
   <header>
-    <a class="back" href="./index.html">&larr; Back to the catalog</a>
     <h1 class="skill-name" id="skill-name">Loading…</h1>
     <div class="meta" id="skill-meta"></div>
     <p class="lede" id="skill-desc"></p>
@@ -114,7 +124,7 @@ function render(md){
       closeList();
       const lang = line.slice(3).trim(); const buf = [];
       for (i++; i < lines.length && !lines[i].trim().startsWith('```'); i++) buf.push(lines[i]);
-      out.push('<pre><code data-lang="'+esc(lang)+'">'+esc(buf.join('\n'))+'</code></pre>');
+      out.push('<pre tabindex="0" aria-label="Code sample"><code data-lang="'+esc(lang)+'">'+esc(buf.join('\n'))+'</code></pre>');
       continue;
     }
     if (/^>\s*\[!(IMPORTANT|WARNING|NOTE|TIP|CAUTION)\]/i.test(line)) {  // GH callout
@@ -207,6 +217,13 @@ function bodyUnavailable(name){
   document.getElementById('skill-meta').innerHTML =
     '<span class="badge primary">'+esc(skill.name)+'</span>' +
     (skill.versions || []).map(v => '<span class="badge">'+esc(v)+'</span>').join('');
+  if (skill.releaseNote) {
+    const note = document.createElement('p');
+    note.className = 'release-note';
+    note.setAttribute('aria-label', 'Verification scope');
+    note.textContent = skill.releaseNote;
+    document.getElementById('skill-desc').after(note);
+  }
 
   const refs = (skill.files || []).filter(f => f !== skill.name+'/SKILL.md');
   if (refs.length) {

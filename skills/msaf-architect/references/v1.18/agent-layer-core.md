@@ -87,11 +87,13 @@ await provider.ReleaseSessionAsync(session, cancelRunning: false);    // throws 
 <!-- shared:v118-adoption-traps -->
 | Trap | Reality |
 | --- | --- |
-| Suppressing `MAAI001` for the whole v1.18 agent layer | Only `EnableInvocableFunctionBypassing`, `UseInvocableFunctionBypassing`, and `BackgroundAgentsProvider` are gated. `AllowConcurrentInvocation` and `MaxAutoApprovalIterations` compile clean — scope the suppression to what needs it. |
+| Suppressing `MAAI001` for the whole v1.18 agent layer | The bypass members `EnableInvocableFunctionBypassing` and `UseInvocableFunctionBypassing`, plus the types `BackgroundAgentsProvider` and `BackgroundAgentsProviderOptions`, are gated. `AllowConcurrentInvocation` and `MaxAutoApprovalIterations` compile clean — scope the suppression to what needs it. |
 | Treating `AllowConcurrentInvocation` as "let the model call several tools" | That is the chat-options flag. This one decides whether the agent *executes* several returned calls in parallel. `AllowConcurrentInvocation` defaults to `false`; the chat-options flag is a nullable `bool` that defaults to `null` — the provider decides. |
 | Reading `MaxAutoApprovalIterations = null` as "unbounded" | `null` means the default, `ToolApprovalAgent.DefaultMaxAutoApprovalIterations` — a `const int` of **40**. It is a constant, so a reflection dump never lists it and assigning to it is CS0131. |
 | Registering `UseInvocableFunctionBypassing` above approval-response binding in a custom pipeline | Binding drops responses it never recorded; the bypass injects synthetic ones. In that order the stored calls are silently discarded. Put the bypass **below** binding, above the function-invoking client. |
 <!-- /shared:v118-adoption-traps -->
+
+*Experimental options-type recheck (2026-09-20): `probe-contract-metadata` executed against MAF 1.18.0 confirms the `MAAI001` experimental attribute on `BackgroundAgentsProviderOptions`. The adoption summary now includes the options type already called out above; other historical claims retain their original provenance.*
 
 ---
 *Verified against MAF v1.18.0 DLL surface and compile tests (2026-08-27). The four new members were compiled and executed against the pinned 1.18.0 packages and fail to compile against 1.17.0 (CS1061/CS0117). The `MAAI001` split, the optional parameters and their defaults, and the `false` defaults of both flags are compile-test facts a reflection dump cannot express; the decorator chain order was inspected on a built pipeline, and behaviours attributed to the package documentation are marked as such; the Abstractions and Workflows assemblies are byte-identical to v1.17 by mechanical diff. The adoption-trap table was relocated here from `version-map.md` on 2026-09-01, unchanged in substance. Fixed in place on 2026-09-03: the type-level `MAAI001` warning (compile-tested unsuppressed on 1.17.0–1.20.0) and the package's security note were added to the background-agent section; no other change.*

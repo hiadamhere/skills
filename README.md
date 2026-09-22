@@ -8,11 +8,11 @@ Verified, version-matched skills for any AI coding agent that reads the Agent Sk
 
 | Skill | For | Verified against |
 |---|---|---|
-| [`msaf-architect`](#msaf-architect) | Multi-agent systems on the Microsoft Agent Framework (C#) | Microsoft.Agents.AI v1.10 - v1.20 assemblies, per version |
-| [`microsoft-extensions-ai`](#microsoft-extensions-ai) | .NET's unified LLM abstractions | Microsoft.Extensions.AI 10.9.0 assemblies |
-| [`mcp-sdk`](#mcp-sdk) | MCP servers in C#, TypeScript and Python | `ModelContextProtocol` 2.0.0-preview.3, `@modelcontextprotocol/sdk` 1.30.0, `mcp` 2.0.0 |
+| [`msaf-architect`](#msaf-architect) | Multi-agent systems on the Microsoft Agent Framework (C#) | Microsoft.Agents.AI v1.10 - v1.22 assemblies, per version |
+| [`microsoft-extensions-ai`](#microsoft-extensions-ai) | .NET's unified LLM abstractions | Microsoft.Extensions.AI 10.10.0 assemblies |
+| [`mcp-sdk`](#mcp-sdk) | MCP servers in C#, TypeScript and Python | `ModelContextProtocol` 2.2.0, `@modelcontextprotocol/sdk` 1.30.0, `mcp` 2.2.0 |
 | [`spectre-console`](#spectre-console) | Rich .NET terminal UIs | Spectre.Console 0.57.2 assemblies |
-| [`maui-engineer`](#maui-engineer) | Architecture and planning for .NET MAUI apps | Official docs and the target project (methodology skill) |
+| [`maui-engineer`](#maui-engineer) | Architecture and planning for .NET MAUI apps | Official docs and the target project; MAUI 10 supported, 8/9 legacy |
 | [`reviewers`](#reviewers) | A configurable multi-lens review panel for any artifact | The Agent Skills standard |
 
 ## Install
@@ -88,7 +88,7 @@ curl -fsSL https://raw.githubusercontent.com/hiadamhere/skills/main/install.sh |
 
 ### `msaf-architect`
 
-Agents and workflows on the **Microsoft Agent Framework**, documented per version from **v1.10 through v1.20**: the four orchestration builders, checkpointing, hosted workflows, context compaction, the workflow event stream and declarative executors.
+Agents and workflows on the **Microsoft Agent Framework**, documented per version from **v1.10 through v1.22**: the four orchestration builders, checkpointing, hosted workflows, context compaction, the workflow event stream and declarative executors.
 
 On the current versions one question costs one page. Resolve your framework version, check the compatibility matrix, read the single topic page for the task. Older pinned folders keep their original per-release structure, and each page says where the rest is.
 
@@ -103,6 +103,8 @@ Prevents:
 - In v1.20, a background wait timeout that rejects `Timeout.InfiniteTimeSpan` while the release timeout beside it accepts it
 
 ### `microsoft-extensions-ai`
+
+Verified against **10.10.0** on September 20, 2026. Both assemblies retain the 10.9.0 public API signatures and experimental annotations; all 47 reference examples compile against the pin. Dedicated image, speech, realtime and hosted-file guides add workflow depth, with 31 new offline component assertions. The guides mention 167/239 public types (69.9%), an inventory metric rather than test coverage. See [verification and remaining gaps](skills/microsoft-extensions-ai/references/verification-and-coverage.md); no live provider integration is claimed.
 
 [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/), .NET's unified LLM layer: `IChatClient` calls and streaming, `ChatOptions`, structured output, embeddings, and the middleware and DI pipeline.
 
@@ -125,7 +127,7 @@ MCP postdates most training data, so models invent its shapes.
 
 Prevents:
 
-- `FastMCP`, which does not exist in `mcp` 2.0.0
+- `FastMCP`, which does not exist in `mcp` 2.2.0
 - `server.tool()`, deprecated in favour of `registerTool`
 - `WithHttpTransport()` and `MapMcp()`, which live in a package the pinned C# SDK does not include
 
@@ -163,7 +165,7 @@ The shipped lenses are a starter kit. The value is the overlay, where you encode
 
 Every API-bearing skill pins a ground truth: the package's assemblies reflected into a surface dump, or the SDK's shipped type information. Every type, member and signature in its documentation must exist there.
 
-What metadata cannot show is established by compiling and executing the exact documented pattern against the pinned version. That covers optional parameters, `init`-only setters, protected members, experimental gates and runtime behaviour.
+Claims beyond metadata are supported by pinned compile/execution probes or explicitly attributed package contracts. Each reference states its verification boundaries, including which runtime behaviour was executed and which was not.
 
 Reference documents carry a dated verification stamp. An automated gate rejects any unverified identifier, stale stamp or coverage regression before a release. Claims that an API does not exist are compile-tested rather than assumed.
 

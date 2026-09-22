@@ -144,7 +144,7 @@ public async Task Integration_FullWorkflowRun_Succeeds()
     RunStatus status = await run.GetStatusAsync(CancellationToken.None);
 
     // Assert
-    Assert.Equal(RunStatus.Ended, status);
+    Assert.Equal(RunStatus.Idle, status);
 
     var outputEvent = run.NewEvents.OfType<WorkflowOutputEvent>().FirstOrDefault();
     Assert.NotNull(outputEvent);
@@ -156,3 +156,5 @@ public async Task Integration_FullWorkflowRun_Succeeds()
 
 ---
 *Verified against MAF v1.11.0 DLL surface (2026-07-03). Fixed in place on 2026-09-03: the OpenTelemetry sample lacked `using OpenTelemetry;` (`Sdk` is in that namespace, CS0103 without it, established by compiling the sample against pinned 1.20.0 packages) and never named the exporter package it needs; both corrected, no other change.*
+
+*Verified against MAF v1.11.0 DLL surface and completion-status execution probe (2026-09-19). Accuracy correction only: a normally completed run reports `RunStatus.Idle` and still exposes output events; the sample no longer gates successful output on the wrong status. The earlier verification above remains the provenance for other claims.*

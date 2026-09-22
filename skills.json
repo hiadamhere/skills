@@ -3,7 +3,7 @@
     {
       "name": "msaf-architect",
       "displayName": "MSAF Architect (Microsoft Agent Framework C#)",
-      "description": "Version-matched architecture and API guidance for Microsoft Agent Framework workflows - executors, edges, checkpointing, human-in-the-loop, the four orchestration builders (sequential, concurrent, group chat, handoff), and the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing, background agents). Every claim is checked against the real NuGet assemblies, v1.10 through v1.20.",
+      "description": "Version-matched architecture and API guidance for Microsoft Agent Framework workflows - executors, edges, checkpointing, human-in-the-loop, the four orchestration builders (sequential, concurrent, group chat, handoff), and the agent layer (ChatClientAgent options, tool approval, per-session chat-client routing, background agents). Every claim is checked against the real NuGet assemblies, v1.10 through v1.22.",
       "versions": [
         "v1.10",
         "v1.11",
@@ -15,7 +15,9 @@
         "v1.17",
         "v1.18",
         "v1.19",
-        "v1.20"
+        "v1.20",
+        "v1.21",
+        "v1.22"
       ],
       "files": [
         "msaf-architect/SKILL.md",
@@ -124,6 +126,34 @@
         "msaf-architect/references/v1.20/state-and-persistence.md",
         "msaf-architect/references/v1.20/workflow-events.md",
         "msaf-architect/references/v1.20/workflow-hosting.md",
+        "msaf-architect/references/v1.21/agent-layer-core.md",
+        "msaf-architect/references/v1.21/agent-loops.md",
+        "msaf-architect/references/v1.21/agent-middleware.md",
+        "msaf-architect/references/v1.21/agent-skills.md",
+        "msaf-architect/references/v1.21/background-agents.md",
+        "msaf-architect/references/v1.21/context-compaction.md",
+        "msaf-architect/references/v1.21/declarative-executors.md",
+        "msaf-architect/references/v1.21/hitl-and-routing.md",
+        "msaf-architect/references/v1.21/orchestration-patterns.md",
+        "msaf-architect/references/v1.21/production-readiness.md",
+        "msaf-architect/references/v1.21/state-and-persistence.md",
+        "msaf-architect/references/v1.21/workflow-events.md",
+        "msaf-architect/references/v1.21/workflow-hosting.md",
+        "msaf-architect/references/v1.22/agent-chat-client.md",
+        "msaf-architect/references/v1.22/agent-layer-core.md",
+        "msaf-architect/references/v1.22/agent-loops.md",
+        "msaf-architect/references/v1.22/agent-middleware.md",
+        "msaf-architect/references/v1.22/agent-session-store.md",
+        "msaf-architect/references/v1.22/agent-skills.md",
+        "msaf-architect/references/v1.22/background-agents.md",
+        "msaf-architect/references/v1.22/context-compaction.md",
+        "msaf-architect/references/v1.22/declarative-executors.md",
+        "msaf-architect/references/v1.22/hitl-and-routing.md",
+        "msaf-architect/references/v1.22/orchestration-patterns.md",
+        "msaf-architect/references/v1.22/production-readiness.md",
+        "msaf-architect/references/v1.22/state-and-persistence.md",
+        "msaf-architect/references/v1.22/workflow-events.md",
+        "msaf-architect/references/v1.22/workflow-hosting.md",
         "msaf-architect/references/version-map.md"
       ]
     },
@@ -146,21 +176,27 @@
     {
       "name": "microsoft-extensions-ai",
       "displayName": "Microsoft.Extensions.AI (.NET LLM abstractions)",
-      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families - images, speech, realtime, hosted files - and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. Every API is verified against the real assemblies.",
+      "description": "Verified, version-matched guidance for the Microsoft.Extensions.AI unified LLM abstractions for .NET (IChatClient, streaming, ChatOptions, tool/function calling including provider-hosted tools and human approval, structured output, embeddings, the content model, conversation state and background responses, the middleware/DI pipeline, the non-chat client families - images, speech, realtime, hosted files - and routing/failover between chat clients). Use when writing C# that talks to LLMs through Microsoft.Extensions.AI. API signatures are checked against the pinned assemblies; selected behaviors are tested offline.",
       "versions": [
-        "10.9.0"
+        "10.10.0"
       ],
+      "releaseNote": "10.10.0 verified September 20, 2026: 47 compiled examples, 31 new offline component assertions, and dedicated image, speech, realtime and file workflows. Guides mention 167/239 public types (69.9%); this is an inventory metric, not test coverage. Live provider integrations remain untested.",
       "files": [
         "microsoft-extensions-ai/SKILL.md",
         "microsoft-extensions-ai/references/beyond-chat.md",
         "microsoft-extensions-ai/references/chat-client.md",
         "microsoft-extensions-ai/references/content-model.md",
         "microsoft-extensions-ai/references/embeddings.md",
+        "microsoft-extensions-ai/references/hosted-files.md",
         "microsoft-extensions-ai/references/hosted-tools-and-approval.md",
+        "microsoft-extensions-ai/references/image-generation.md",
         "microsoft-extensions-ai/references/middleware-and-di.md",
+        "microsoft-extensions-ai/references/realtime.md",
         "microsoft-extensions-ai/references/routing-and-failover.md",
+        "microsoft-extensions-ai/references/speech.md",
         "microsoft-extensions-ai/references/structured-output.md",
-        "microsoft-extensions-ai/references/tool-calling.md"
+        "microsoft-extensions-ai/references/tool-calling.md",
+        "microsoft-extensions-ai/references/verification-and-coverage.md"
       ]
     },
     {
@@ -168,9 +204,9 @@
       "displayName": "MCP SDK (Model Context Protocol)",
       "description": "Verified, version-matched guidance for building against the MCP SDKs in C#, TypeScript, and Python: tools, transports, and a minimal server -- each verified against its own pinned SDK.",
       "versions": [
-        "C# 2.0.0-preview.3",
+        "C# 2.2.0",
         "TS 1.30.0",
-        "Python 2.0.0"
+        "Python 2.2.0"
       ],
       "files": [
         "mcp-sdk/SKILL.md",
@@ -184,7 +220,8 @@
       "displayName": ".NET MAUI Architect",
       "description": "Version-aware architecture and planning guidance for .NET MAUI apps: target-platform and SDK/workload/package strategy and pinning, native XAML vs Blazor Hybrid, project layout and platform-code boundaries, MVVM/DI, navigation, app lifecycle, state/storage/offline data, testing strategy, performance budgets, accessibility, and publishing (signing, trimming/AOT, and store distribution) - resolved against the project's real toolchain, not model memory.",
       "versions": [
-        ".NET MAUI 8-10"
+        "MAUI 10 (supported)",
+        "MAUI 8/9 (legacy)"
       ],
       "files": [
         "maui-engineer/SKILL.md",

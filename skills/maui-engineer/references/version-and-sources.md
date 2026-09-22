@@ -21,7 +21,17 @@ Do not assume the newest NuGet package is compatible with the project's SDK/work
 - **Workload sets are the reproducibility mechanism** (SDK 8.0.400+): one version pins the whole workload group. A repo pins it in `global.json` (`sdk.workloadVersion`), whose presence alone switches the SDK to workload-set mode; the CLI equivalents are `dotnet workload config --update-mode workload-set` and version-pinned `install`/`update`. **An unpinned CI machine floats** — same repo, different day, different toolchain. Pin the SDK version and the workload set in the repo, and let upgrades be commits.
 
 > [!WARNING]
-> **A MAUI major's support window is much shorter than its .NET base.** The policy guarantees a .NET MAUI major a *minimum* of six months of servicing after its successor ships — and in practice the published dates have sat close to that floor, while the underlying .NET LTS runs for years. Concretely, as of 2026-08-31: MAUI 9 left support 2026-05-12 although .NET 9 itself is supported to 2026-11-10, and MAUI 10's listed end (2027-05-11) is well before .NET 10's LTS end (2028-11-14). **Plan the annual MAUI major upgrade as a scheduled project**; "we're on the LTS" is not the safety it suggests. Verify current dates on the official policy page at planning time — the guarantee is a floor, not a schedule.
+> **A MAUI major's support window is much shorter than its .NET base.** The policy guarantees a .NET MAUI major a *minimum* of six months of servicing after its successor ships — and in practice the published dates have sat close to that floor, while the underlying .NET LTS runs for years. Concretely, as of 2026-09-20: MAUI 9 left support 2026-05-12 although .NET 9 itself is supported to 2026-11-10, and MAUI 10's listed end (2027-05-11) is well before .NET 10's LTS end (2028-11-14). **Plan the annual MAUI major upgrade as a scheduled project**; "we're on the LTS" is not the safety it suggests. Verify current dates on the official policy page at planning time — the guarantee is a floor, not a schedule.
+
+The [official MAUI support table](https://dotnet.microsoft.com/en-us/platform/support/policy/maui), checked 2026-09-20, distinguishes:
+
+| Target | Status | Support end | Planning implication |
+|---|---|---|---|
+| MAUI 10 | Supported; latest servicing release 10.0.101 (2026-09-07) | 2027-05-11 | Baseline for new work; check SDK/workload compatibility before updating packages |
+| MAUI 9 | Out of support | 2026-05-12 | Maintain only as an explicit legacy constraint; plan migration |
+| MAUI 8 | Out of support | 2025-05-14 | Maintain only as an explicit legacy constraint; plan migration |
+
+Microsoft support requires the latest servicing level for the supported major. These are dated policy facts, not a standing instruction to upgrade an existing project without authorization. Recheck the table when planning an upgrade; .NET runtime LTS support does not extend MAUI support.
 
 - **Upgrades are toolchain events**: re-verify trimming/AOT defaults ([publishing](publish-and-distribution.md)), re-baseline [performance budgets](performance-budgets.md), and re-run the platform matrix — a major can change runtime and minimum platform versions.
 - **Xamarin.Forms is out of support** (since 2024-05-01); for a migration, the documented route is the .NET Upgrade Assistant plus the official migration docs — expect real porting effort, not a mechanical conversion.
@@ -50,3 +60,5 @@ Context7's `/dotnet/maui` library is useful for discovering relevant documentati
 
 ---
 *Reflects official .NET MAUI documentation, the .NET/.NET MAUI support policy pages, and the .NET SDK workload-sets documentation (2026-08-31); resolve exact signatures, versions, and support dates from the target project and the live policy pages.*
+
+*Support-label recheck (2026-09-20): the MAUI support table and latest servicing version above were checked against the official support policy. This does not re-date the other architecture and toolchain guidance.*

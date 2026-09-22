@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Agent Skills Catalog Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --bg-dark: #07090e;
@@ -328,14 +328,26 @@
             text-decoration: underline;
         }
     </style>
+    <link rel="stylesheet" href="./site-theme.css">
+    <script src="./site-theme.js"></script>
 </head>
-<body>
+<body class="catalog-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <nav class="site-nav" aria-label="Site navigation">
+        <div class="site-links"><a class="portfolio-link" href="https://hiadamhere.github.io/"><span class="portfolio-mark" aria-hidden="true">✳</span>Open-source developer tools <span aria-hidden="true">↗</span></a></div>
+        <div class="theme-picker" role="group" aria-label="Color theme" hidden>
+            <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+            <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+        </div>
+    </nav>
 
     <div class="bg-glows"></div>
 
-    <div class="container">
+    <main class="container" id="main-content">
         <header>
-            <h1>AI Agent Skills Catalog</h1>
+            <p class="eyebrow">From Adam's project shelf</p>
+            <h1>AI Agent Skills<span style="color:var(--coral)">.</span><br><em>The catalog.</em></h1>
             <p>Verified, version-matched skills for any AI coding agent that reads the Agent Skills format.</p>
         </header>
 
@@ -372,10 +384,12 @@
                             <span class="badge-meta primary">Core</span>
                         </div>
                         <h3>msaf-architect</h3>
-                        <p>Version-matched Microsoft Agent Framework architecture, verified through v1.20 - session-persisted chat-client routing, hosted-workflow checkpoint controls, background agents and their wait-tool timeout, the four orchestration builders, Magentic prompt overrides, and the v1.14 async-migration map.</p>
+                        <p>Version-matched Microsoft Agent Framework architecture, verified through v1.22 - session-persisted chat-client routing, hosted-workflow checkpoint controls, background agents and their wait-tool timeout, the four orchestration builders, Magentic prompt overrides, and the v1.14 async-migration map.</p>
                     </div>
                     <div class="skill-bottom">
                         <div class="ver-list">
+                            <span class="ver-tag">v1.22.0</span>
+                            <span class="ver-tag">v1.21.0</span>
                             <span class="ver-tag">v1.20.0</span>
                             <span class="ver-tag">v1.19.0</span>
                             <span class="ver-tag">v1.18.0</span>
@@ -393,7 +407,8 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
+    <footer class="site-footer">Part of <a href="https://hiadamhere.github.io/">Adam's tools &amp; side projects</a>. Made to be useful.</footer>
 
     <script>
         // Fetch and dynamically render skills from skills.json
@@ -426,6 +441,7 @@
                                     </div>
                                     <h3>${skill.displayName || skill.name}</h3>
                                     <p>${skill.description || ''}</p>
+                                    ${skill.releaseNote ? `<p class="release-note" aria-label="Verification scope">${skill.releaseNote}</p>` : ''}
                                 </div>
                                 <div class="skill-bottom">
                                     <div class="ver-list">

@@ -154,7 +154,7 @@ public async Task Integration_WorkflowCompletesSuccessfully()
     Run run = await InProcessExecution.RunAsync(workflow, "Test Input", sessionId, CancellationToken.None);
     RunStatus status = await run.GetStatusAsync(CancellationToken.None);
 
-    Assert.Equal(RunStatus.Ended, status);
+    Assert.Equal(RunStatus.Idle, status);
 
     var outputEvent = run.NewEvents
         .OfType<WorkflowOutputEvent>()
@@ -190,3 +190,5 @@ Nothing was removed or renamed — v1.19 is purely additive by mechanical surfac
 
 ---
 *Verified against MAF v1.19.0 DLL surface and compile tests (2026-08-27). The six v1.19 members were compiled and executed against the pinned 1.19.0 packages and fail to compile against 1.18.0; the `MAAI001` split and the dependency versions are compile-test and package-metadata facts a reflection dump cannot express. **Provenance of the carried-forward material:** the DI, streaming and testing samples were compile-tested on pinned **1.12.0/1.13.0**; the `WatchStreamAsync(blockOnPendingRequest, …)` overload and its optional token on **1.15.0**; the v1.18 operational items on **1.18.0**. The Workflows production surface is byte-identical from v1.13 through v1.19 by mechanical diff, which is what carries them here — they were not re-executed on 1.19.0. Consolidated into this folder on 2026-09-01 from the v1.13, v1.14, v1.15 and v1.18 guides; no claim was re-dated. Fixed in place on 2026-09-03: the OpenTelemetry sample lacked `using OpenTelemetry;` (`Sdk` is in that namespace, CS0103 without it) and never named the exporter package; both corrected, compile-tested in the catalog's private compile harness (`probe-visualizer-views`) against pinned 1.20.0 with `OpenTelemetry.Exporter.OpenTelemetryProtocol` 1.15.3.*
+
+*Verified against MAF v1.19.0 DLL surface and completion-status execution probe (2026-09-19). Accuracy correction only: a normally completed run reports `RunStatus.Idle` and still exposes output events; the sample no longer gates successful output on the wrong status. The earlier verification above remains the provenance for other claims.*

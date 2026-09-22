@@ -6,37 +6,42 @@ This document maps feature availability and breaking API changes across Microsof
 
 ## 📊 Feature Support Matrix
 
-| Feature | v1.10 | v1.11 | v1.12 | v1.13 | v1.14 | v1.15 | v1.16 | v1.17 | v1.18 | v1.19 | v1.20 | Reference |
-| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | --- |
-| Superstep workflow execution, executors, edges, streaming | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `SKILL.md` |
-| `RequestPort` HITL and `RunStatus.PendingRequests` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/hitl-and-routing.md` |
-| Scoped workflow state and checkpointing | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/state-and-persistence.md` |
-| Sequential / concurrent / group-chat / handoff orchestration builders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/orchestration-patterns.md` |
-| Context compaction: strategies, triggers, `CompactionProvider` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/context-compaction.md` |
-| Workflow event taxonomy (21 types) and typed output | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/workflow-events.md` |
-| Declarative executors: `[MessageHandler]` + `ConfigureProtocol` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/declarative-executors.md` |
-| Hosting a workflow as an `AIAgent` (`WorkflowHostingExtensions.AsAIAgent`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.20/workflow-hosting.md` (v1.19: `v1.19/workflow-hosting.md`; earlier: `vX.X/state-and-persistence.md`) |
-| `LoopAgent` and loop evaluators | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-loops.md` |
-| Context-aware agent skills and tool auto-approval | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-skills.md` |
-| Composable/disposable skill sources and renamed `AgentFileStore` contract | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-skills.md` |
-| Contextual `ToolAutoApprovalRuleContext` rules | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.14/agent-skills.md` |
-| Async agent-mode state and async message injection | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.14/agent-layer-core.md` |
-| Approval-response binding and approval-not-required bypass middleware | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.14/agent-layer-core.md` |
-| `CheckpointManager.GetLatestCheckpointAsync` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.15/state-and-persistence.md` |
-| `WatchStreamAsync(blockOnPendingRequest, …)` overload | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.15/production-readiness.md` |
-| Magentic prompt overrides + response language (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/hitl-and-routing.md` (v1.19: `v1.19/hitl-and-routing.md`; earlier: `v1.16/hitl-and-routing.md`) |
-| `ChatClientAgentOptions.AllowConcurrentInvocation` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`; earlier: `v1.18/agent-layer-core.md`) |
-| `ToolApprovalAgentOptions.MaxAutoApprovalIterations` (default 40) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | `v1.20/agent-skills.md` (v1.19: `v1.19/agent-skills.md`; earlier: `v1.18/agent-skills.md`) |
-| Invocable-function bypass: `EnableInvocableFunctionBypassing` / `UseInvocableFunctionBypassing` (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`; v1.18: `v1.18/agent-layer-core.md`) |
-| `BackgroundAgentsProvider.ReleaseSessionAsync` (⚗️ the type is `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | `v1.20/background-agents.md` (v1.19: `v1.19/agent-middleware.md`; v1.18: `v1.18/agent-layer-core.md`) |
-| `BackgroundAgentsProviderOptions.WaitTimeout` — wait-tool timeout, default 5 min (⚗️ the type is `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | `v1.20/background-agents.md` |
-| `RoutePersistingRoutingChatClient` session-persisted routing (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`) |
-| `WorkflowAgentMetadata` + `WorkflowHostingExtensions.WithCheckpointing` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | `v1.20/workflow-hosting.md` (v1.19: `v1.19/workflow-hosting.md`) |
-| `WorkflowSessionCheckpointRecovery` (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | `v1.20/workflow-hosting.md` (v1.19: `v1.19/workflow-hosting.md`) |
-| `FeatureUsage` process-wide feature tracking (⚗️ `MAAI001`, infrastructure) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`) |
-| `AgentSkillsSource.GetSkillsAsync(ct)` bare-token overload + `UseScriptApproval` | ✅ | ✅ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | **Removed in v1.12** — migration: `v1.12/agent-skills.md` |
-| Pre-1.13 `AgentFileStore` file methods (`WriteFileAsync`/`ReadFileAsync`/`ListFilesAsync`/`SearchFilesAsync`; `ListDirectoriesAsync` from v1.11) | ✅ | ✅ | ✅ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | **Renamed in v1.13** — migration: `v1.13/agent-skills.md` |
-| `WorkflowSuspendedException` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | **Never shipped in any release — see warning below** |
+| Feature | v1.10 | v1.11 | v1.12 | v1.13 | v1.14 | v1.15 | v1.16 | v1.17 | v1.18 | v1.19 | v1.20 | v1.21 | v1.22 | Reference |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | --- |
+| Superstep workflow execution, executors, edges, streaming | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `SKILL.md` |
+| `RequestPort` HITL and `RunStatus.PendingRequests` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/hitl-and-routing.md` |
+| Scoped workflow state and checkpointing | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/state-and-persistence.md` |
+| Sequential / concurrent / group-chat / handoff orchestration builders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/orchestration-patterns.md` |
+| Context compaction: strategies, triggers, `CompactionProvider` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/context-compaction.md` |
+| Workflow event taxonomy (21 types) and typed output | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/workflow-events.md` |
+| Declarative executors: `[MessageHandler]` + `ConfigureProtocol` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/declarative-executors.md` |
+| Hosting a workflow as an `AIAgent` (`WorkflowHostingExtensions.AsAIAgent`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.20/workflow-hosting.md` (v1.19: `v1.19/workflow-hosting.md`; earlier: `vX.X/state-and-persistence.md`) |
+| `LoopAgent` and loop evaluators | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-loops.md` |
+| Context-aware agent skills and tool auto-approval | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-skills.md` |
+| Composable/disposable skill sources and renamed `AgentFileStore` contract | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `vX.X/agent-skills.md` |
+| Contextual `ToolAutoApprovalRuleContext` rules | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.14/agent-skills.md` |
+| Async agent-mode state and async message injection | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.14/agent-layer-core.md` |
+| Approval-response binding and approval-not-required bypass middleware | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.14/agent-layer-core.md` |
+| `CheckpointManager.GetLatestCheckpointAsync` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.15/state-and-persistence.md` |
+| `WatchStreamAsync(blockOnPendingRequest, …)` overload | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.15/production-readiness.md` |
+| Magentic prompt overrides + response language (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/hitl-and-routing.md` (v1.19: `v1.19/hitl-and-routing.md`; earlier: `v1.16/hitl-and-routing.md`) |
+| `ChatClientAgentOptions.AllowConcurrentInvocation` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`; earlier: `v1.18/agent-layer-core.md`) |
+| `ToolApprovalAgentOptions.MaxAutoApprovalIterations` (default 40) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | `v1.20/agent-skills.md` (v1.19: `v1.19/agent-skills.md`; earlier: `v1.18/agent-skills.md`) |
+| Invocable-function bypass: `EnableInvocableFunctionBypassing` / `UseInvocableFunctionBypassing` (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`; v1.18: `v1.18/agent-layer-core.md`) |
+| `BackgroundAgentsProvider.ReleaseSessionAsync` (⚗️ the type is `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/background-agents.md` (v1.19: `v1.19/agent-middleware.md`; v1.18: `v1.18/agent-layer-core.md`) |
+| `BackgroundAgentsProviderOptions.WaitTimeout` — wait-tool timeout, default 5 min (⚗️ the type is `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | `v1.20/background-agents.md` |
+| `RoutePersistingRoutingChatClient` session-persisted routing (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`) |
+| `WorkflowAgentMetadata` + `WorkflowHostingExtensions.WithCheckpointing` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | `v1.20/workflow-hosting.md` (v1.19: `v1.19/workflow-hosting.md`) |
+| `WorkflowSessionCheckpointRecovery` (⚗️ `MAAI001`) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/workflow-hosting.md` (v1.19: `v1.19/workflow-hosting.md`) |
+| `FeatureUsage` process-wide feature tracking (⚗️ `MAAI001`, infrastructure) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | ⚗️ | ⚗️ | `v1.20/agent-middleware.md` (v1.19: `v1.19/agent-middleware.md`) |
+| `AgentSkillsSource.GetSkillsAsync(ct)` bare-token overload + `UseScriptApproval` | ✅ | ✅ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | **Removed in v1.12** — migration: `v1.12/agent-skills.md` |
+| Pre-1.13 `AgentFileStore` file methods (`WriteFileAsync`/`ReadFileAsync`/`ListFilesAsync`/`SearchFilesAsync`; `ListDirectoriesAsync` from v1.11) | ✅ | ✅ | ✅ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | **Renamed in v1.13** — migration: `v1.13/agent-skills.md` |
+| `WorkflowSuspendedException` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | **Never shipped in any release — see warning below** |
+| `AgentFileStore.SplitLines` / `ScanContent`, virtual search, `FileLineEdit.ExpectedLine` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | ⚗️ | `vX.X/agent-skills.md` |
+| `AgentSessionStore`, `AgentSessionStoreKey`, `DelegatingAgentSessionStore` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | `v1.22/agent-session-store.md` |
+| `AsIChatClient` agent adapter | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | `v1.22/agent-chat-client.md` |
+| Mode tool switches and silent `SetModeAsync` overload | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | `v1.22/agent-layer-core.md` |
+| `OpenTelemetryAgent.DefaultSourceName` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚗️ | `v1.22/production-readiness.md` |
 
 ⚗️ = ships, but gated behind the `MAAI001` experimental diagnostic (a compile **error** until suppressed).
 ⛔ = existed in an earlier release and was **removed or renamed** — code written against it will not compile. ❌ = never present in that version.
@@ -57,6 +62,8 @@ The **adoption traps** for each release — what breaks when you take the new AP
 | v1.17 → v1.18 | agent layer only: concurrent invocation, auto-approval cap, bypass, background release; half `MAAI001` | no |
 | v1.18 → v1.19 | `FeatureUsage`, session-persisting routing client, hosted-workflow checkpoint controls; `Microsoft.Extensions.AI` 10.7.0 → **10.9.0** | no |
 | v1.19 → v1.20 | agent layer only: **one property**, `BackgroundAgentsProviderOptions.WaitTimeout`; Workflows and Abstractions byte-identical; `Microsoft.Extensions.AI` stays 10.9.0 | no |
+| v1.20 → v1.21 | file-search helpers, default search implementation, guarded line edits; Workflows and Abstractions unchanged; Microsoft.Extensions.AI 10.10.0 | no |
+| v1.21 → v1.22 | session stores, chat-client adapter, mode controls and telemetry source; Workflows unchanged; Microsoft.Extensions.AI 10.10.0 | no |
 
 "Breaking" means something was removed or renamed — those rows are the ⛔ cells above and the table below.
 
@@ -98,18 +105,22 @@ Each folder holds one page per topic, self-contained for that version. Read the 
 | [v1.17](v1.17/) | 1.17.x — API-identical to v1.16; the folder confirms there is nothing to migrate |
 | [v1.18](v1.18/) | 1.18.x — concurrent invocation, auto-approval cap, bypass, background release |
 | [v1.19](v1.19/) | 1.19.x — session-persisted routing, hosted-workflow checkpoint controls |
-| [v1.20](v1.20/) | **latest verified** — API-identical to v1.19 except the background wait-tool timeout; background agents get their own page |
+| [v1.20](v1.20/) | 1.20.x — API-identical to v1.19 except the background wait-tool timeout; background agents get their own page |
+| [v1.21](v1.21/) | 1.21.x — shared file-search line coordinates and guarded line edits |
+| [v1.22](v1.22/) | **latest verified** — session stores, agent-to-chat-client adapter, mode controls, telemetry source |
 
-**v1.11–v1.19 are frozen as historical record.** They are correct for their pin and are not restructured further; new topics are documented in the current folder, with the matrix row naming it.
+**v1.11–v1.21 are frozen as historical record.** They are correct for their pin and are not restructured further; new topics are documented in the current folder, with the matrix row naming it.
 
 ---
 
 ## ⚠️ Version Fallback & Future Rules
 
 - **v1.10.x projects:** use the v1.11 folder for workflow guidance, but do not use the loop-agent family or the `WithChainOnlyAgentResponses` sequential chain-only option (neither exists in 1.10).
-- **Versions newer than v1.20:** treat every signature as unverified until a new surface dump and compile test exist. Regenerate ground truth via the private analyzer (`--version <ver>`) before relying on new APIs.
+- **Versions newer than v1.22:** treat every signature as unverified until a new surface dump and compile test exist. Regenerate ground truth via the private analyzer (`--version <ver>`) before relying on new APIs.
 - Do not mix newer features (composable skill sources, loop evaluators, context-aware skills, async agent modes, the v1.15 Workflows additions, Magentic prompt overrides, the v1.18 agent options, the v1.19 routing client and hosted-workflow checkpoint controls, the v1.20 wait-tool timeout) into older-pinned codebases.
-- **Experimental APIs are not a version feature you can rely on.** Anything behind `MAAI001` may change or vanish in a later minor release; isolate it behind your own seam. The gate is applied per member, not per release: a version's additions can be half gated and half not (v1.18 and v1.19 both are; v1.20's single addition is gated).
+- **Experimental APIs are not a version feature you can rely on.** Anything behind `MAAI001` may change or vanish in a later minor release; isolate it behind your own seam. The gate can apply to a whole type or an individual member, not an entire release: a version's additions can be half gated and half not (v1.18 and v1.19 both are; v1.20's single addition is gated).
 
 ---
 *Verified against MAF v1.10.0 / v1.11.0 / v1.12.0 / v1.13.0 / v1.14.0 / v1.15.0 / v1.16.0 / v1.17.0 / v1.18.0 / v1.19.0 / v1.20.0 DLL surfaces and compile tests (2026-09-03). The v1.20 column was added on 2026-09-03 from the mechanical 1.19.0 → 1.20.0 surface diff (one added member, no removals). The per-release adoption traps this file used to carry were relocated on 2026-09-01 into the topic pages of the versions they concern, unchanged in substance.*
+
+*Verified against MAF v1.21.0 and v1.22.0 DLL surfaces and pinned compile/execution probes (2026-09-19). The new columns describe the three analyzed assemblies, not every package in either release.*

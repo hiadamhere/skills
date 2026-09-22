@@ -1,6 +1,6 @@
 # 🟦 MCP in C# (`ModelContextProtocol`)
 
-The official C# SDK builds an MCP **server** as a hosted service: register it on the DI container, choose a transport, and expose tools as attributed methods. Add the `ModelContextProtocol` package (`dotnet add package ModelContextProtocol --prerelease`) plus `Microsoft.Extensions.Hosting`.
+The official C# SDK builds an MCP **server** as a hosted service: register it on the DI container, choose a transport, and expose tools as attributed methods. Add the `ModelContextProtocol` package (`dotnet add package ModelContextProtocol --version 2.2.0`) plus `Microsoft.Extensions.Hosting`.
 
 > [!IMPORTANT]
 > **There is no `ModelContextProtocol.SDK` namespace** — that is a common hallucination. Server wiring (`AddMcpServer`, `WithStdioServerTransport`, `WithTools<T>`) lives in the **`Microsoft.Extensions.DependencyInjection`** namespace; the tool attributes (`[McpServerTool]`, `[McpServerToolType]`) live in `ModelContextProtocol.Server`.
@@ -12,10 +12,13 @@ The official C# SDK builds an MCP **server** as a hosted service: register it on
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 
 var builder = Host.CreateApplicationBuilder(args);
+// stdout belongs to MCP; route every console log level to stderr.
+builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
@@ -35,6 +38,19 @@ public class EchoTools
 * `WithTools<T>()` scans a **`[McpServerToolType]`** class for **`[McpServerTool]`** methods. The type argument **must not be a `static` class** (`static` types can't be type arguments — `CS0718`); mark the class non-static and the tool methods `static`.
 * `[Description]` (the standard System.ComponentModel attribute) supplies the tool/parameter descriptions the client sees.
 * The host's `RunAsync()` keeps the server alive; don't wrap it in your own stdin loop.
+
+## Migrating from 2.0.0-preview.3 to 2.2.0
+
+The minimal stdio server above remains compatible; the wider public surface has breaking changes. Recompile custom protocol integrations before adopting this pin:
+
+- `McpServer.InterceptOutgoingRequests` does not exist in 2.2.0. Use `WithOutgoingRequestInterceptor`, returning `McpServer` rather than a disposable registration.
+- `McpRequestFilters.CallToolWithAlternateFilters` now contains `McpRequestInvocationFilter<TParams, TResult>` delegates. Each receives the request context, the next handler and the cancellation token; update custom filters to that invocation shape.
+- `DiscoverResult` no longer exposes `ServerInfo`. Do not carry that property access forward from the preview.
+- OAuth adds `ClientOAuthOptions.AuthorizationCallbackHandler`: its callback receives an `AuthorizationCallbackContext` with `AuthorizationUri` and `RedirectUri`, and returns an `AuthorizationResult` with `Code`, `State` and `Iss`. These are reflected API shapes, not proof of a complete OAuth integration; validate the redirect and issuer flow against the pinned SDK documentation before deployment.
+
+`CallToolWithAlternateFilters` and `WithOutgoingRequestInterceptor` require explicit experimental opt-in: compilation fails with **MCPEXP002** until suppressed (for example, a narrowly scoped `#pragma warning disable MCPEXP002`). The retained migration compile checks both the unsuppressed error and the suppressed API shapes. The ordinary stdio example needs no experimental suppression.
+
+The two 2.2.0 assembly dumps establish these changes. The retained offline probe compiles this page's examples and migration shapes, rejects the four original invalid patterns plus the two removed preview members, and executes initialization, tool listing, a successful echo and rejected missing arguments against the stdio server. HTTP hosting and OAuth integration are not exercised by that probe.
 
 ## Registering tools other ways
 
@@ -88,4 +104,4 @@ You then route your endpoint's traffic into `HandleGetRequestAsync(Stream, Cance
 **Practical guidance:** if you need an HTTP MCP server, add `ModelContextProtocol.AspNetCore` and verify its API against that package's own version — this skill's ground truth does not cover it. If you need a locally launched server, `WithStdioServerTransport()` is the shipped, verified path and should be the default.
 
 ---
-*Verified against ModelContextProtocol 2.0.0-preview.3 DLL surface (`ModelContextProtocol` + `ModelContextProtocol.Core`) and compile-tested against the pinned package (2026-08-05). That `WithHttpTransport()` does not exist (CS1061), that `Stateless` is `init`-only (CS8852), and the `ModelContextProtocol.Client` / `.Server` split of the HTTP types are all compile-test facts.*
+*Verified against ModelContextProtocol 2.2.0 DLL surface (`ModelContextProtocol` + `ModelContextProtocol.Core`) and compile-tested against the pinned package (2026-09-20). That `WithHttpTransport()` does not exist (CS1061), that `Stateless` is `init`-only (CS8852), and the `ModelContextProtocol.Client` / `.Server` split of the HTTP types are all compile-test facts.*
