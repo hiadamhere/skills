@@ -57,7 +57,7 @@ a:focus-visible, button:focus-visible, select:focus-visible, [tabindex]:focus-vi
     font-size: .85rem;
 }
 .site-links { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
-.site-nav a { color: var(--ink); text-decoration: none; padding-block: 8px; }
+.site-nav a { color: var(--ink); text-decoration: none; padding-block: 8px; min-height: 44px; display: inline-flex; align-items: center; }
 .site-nav a:hover { color: var(--coral); text-decoration: underline; text-underline-offset: 5px; }
 .site-nav .portfolio-link { display: inline-flex; align-items: center; gap: 10px; }
 .portfolio-mark { color: var(--coral); font-size: 1.5rem; line-height: 1; }
@@ -65,7 +65,7 @@ a:focus-visible, button:focus-visible, select:focus-visible, [tabindex]:focus-vi
 .theme-picker[hidden] { display: none; }
 .theme-picker button {
     border: 0; border-radius: 20px; background: transparent; color: var(--muted);
-    font-size: .75rem; padding: 8px 12px; min-height: 34px; cursor: pointer;
+    font-size: .75rem; padding: 8px 12px; min-width: 44px; min-height: 44px; cursor: pointer;
 }
 .theme-picker button[aria-pressed='true'] { background: var(--line); color: var(--ink); }
 .theme-picker button:hover { color: var(--ink); }
