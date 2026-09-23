@@ -9,6 +9,7 @@ Entries group changes by release preparation date. The catalog is not versioned 
 ## 2026-09-22
 
 ### Changed
+- Every published page now shows the portfolio favicon in the browser tab.
 - All four pages label the portfolio link "Open-source developer tools". Repaired a broken MSAF diagram popup and clarified abbreviated diagram labels. Visualizer validation now checks prose identifiers against historical API surfaces; this checks existence, not semantic or version correctness.
 - MCP C# and Python pins updated to 2.2.0. Refreshed C# surfaces, migration guidance and absence checks; corrected stdio logging and Python constructor wording. Retained offline checks compile examples and execute stdio tool-call round trips. TypeScript remains at 1.30.0.
 - MSAF completion examples now read the actual AgentResponse payload. Retained agent-bound completion and checkpoint identity probes; clarified type-level versus member-level experimental gates in the skill and visualizer.
